@@ -67,7 +67,11 @@ app.use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, cache-control, pragma');
+    const reqHeaders = req.headers['access-control-request-headers'];
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        reqHeaders || 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, cache-control, pragma, x-staff-portal, x-restaurant-id, x-branch-id'
+    );
     
     if (req.method === 'OPTIONS') {
         return res.status(204).end();
@@ -79,7 +83,7 @@ app.use(cors({
     origin: (origin, callback) => callback(null, true),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Access-Control-Request-Method', 'Access-Control-Request-Headers', 'cache-control', 'pragma'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Access-Control-Request-Method', 'Access-Control-Request-Headers', 'cache-control', 'pragma', 'x-staff-portal', 'x-restaurant-id', 'x-branch-id'],
     optionsSuccessStatus: 204
 }));
 

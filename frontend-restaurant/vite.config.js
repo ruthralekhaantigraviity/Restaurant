@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiUrl = mode === 'development'
     ? (env.VITE_API_URL && env.VITE_API_URL.includes('5000') ? env.VITE_API_URL : 'http://localhost:5000/api')
-    : (env.VITE_API_URL || 'https://backend-ochre-five-29.vercel.app');
+    : (env.VITE_API_URL || 'https://restaurant-1-7400.onrender.com/api');
   const customerUrl = env.VITE_CUSTOMER_URL || '';
 
   return {
