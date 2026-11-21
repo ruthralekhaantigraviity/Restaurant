@@ -40,7 +40,7 @@ const ManagerReports = () => {
                 branch: selectedBranch
             });
             setReportData(res.data);
-            toast.success('Report generated successfully!');
+            // Report loaded directly into view without annoying popup toast
         } catch (err) {
             console.error(err);
             if (err.response?.data?.message) {

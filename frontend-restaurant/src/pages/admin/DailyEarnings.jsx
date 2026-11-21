@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { 
-    DollarSign, ShoppingBag, TrendingUp, TrendingDown, Calendar, 
+import {
+    DollarSign, ShoppingBag, TrendingUp, TrendingDown, Calendar,
     Clock, CheckCircle2, AlertCircle, RefreshCw, Layers, CreditCard,
     ArrowUpRight, ArrowDownRight, Info, Download, UtensilsCrossed,
     Users, Building2, Sliders
 } from 'lucide-react';
-import { 
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-    ResponsiveContainer, BarChart, Bar, Legend, Cell, PieChart, Pie 
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, BarChart, Bar, Legend, Cell, PieChart, Pie
 } from 'recharts';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -120,25 +120,23 @@ const DailyEarnings = () => {
                     <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                         <button
                             onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                                selectedDate === new Date().toISOString().split('T')[0]
-                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                            }`}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${selectedDate === new Date().toISOString().split('T')[0]
+                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                                }`}
                         >
                             Today
                         </button>
                         <button
                             onClick={() => setSelectedDate(yesterdayDate)}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                                selectedDate === yesterdayDate
-                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-                            }`}
+                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${selectedDate === yesterdayDate
+                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                                }`}
                         >
                             Yesterday
                         </button>
-                        <input 
+                        <input
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
@@ -147,7 +145,7 @@ const DailyEarnings = () => {
                     </div>
 
                     {branches.length > 1 && (
-                        <select 
+                        <select
                             value={branchId}
                             onChange={(e) => setBranchId(e.target.value)}
                             className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold"
@@ -157,7 +155,7 @@ const DailyEarnings = () => {
                         </select>
                     )}
 
-                    <button 
+                    <button
                         type="button"
                         onClick={handleExportCSV}
                         className="h-10 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold shadow-xs whitespace-nowrap cursor-pointer"
@@ -166,7 +164,7 @@ const DailyEarnings = () => {
                         <Download size={15} /> Export CSV
                     </button>
 
-                    <button 
+                    <button
                         type="button"
                         onClick={fetchData}
                         className="h-10 w-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center shadow-xs cursor-pointer"
@@ -218,20 +216,18 @@ const DailyEarnings = () => {
                     </div>
                 </div>
 
-                <div className={`p-5 rounded-2xl border shadow-xs ${
-                    (profitability.estimatedProfitLoss || 0) >= 0 
-                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800' 
-                        : 'bg-red-50/60 dark:bg-red-950/20 border-red-200 dark:border-red-800'
-                }`}>
+                <div className={`p-5 rounded-2xl border shadow-xs ${(profitability.estimatedProfitLoss || 0) >= 0
+                    ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
+                    : 'bg-red-50/60 dark:bg-red-950/20 border-red-200 dark:border-red-800'
+                    }`}>
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                             {profitability.isEstimated ? 'Estimated Profit' : 'Confirmed Cash Profit'}
                         </span>
                         <DollarSign size={18} className={(profitability.estimatedProfitLoss || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'} />
                     </div>
-                    <div className={`text-2xl font-black ${
-                        (profitability.estimatedProfitLoss || 0) >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
-                    }`}>
+                    <div className={`text-2xl font-black ${(profitability.estimatedProfitLoss || 0) >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
+                        }`}>
                         ₹{(profitability.estimatedProfitLoss || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
@@ -259,8 +255,8 @@ const DailyEarnings = () => {
                             <AreaChart data={hourlyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="hourlyColor" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.4}/>
-                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
