@@ -102,19 +102,21 @@ const TipManagement = () => {
                         Isolated tip ledger stored separately from normal sales revenue. Track date-wise and waiter-wise earnings with verified settlement.
                     </p>
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 shrink-0">
                     <button 
+                        type="button"
                         onClick={fetchData}
                         disabled={loading}
-                        className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 transition-all"
+                        className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 inline-flex items-center justify-center gap-2 transition-all shadow-xs whitespace-nowrap cursor-pointer"
                     >
-                        <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                        <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
                         <span>Refresh</span>
                     </button>
                     <button 
+                        type="button"
                         onClick={() => { setSettleTarget({}); setIsSettleModalOpen(true); }}
                         disabled={!summary?.totals?.pendingTips || summary.totals.pendingTips <= 0}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all"
+                        className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-xs transition-all whitespace-nowrap cursor-pointer"
                     >
                         <CheckCircle2 size={16} />
                         <span>Settle All Pending Tips</span>

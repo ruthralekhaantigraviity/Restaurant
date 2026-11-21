@@ -152,7 +152,7 @@ const Reports = () => {
 
             const res = await api.post('/reports/generate', payload);
             setReportResult(res.data);
-            toast.success('Report generated successfully!');
+            // No toast popup on report card click or filter change — only display content
         } catch (error) {
             console.error('Failed to generate report', error);
             toast.error(error.response?.data?.message || 'Error generating report');
@@ -253,12 +253,12 @@ const Reports = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 no-print">
+                <div className="flex items-center gap-2.5 no-print shrink-0">
                     <button 
                         type="button"
                         onClick={handleDownloadCSV}
                         disabled={!reportResult || !reportResult.data?.length}
-                        className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-md shadow-emerald-900/10 cursor-pointer"
+                        className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-xs cursor-pointer whitespace-nowrap"
                     >
                         <Download size={16} /> Download CSV Report
                     </button>
@@ -266,7 +266,7 @@ const Reports = () => {
                         type="button"
                         onClick={() => window.print()}
                         disabled={!reportResult || !reportResult.data?.length}
-                        className="bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer"
+                        className="h-10 px-4 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-xs cursor-pointer whitespace-nowrap"
                     >
                         <Printer size={16} /> Print Report
                     </button>

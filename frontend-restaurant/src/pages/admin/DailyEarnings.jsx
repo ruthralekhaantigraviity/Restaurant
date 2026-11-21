@@ -158,19 +158,21 @@ const DailyEarnings = () => {
                     )}
 
                     <button 
+                        type="button"
                         onClick={handleExportCSV}
-                        className="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors flex items-center gap-1.5 text-xs font-bold shadow-xs"
+                        className="h-10 px-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold shadow-xs whitespace-nowrap cursor-pointer"
                         title="Export Daily Report CSV"
                     >
                         <Download size={15} /> Export CSV
                     </button>
 
                     <button 
+                        type="button"
                         onClick={fetchData}
-                        className="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                        className="h-10 w-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors inline-flex items-center justify-center shadow-xs cursor-pointer"
                         title="Refresh live metrics"
                     >
-                        <RefreshCw size={15} />
+                        <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
                     </button>
                 </div>
             </div>

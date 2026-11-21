@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-    Clock, CheckCircle, XCircle, ShieldAlert, ShieldCheck, 
-    Search, RefreshCw, Calendar, Mail, Phone, Store, User, 
+import {
+    Clock, CheckCircle, XCircle, ShieldAlert, ShieldCheck,
+    Search, RefreshCw, Calendar, Mail, Phone, Store, User,
     ArrowRight, Lock, Unlock, Eye, Sparkles, AlertTriangle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,7 +13,7 @@ const FreeTrialManagement = () => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
-    
+
     // Modal states
     const [selectedRestaurant, setSelectedRestaurant] = useState(null);
     const [modalType, setModalType] = useState(null); // 'approve' | 'reject' | 'freeze' | 'unfreeze' | 'details'
@@ -128,7 +128,7 @@ const FreeTrialManagement = () => {
     // Filter Logic
     const filteredRestaurants = restaurants.filter(r => {
         const sub = r.subscription || {};
-        const matchesSearch = 
+        const matchesSearch =
             r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             r.ownerId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             r.ownerId?.email?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -241,11 +241,10 @@ const FreeTrialManagement = () => {
                         <button
                             key={tab}
                             onClick={() => setFilterStatus(tab)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                filterStatus === tab 
-                                    ? 'bg-orange-500 text-white shadow-xs' 
-                                    : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${filterStatus === tab
+                                ? 'bg-orange-500 text-white shadow-xs'
+                                : 'text-slate-600 hover:bg-slate-100'
+                                }`}
                         >
                             {tab}
                         </button>
@@ -290,15 +289,15 @@ const FreeTrialManagement = () => {
 
                                     // Effective Trial / Expiry Date calculation
                                     const rawExpiry = sub.trialEndDate || sub.expiryDate || sub.subscriptionEndDate;
-                                    const effectiveExpiry = rawExpiry 
-                                        ? new Date(rawExpiry) 
-                                        : (sub.trialRequestDate 
-                                            ? new Date(new Date(sub.trialRequestDate).getTime() + 7 * 24 * 60 * 60 * 1000) 
-                                            : (r.createdAt 
-                                                ? new Date(new Date(r.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000) 
+                                    const effectiveExpiry = rawExpiry
+                                        ? new Date(rawExpiry)
+                                        : (sub.trialRequestDate
+                                            ? new Date(new Date(sub.trialRequestDate).getTime() + 7 * 24 * 60 * 60 * 1000)
+                                            : (r.createdAt
+                                                ? new Date(new Date(r.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000)
                                                 : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                                              )
-                                          );
+                                            )
+                                        );
 
                                     // Countdown calculation
                                     const diff = effectiveExpiry.getTime() - Date.now();
@@ -351,11 +350,10 @@ const FreeTrialManagement = () => {
                                                     </span>
                                                 ) : (
                                                     <div className="space-y-0.5">
-                                                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border inline-block ${
-                                                            daysLeft <= 3 
-                                                                ? 'text-amber-700 bg-amber-50 border-amber-200' 
-                                                                : 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                                                        }`}>
+                                                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border inline-block ${daysLeft <= 3
+                                                            ? 'text-amber-700 bg-amber-50 border-amber-200'
+                                                            : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                                                            }`}>
                                                             {daysLeft === 0 ? 'Expires today' : `${daysLeft} days remaining`}
                                                         </span>
                                                         <div className="text-[10px] text-slate-500 font-medium">
@@ -367,13 +365,12 @@ const FreeTrialManagement = () => {
 
                                             {/* Status Badge */}
                                             <td className="p-4 text-center">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                                                    isPending ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                                                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${isPending ? 'bg-amber-100 text-amber-800 border-amber-200' :
                                                     isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold' :
-                                                    isFrozen ? 'bg-slate-900 text-white border-slate-950' :
-                                                    isExpired ? 'bg-rose-100 text-rose-800 border-rose-200' :
-                                                    'bg-slate-100 text-slate-700 border-slate-200'
-                                                }`}>
+                                                        isFrozen ? 'bg-slate-900 text-white border-slate-950' :
+                                                            isExpired ? 'bg-rose-100 text-rose-800 border-rose-200' :
+                                                                'bg-slate-100 text-slate-700 border-slate-200'
+                                                    }`}>
                                                     {isActive ? 'ACTIVE' : (sub.status || 'INACTIVE')}
                                                 </span>
                                             </td>

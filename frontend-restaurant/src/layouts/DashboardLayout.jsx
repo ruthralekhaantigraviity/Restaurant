@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
@@ -312,7 +312,14 @@ const DashboardLayout = () => {
                                </div>
                            )}
                            <div className={(isPathBlocked || isCustomModuleBlocked) ? 'blur-[8px] pointer-events-none select-none transition-all duration-300' : 'transition-all duration-300'}>
-                               <Outlet />
+                               <Suspense fallback={
+                                   <div className="flex flex-col items-center justify-center min-h-[350px] space-y-3">
+                                       <div className="w-8 h-8 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin" />
+                                       <span className="text-xs font-semibold text-slate-400">Loading module...</span>
+                                   </div>
+                               }>
+                                   <Outlet />
+                               </Suspense>
                            </div>
                        </div>
                     )}

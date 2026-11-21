@@ -361,6 +361,14 @@ const BillingManagement = () => {
             return;
         }
 
+        if (posCustomerPhone) {
+            const cleanPhone = posCustomerPhone.trim();
+            if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                toast.error('Customer phone number must be a valid 10-digit number starting with 6, 7, 8, or 9.');
+                return;
+            }
+        }
+
         setIsSubmittingPos(true);
         try {
             const orderPayload = {
@@ -377,6 +385,8 @@ const BillingManagement = () => {
                 branchId: posBranchId || undefined,
                 taxPrice: posTaxAmt,
                 totalPrice: posTotal,
+                customerName: posCustomerName || 'Walk-in',
+                customerPhone: posCustomerPhone || '',
                 notes: `POS Bill created by Admin. Customer: ${posCustomerName || 'Walk-in'} (${posCustomerPhone || 'N/A'})`
             };
 
@@ -1051,16 +1061,32 @@ const BillingManagement = () => {
                             </div>
 
                             <div>
-                                <label className="font-bold text-gray-500 dark:text-slate-400 block mb-1">Phone (Optional)</label>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="font-bold text-gray-500 dark:text-slate-400 block text-xs">Phone (Optional)</label>
+                                    <span className="text-[10px] text-slate-400">Starts with 6-9</span>
+                                </div>
                                 <input 
                                     type="tel"
                                     inputMode="numeric"
                                     maxLength={10}
                                     pattern="[6-9][0-9]{9}"
-                                    placeholder="9876543210"
+                                    placeholder="e.g. 9876543210"
                                     value={posCustomerPhone}
-                                    onChange={(e) => setPosCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg font-semibold text-gray-800 dark:text-white"
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        if (val.length === 1 && !['6', '7', '8', '9'].includes(val)) {
+                                            toast.error('Mobile number must start with 6, 7, 8, or 9', { id: 'pos-phone-warn' });
+                                            return;
+                                        }
+                                        setPosCustomerPhone(val);
+                                    }}
+                                    className={`w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border rounded-lg font-semibold text-gray-800 dark:text-white transition-colors ${
+                                        posCustomerPhone && posCustomerPhone.length === 10 && /^[6-9]\d{9}$/.test(posCustomerPhone)
+                                            ? 'border-emerald-500 ring-1 ring-emerald-500/20'
+                                            : posCustomerPhone && posCustomerPhone.length > 0
+                                            ? 'border-amber-400'
+                                            : 'border-gray-200 dark:border-slate-700'
+                                    }`}
                                 />
                             </div>
                         </div>

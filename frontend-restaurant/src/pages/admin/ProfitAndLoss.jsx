@@ -151,10 +151,11 @@ const ProfitAndLoss = () => {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                     <button 
+                        type="button"
                         onClick={handleExportCSV}
-                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs"
+                        className="h-10 px-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl font-bold transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-xs whitespace-nowrap cursor-pointer"
                     >
                         <Download size={15} /> Export P&L CSV
                     </button>
