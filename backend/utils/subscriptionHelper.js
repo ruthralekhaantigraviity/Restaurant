@@ -214,14 +214,17 @@ export const evaluateSubscriptionAccess = async (restaurant, { notifyOnExpire = 
         };
     }
 
-    // 2. Pending Trial Approval
+    // 2. Pending Trial Approval (only block if not already an approved restaurant with active subscription)
     if (sub.status === 'Pending Approval') {
-        return {
-            isFrozen: true,
-            isPendingApproval: true,
-            subscriptionStatus: 'Pending Approval',
-            message: 'Your 7-Day Free Trial request is pending Super Admin approval. Operational features will unlock once approved.',
-        };
+        const hasActiveDates = sub.subscriptionEndDate && new Date(sub.subscriptionEndDate) > new Date();
+        if (!hasActiveDates && restaurant.approvalStatus !== 'Approved') {
+            return {
+                isFrozen: true,
+                isPendingApproval: true,
+                subscriptionStatus: 'Pending Approval',
+                message: 'Your 7-Day Free Trial request is pending Super Admin approval. Operational features will unlock once approved.',
+            };
+        }
     }
 
     // 3. Rejected Trial Request

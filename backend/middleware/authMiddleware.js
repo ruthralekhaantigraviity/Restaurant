@@ -171,7 +171,7 @@ export const checkVerification = async (req, res, next) => {
             return next();
         }
 
-        if (restaurant.approvalStatus !== 'Approved' || restaurant.subscription?.status === 'Pending Approval') {
+        if (restaurant.approvalStatus !== 'Approved') {
             return res.status(403).json({
                 message: 'Restaurant registration and free trial are pending SuperAdmin approval.',
                 requiresApproval: true,
