@@ -3,7 +3,8 @@ import {
     Save, Upload, User, ArrowRight, Camera, X, Sun, Key, Lock, Eye, EyeOff, Trash2,
     Sliders, CheckCircle2, Check, Sparkles, Utensils, QrCode, Receipt, Package, Truck, 
     Phone, Wine, Coffee, Flame, ShieldCheck, Zap, Bell, Percent, Users, Award, Store,
-    Layers, RefreshCw, CreditCard, Banknote, Heart, Printer, MonitorDot, AlertTriangle, HelpCircle
+    Layers, RefreshCw, CreditCard, Banknote, Heart, Printer, MonitorDot, AlertTriangle, HelpCircle,
+    ShoppingBag
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
