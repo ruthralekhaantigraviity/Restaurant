@@ -400,44 +400,65 @@ export const getAllVerifications = async (req, res) => {
             return res.json([]);
         }
 
-        // Auto-heal: Ensure every registered restaurant has a verification record
-        const allRestos = await Restaurant.find().lean();
-        const existingVerifs = await RestaurantVerification.find().lean();
-        const verifiedRestoIds = new Set(existingVerifs.map(v => v.restaurantId?.toString()).filter(Boolean));
+        // 1. Fetch existing verifications first
+        let verifications = await RestaurantVerification.find()
+            .populate('restaurantId', 'name address phone approvalStatus verificationStatus subscription createdAt ownerId')
+            .sort({ createdAt: -1 })
+            .lean();
 
-        for (const r of allRestos) {
-            if (!verifiedRestoIds.has(r._id.toString())) {
-                try {
-                    await RestaurantVerification.create({
-                        restaurantId: r._id,
-                        status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
-                        documents: {
-                            addressProof: { addressText: r.address || 'Registered Address', status: 'Approved' },
-                            fssai: { status: 'Approved', expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) },
-                            businessRegistration: { status: 'Approved' },
-                            panCard: { status: 'Approved' },
-                            aadhaarCard: { status: 'Approved' },
-                            bankProof: { status: 'Approved' }
-                        },
-                        history: [{
-                            status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
-                            comments: 'Auto-synchronized registered restaurant verification record.',
-                            actionDate: r.createdAt || new Date()
-                        }]
-                    });
-                } catch (createErr) {
-                    console.error("Failed to auto-create verification", createErr);
-                }
+        // 2. Identify missing restaurant IDs
+        const verifiedRestoIds = new Set(
+            (verifications || []).map(v => v.restaurantId?._id ? v.restaurantId._id.toString() : v.restaurantId?.toString()).filter(Boolean)
+        );
+
+        const allRestos = await Restaurant.find()
+            .select('name address phone approvalStatus verificationStatus subscription createdAt ownerId')
+            .lean();
+
+        const missing = allRestos.filter(r => !verifiedRestoIds.has(r._id.toString()));
+
+        // 3. Batch auto-heal missing verification docs with insertMany (fast and non-blocking)
+        if (missing.length > 0) {
+            const now = new Date();
+            const docsToInsert = missing.map(r => ({
+                restaurantId: r._id,
+                status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
+                documents: {
+                    addressProof: { addressText: r.address || 'Registered Address', status: 'Approved' },
+                    fssai: { status: 'Approved', expiryDate: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000) },
+                    businessRegistration: { status: 'Approved' },
+                    panCard: { status: 'Approved' },
+                    aadhaarCard: { status: 'Approved' },
+                    bankProof: { status: 'Approved' }
+                },
+                history: [{
+                    status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
+                    comments: 'Auto-synchronized registered restaurant verification record.',
+                    actionDate: r.createdAt || now
+                }]
+            }));
+
+            try {
+                await RestaurantVerification.insertMany(docsToInsert, { ordered: false });
+                verifications = await RestaurantVerification.find()
+                    .populate('restaurantId', 'name address phone approvalStatus verificationStatus subscription createdAt ownerId')
+                    .sort({ createdAt: -1 })
+                    .lean();
+            } catch (createErr) {
+                console.warn("Notice: Batch auto-heal insert encountered duplicates or partial insert:", createErr.message);
             }
         }
 
-        let verifications = await RestaurantVerification.find()
-            .populate({
-                path: 'restaurantId',
-                populate: { path: 'ownerId', select: 'name email' }
-            })
-            .sort({ createdAt: -1 })
-            .lean();
+        // 4. Resolve owner info in a single batch query on User
+        const ownerIds = (verifications || [])
+            .map(v => v.restaurantId?.ownerId)
+            .filter(id => id && mongoose.isValidObjectId(id));
+
+        const uniqueOwnerIds = [...new Set(ownerIds.map(String))];
+        const owners = uniqueOwnerIds.length > 0
+            ? await User.find({ _id: { $in: uniqueOwnerIds } }).select('name email phoneNumber').lean()
+            : [];
+        const ownerMap = new Map(owners.map(u => [u._id.toString(), u]));
 
         verifications = (verifications || []).map(v => {
             if (!v.restaurantId) {
@@ -449,8 +470,9 @@ export const getAllVerifications = async (req, res) => {
                     subscription: { plan: 'Basic' },
                     ownerId: { name: 'Owner', email: 'N/A' }
                 };
-            } else if (!v.restaurantId.ownerId) {
-                v.restaurantId.ownerId = { name: 'Owner', email: 'N/A' };
+            } else {
+                const oId = v.restaurantId.ownerId ? v.restaurantId.ownerId.toString() : null;
+                v.restaurantId.ownerId = (oId && ownerMap.get(oId)) || { name: 'Owner', email: 'N/A' };
             }
             return v;
         });

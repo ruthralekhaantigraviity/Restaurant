@@ -74,9 +74,12 @@ const SuperAdminDashboard = () => {
                     console.warn('[SuperAdmin] Failed to fetch /restaurants:', err?.response?.status, err?.response?.data || err.message);
                     return { data: [] };
                 }),
-                api.get('/restaurants/verification/all', reqConfig).catch(err => {
-                    console.warn('[SuperAdmin] Failed to fetch /verifications:', err?.response?.status, err?.response?.data || err.message);
-                    return { data: [] };
+                api.get('/restaurants/verification/all', { ...reqConfig, timeout: 12000 }).catch(async (err) => {
+                    try {
+                        return await api.get('/super-admin/verifications', { ...reqConfig, timeout: 8000 });
+                    } catch {
+                        return { data: [] };
+                    }
                 }),
                 api.get('/inquiries/admin', reqConfig).catch(err => {
                     console.warn('[SuperAdmin] Failed to fetch /inquiries:', err?.response?.status, err?.response?.data || err.message);

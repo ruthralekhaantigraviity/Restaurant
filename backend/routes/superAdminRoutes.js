@@ -12,7 +12,7 @@ import {
     manualFreezeRestaurant, manualUnfreezeRestaurant,
     createRestaurantBySuperAdmin
 } from '../controllers/superAdminController.js';
-import { deleteVerification } from '../controllers/verificationController.js';
+import { deleteVerification, getAllVerifications } from '../controllers/verificationController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -28,6 +28,7 @@ router.route('/restaurants/:id/subscription').put(updateSubscription);
 router.route('/restaurants/:id/approval').put(updateApprovalStatus);
 router.route('/restaurants/:id/modules').put(updateRestaurantModules);
 
+router.route('/verifications').get(getAllVerifications);
 router.route('/verifications/:id').delete(deleteVerification);
 
 router.route('/notifications').get(getSuperAdminNotifications);

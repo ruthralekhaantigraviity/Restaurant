@@ -808,9 +808,10 @@ export const getTrialRequests = async (req, res) => {
         const restaurants = await Restaurant.find(query)
             .populate('ownerId', 'name email phoneNumber')
             .populate('subscription.approvedBy', 'name email')
-            .sort({ 'subscription.trialRequestDate': -1, createdAt: -1 });
+            .sort({ 'subscription.trialRequestDate': -1, createdAt: -1 })
+            .lean();
 
-        res.json(restaurants);
+        res.json(restaurants || []);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

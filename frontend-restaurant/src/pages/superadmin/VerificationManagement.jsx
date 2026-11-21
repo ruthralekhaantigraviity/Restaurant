@@ -32,12 +32,19 @@ const VerificationManagement = () => {
     const loadVerifications = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/restaurants/verification/all');
+            const reqConfig = { timeout: 12000 };
+            let res;
+            try {
+                res = await api.get('/restaurants/verification/all', reqConfig);
+            } catch (vErr) {
+                // Try alias route
+                res = await api.get('/super-admin/verifications', reqConfig);
+            }
             let data = Array.isArray(res.data) ? res.data : [];
 
             // Fallback: If verification endpoint returns no items, query all platform restaurants directly
             if (data.length === 0) {
-                const restRes = await api.get('/super-admin/restaurants');
+                const restRes = await api.get('/super-admin/restaurants', reqConfig);
                 const rests = Array.isArray(restRes.data) ? restRes.data : [];
                 data = rests.map(r => ({
                     _id: r._id,
@@ -51,7 +58,7 @@ const VerificationManagement = () => {
         } catch (error) {
             console.error("Failed to fetch verifications", error);
             try {
-                const restRes = await api.get('/super-admin/restaurants');
+                const restRes = await api.get('/super-admin/restaurants', { timeout: 8000 });
                 const rests = Array.isArray(restRes.data) ? restRes.data : [];
                 const fallbackData = rests.map(r => ({
                     _id: r._id,

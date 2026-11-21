@@ -23,11 +23,19 @@ const FreeTrialManagement = () => {
     const fetchTrialRequests = async () => {
         try {
             setLoading(true);
-            const res = await api.get('/super-admin/trial-requests');
+            const reqConfig = { timeout: 12000 };
+            const res = await api.get('/super-admin/trial-requests', reqConfig);
             setRestaurants(res.data || []);
         } catch (error) {
             console.error('Failed to fetch trial requests:', error);
-            toast.error('Failed to load free trial requests.');
+            try {
+                // Defensive fallback: get platform restaurants if trial-requests route timed out
+                const fallbackRes = await api.get('/super-admin/restaurants', { timeout: 8000 });
+                const allRestos = Array.isArray(fallbackRes.data) ? fallbackRes.data : [];
+                setRestaurants(allRestos);
+            } catch (fErr) {
+                toast.error('Failed to load free trial requests.');
+            }
         } finally {
             setLoading(false);
         }
