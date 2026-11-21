@@ -47,12 +47,23 @@ const RestaurantDetails = () => {
     const [bookingDate, setBookingDate] = useState('');
     const [bookingTime, setBookingTime] = useState('');
     const [bookingGuests, setBookingGuests] = useState('2');
-    const [bookingSeating, setBookingSeating] = useState('indoor');
+    const [bookingSeating, setBookingSeating] = useState('Corner Table');
     const [bookingSuccess, setBookingSuccess] = useState(false);
     const [bookingLoading, setBookingLoading] = useState(false);
 
+    // Check if table reservations are allowed by admin for this restaurant
+    const isTableBookingAvailable = restaurant
+        ? (restaurant.features?.tableReservations !== false &&
+           restaurant.posConfig?.tablesEnabled !== false &&
+           restaurant.modules?.reservations !== false)
+        : true;
+
     const handleBookTable = (e) => {
         e.preventDefault();
+        if (!isTableBookingAvailable) {
+            toast.error('Table reservations are currently not available for this restaurant.');
+            return;
+        }
         if (!bookingDate || !bookingTime) {
             toast.error('Please select a date and time.');
             return;
@@ -74,15 +85,17 @@ const RestaurantDetails = () => {
 
             let formattedDate = bookingDate;
             try {
-                const d = new Date(bookingDate);
+                const d = new Date(bookingDate + 'T00:00:00');
                 formattedDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             } catch (err) { }
 
             const newRes = {
+                id: 'RES-' + Date.now().toString().slice(-6),
                 date: formattedDate,
                 time: formattedTime,
                 guests: parseInt(bookingGuests) || 2,
-                type: bookingSeating === 'indoor' ? 'Indoor' : bookingSeating === 'outdoor' ? 'Outdoor' : 'Bar',
+                type: bookingSeating,
+                seatingSetup: bookingSeating,
                 status: 'Confirmed',
                 statusColor: 'bg-green-50 text-green-700 border-green-100',
                 restaurantName: restaurant?.name || 'Restaurant'
@@ -91,7 +104,8 @@ const RestaurantDetails = () => {
             const existing = JSON.parse(localStorage.getItem('customerReservations') || '[]');
             localStorage.setItem('customerReservations', JSON.stringify([newRes, ...existing]));
             setBookingSuccess(true);
-        }, 1200);
+            toast.success(`Table booked for ${bookingSeating}!`);
+        }, 800);
     };
 
     useEffect(() => {
@@ -642,24 +656,33 @@ const RestaurantDetails = () => {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-400 dark:text-slate-500 uppercase mb-1">Seating Area</label>
+                                        <label className="block text-xs font-bold text-gray-400 dark:text-slate-500 uppercase mb-1">Dining Setup & Seating</label>
                                         <select
                                             value={bookingSeating}
                                             onChange={(e) => setBookingSeating(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-gray-900 dark:text-white rounded-xl outline-none focus:border-red-500 text-sm"
+                                            className="w-full px-3 py-2 border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-gray-900 dark:text-white rounded-xl outline-none focus:border-red-500 text-sm font-semibold cursor-pointer"
                                         >
-                                            <option value="indoor">Indoor Dining</option>
-                                            <option value="outdoor">Outdoor Terrace</option>
-                                            <option value="bar">Bar Lounge</option>
+                                            <option value="Corner Table">🛋️ Corner Table (Quiet & Secluded)</option>
+                                            <option value="Middle / Central Dining">🍽️ Middle / Central Dining (Main Hall)</option>
+                                            <option value="Window Side Table">🪟 Window Side Table (Scenic View)</option>
+                                            <option value="Private Booth / Alcove">🍷 Private Booth / Alcove (Family Dining)</option>
+                                            <option value="Outdoor Patio / Terrace">🌿 Outdoor Patio / Terrace (Alfresco)</option>
+                                            <option value="Bar & High-Top Counter">🍸 Bar & High-Top Counter (Casual)</option>
                                         </select>
                                     </div>
-                                    <button
-                                        type="submit"
-                                        disabled={bookingLoading}
-                                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-75"
-                                    >
-                                        {bookingLoading ? 'Reserving...' : 'Book Table'}
-                                    </button>
+                                    {!isTableBookingAvailable ? (
+                                        <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-medium">
+                                            ⚠️ Table booking is currently disabled by admin for this restaurant.
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="submit"
+                                            disabled={bookingLoading || !isTableBookingAvailable}
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+                                        >
+                                            {bookingLoading ? 'Reserving...' : `Book ${bookingSeating}`}
+                                        </button>
+                                    )}
                                 </form>
                             )}
                         </div>

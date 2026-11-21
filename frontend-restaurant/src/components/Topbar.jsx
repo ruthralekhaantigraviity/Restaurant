@@ -267,6 +267,7 @@ const Topbar = () => {
                 const res = await api.get('/notifications');
                 if (Array.isArray(res.data)) {
                     const isManager = user?.role === 'BranchManager';
+                    const isAdminUser = user?.role === 'RestaurantAdmin' || user?.role === 'Admin';
                     const userRole = user?.role || '';
                     const userBranchId = String(user?.branchId || '');
 
@@ -282,16 +283,20 @@ const Topbar = () => {
                         if (Array.isArray(n.targetRole) && n.targetRole.length > 0) {
                             const matchesRole = n.targetRole.includes(userRole) ||
                                 n.targetRole.includes('All') ||
-                                ((userRole === 'RestaurantAdmin' || userRole === 'Admin') && n.targetRole.includes('Admin')) ||
+                                (isAdminUser && n.targetRole.includes('Admin')) ||
                                 (isManager && (n.targetRole.includes('BranchManager') || n.targetRole.includes('Manager')));
                             if (!matchesRole) return false;
                         }
 
-                        // Filter out routine kitchen / ready clutter for branch manager
-                        if (isManager) {
-                            const title = (n.title || '').toLowerCase();
-                            const type = (n.type || '').toLowerCase();
-                            if (type === 'kitchen' || title.includes('order ready') || title.includes('served')) {
+                        const title = (n.title || '').toLowerCase();
+                        const type = (n.type || '').toLowerCase();
+
+                        // Filter out routine kitchen / ready / served / preparation clutter for admin & manager
+                        if (isAdminUser || isManager) {
+                            if (type === 'kitchen' || title.includes('order ready') || title.includes('served') || title.includes('preparation') || title.includes('cashier counter')) {
+                                return false;
+                            }
+                            if (n.metadata?.totalPrice && Number(n.metadata.totalPrice) < 1000) {
                                 return false;
                             }
                         }
@@ -332,15 +337,17 @@ const Topbar = () => {
                     setPlans(plansData.value);
                 }
                 if (branchesRes.status === 'fulfilled' && branchesRes.value.data?.length > 0) {
-                    setBranches(branchesRes.value.data);
-                    setSelectedBranch(branchesRes.value.data[0]);
+                    const branchList = branchesRes.value.data;
+                    setBranches(branchList);
+                    const matchingBranch = branchList.find(b => String(b._id) === String(user?.branchId));
+                    setSelectedBranch(matchingBranch || branchList[0]);
                 }
             } catch (error) {
                 console.error('Failed to fetch topbar data', error);
             }
         };
         fetchData();
-    }, [user, api]);
+    }, [user?._id, user?.restaurantId, user?.branchId, api]);
 
     const meta   = getPlanMeta(subscriptionPlan);
     const Icon   = meta?.icon;
@@ -418,12 +425,13 @@ const Topbar = () => {
                         <div className="text-right hidden md:block">
                             <p className="text-sm font-semibold text-gray-800 dark:text-slate-100 capitalize">{user?.name || 'User'}</p>
                             <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                                <p className="text-xs text-gray-500 dark:text-slate-400 capitalize">{user?.role || 'Staff'}</p>
+                                {!isAdmin && (
+                                    <p className="text-xs text-gray-500 dark:text-slate-400 capitalize">{user?.role || 'Staff'}</p>
+                                )}
 
                                 {/* Plan badge — clickable for admins */}
                                 {meta && isAdmin && (
                                     <>
-                                        <span className="text-gray-300 dark:text-slate-600">·</span>
                                         {subscriptionState?.isFrozen || ['Frozen', 'Expired', 'Cancelled', 'Inactive'].includes(subStatus) ? (
                                             <button
                                                 onClick={() => setShowUpgradeModal(true)}

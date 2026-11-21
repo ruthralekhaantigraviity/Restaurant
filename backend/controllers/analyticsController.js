@@ -7,10 +7,15 @@ import StockMovement from '../models/StockMovement.js';
 import Payroll from '../models/Payroll.js';
 import Payment from '../models/Payment.js';
 import Restaurant from '../models/Restaurant.js';
+import Table from '../models/Table.js';
+import DeliveryPartner from '../models/DeliveryPartner.js';
 
 // Helper to resolve user's restaurantId safely with strict tenant isolation
 const getUserRestaurantId = async (user, query = {}) => {
     let rId = user?.restaurantId || user?.restaurant;
+    if (rId && typeof rId === 'object') {
+        rId = rId._id || rId.id;
+    }
     if (!rId && user?.branchId) {
         const branchDoc = await Branch.findById(user.branchId);
         if (branchDoc) rId = branchDoc.restaurantId;
@@ -24,7 +29,7 @@ const getUserRestaurantId = async (user, query = {}) => {
             if (firstRest) rId = firstRest._id;
         }
     }
-    return rId;
+    return rId ? String(rId) : null;
 };
 
 // Timezone-safe date range parser
@@ -88,18 +93,38 @@ const parseDateFilter = (period, startDate, endDate) => {
     return { start, end };
 };
 
+// In-memory short-term cache for analytics responses (30s TTL)
+const analyticsResponseCache = new Map();
+
 // @desc    Get dashboard analytics (Revenue, Orders, etc.)
 // @route   GET /api/analytics/dashboard
 // @access  Private/Admin
 export const getDashboardAnalytics = async (req, res) => {
     try {
         const timeframe = parseInt(req.query.timeframe) || 7;
-        
+        let userRestaurantId = await getUserRestaurantId(req.user, req.query);
+
+        if (!userRestaurantId && req.user.role !== 'SuperAdmin') {
+            return res.json({
+                overview: { totalRevenue: 0, revenueChange: 0, totalOrders: 0, ordersChange: 0, avgOrderValue: 0, avgChange: 0, activeCustomers: 0, customersChange: 0 },
+                revenueTrend: [],
+                popularItems: [],
+                categoryData: [],
+                qrAnalytics: { activeTables: 0, currentOrders: 0, pendingOrders: 0, preparingOrders: 0, readyOrders: 0, servedOrders: 0, completedOrders: 0, avgPrepTime: 0 },
+                deliveryAnalytics: { onlinePartners: 0, activeDeliveries: 0, pendingAssignments: 0, completedDeliveries: 0, totalDeliveryEarnings: 0 }
+            });
+        }
+
+        const cacheKey = `dash_${userRestaurantId || 'all'}_${req.query.branchId || 'all'}_${timeframe}`;
+        const cached = analyticsResponseCache.get(cacheKey);
+        if (cached && (Date.now() - cached.timestamp < 30000)) {
+            return res.json(cached.data);
+        }
+
         const now = new Date();
         const startDate = new Date();
         startDate.setDate(now.getDate() - timeframe);
         
-        // Calculate previous period for comparison percentages
         const previousStartDate = new Date(startDate);
         previousStartDate.setDate(previousStartDate.getDate() - timeframe);
 
@@ -113,14 +138,13 @@ export const getDashboardAnalytics = async (req, res) => {
             createdAt: { $gte: previousStartDate, $lt: startDate }
         };
 
-        // Scope analytics strictly to logged-in user's restaurant and branch
-        let userRestaurantId = await getUserRestaurantId(req.user, req.query);
+        const restIdObj = userRestaurantId ? new mongoose.Types.ObjectId(userRestaurantId) : null;
 
         if (userRestaurantId) {
-            currentPeriodMatch.restaurantId = new mongoose.Types.ObjectId(userRestaurantId);
-            previousPeriodMatch.restaurantId = new mongoose.Types.ObjectId(userRestaurantId);
+            currentPeriodMatch.restaurantId = restIdObj;
+            previousPeriodMatch.restaurantId = restIdObj;
             
-            if (req.query.branchId) {
+            if (req.query.branchId && req.query.branchId !== 'All' && req.query.branchId !== 'undefined' && req.query.branchId !== 'null' && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
                 currentPeriodMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
                 previousPeriodMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
             } else if (req.user.role === 'BranchManager') {
@@ -130,45 +154,139 @@ export const getDashboardAnalytics = async (req, res) => {
                     previousPeriodMatch.branchId = new mongoose.Types.ObjectId(effectiveBranchId);
                 }
             }
-        } else if (req.user.role !== 'SuperAdmin') {
-            return res.json({
-                overview: { totalRevenue: 0, revenueChange: 0, totalOrders: 0, ordersChange: 0, avgOrderValue: 0, avgChange: 0, activeCustomers: 0, customersChange: 0 },
-                revenueTrend: [],
-                popularItems: [],
-                categoryData: [],
-                qrAnalytics: { activeTables: 0, currentOrders: 0, pendingOrders: 0, preparingOrders: 0, readyOrders: 0, servedOrders: 0, completedOrders: 0, avgPrepTime: 0 },
-                deliveryAnalytics: { onlinePartners: 0, activeDeliveries: 0, pendingAssignments: 0, completedDeliveries: 0, totalDeliveryEarnings: 0 }
-            });
         }
 
-        // 1. Current Period Overview
-        const currentOverview = await Order.aggregate([
-            { $match: currentPeriodMatch },
-            { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
-        ]);
-
-        // 2. Previous Period Overview
-        const previousOverview = await Order.aggregate([
-            { $match: previousPeriodMatch },
-            { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
+        // Run all independent queries in parallel using Promise.all to avoid 18 sequential roundtrips
+        const [
+            currentOverview,
+            previousOverview,
+            revenueTrendRaw,
+            popularItemsRaw,
+            activeTables,
+            currentOrders,
+            pendingOrders,
+            preparingOrders,
+            readyOrders,
+            servedOrders,
+            completedOrders,
+            prepTimeAvg,
+            onlinePartners,
+            activeDeliveries,
+            pendingAssignments,
+            completedDeliveries,
+            earningsSum,
+            distinctPhones
+        ] = await Promise.all([
+            Order.aggregate([
+                { $match: currentPeriodMatch },
+                { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
+            ]),
+            Order.aggregate([
+                { $match: previousPeriodMatch },
+                { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
+            ]),
+            Order.aggregate([
+                { $match: currentPeriodMatch },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                        revenue: { $sum: '$totalPrice' },
+                        orders: { $sum: 1 }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]),
+            Order.aggregate([
+                { $match: currentPeriodMatch },
+                { $unwind: '$orderItems' },
+                {
+                    $group: {
+                        _id: '$orderItems.product',
+                        name: { $first: '$orderItems.name' },
+                        totalSold: { $sum: '$orderItems.qty' },
+                        revenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.qty'] } }
+                    }
+                },
+                { $sort: { totalSold: -1 } },
+                { $limit: 10 }
+            ]),
+            restIdObj ? Table.countDocuments({ restaurantId: restIdObj, status: { $in: ['Occupied', 'Reserved', 'Billing'] } }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: { $in: ['Pending', 'Preparing', 'Ready'] } }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: 'Pending' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: 'Preparing' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: 'Ready' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: 'Served' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, status: { $in: ['Served', 'Delivered'] }, isPaid: true }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.aggregate([
+                { $match: { restaurantId: restIdObj, status: { $in: ['Ready', 'Served', 'Delivered', 'Picked Up', 'Completed'] } } },
+                { $project: { duration: { $divide: [ { $subtract: [ "$updatedAt", "$createdAt" ] }, 60000 ] } } },
+                { $match: { duration: { $gte: 1, $lte: 90 } } },
+                { $group: { _id: null, avgDuration: { $avg: "$duration" } } }
+            ]).catch(() => []) : Promise.resolve([]),
+            restIdObj ? DeliveryPartner.countDocuments({ restaurantId: restIdObj, status: 'Online', verificationStatus: 'Approved' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, orderType: 'Delivery', deliveryStatus: { $in: ['Accepted', 'Picked Up', 'On the Way'] } }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, orderType: 'Delivery', deliveryStatus: 'Pending Assignment' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.countDocuments({ restaurantId: restIdObj, orderType: 'Delivery', status: 'Delivered' }).catch(() => 0) : Promise.resolve(0),
+            restIdObj ? Order.aggregate([
+                { $match: { restaurantId: restIdObj, orderType: 'Delivery', status: 'Delivered' } },
+                { $group: { _id: null, total: { $sum: '$deliveryCharge' } } }
+            ]).catch(() => []) : Promise.resolve([]),
+            restIdObj ? Order.distinct('customerPhone', { ...currentPeriodMatch, customerPhone: { $exists: true, $ne: '' } }).catch(() => []) : Promise.resolve([])
         ]);
 
         let curRevenue = currentOverview.length > 0 ? currentOverview[0].totalRevenue : 0;
         let curOrders = currentOverview.length > 0 ? currentOverview[0].totalOrders : 0;
+        let revenueTrend = revenueTrendRaw || [];
+        let popularItems = popularItemsRaw || [];
 
         // Fallback to all-time active restaurant stats if 7-day period has 0 orders
         if (curOrders === 0 && userRestaurantId) {
             const allTimeMatch = {
                 status: { $nin: ['Cancelled', 'Refunded'] },
-                restaurantId: new mongoose.Types.ObjectId(userRestaurantId)
+                restaurantId: restIdObj
             };
-            const allTimeOverview = await Order.aggregate([
-                { $match: allTimeMatch },
-                { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
+            const [allTimeOverview, fallbackTrend, fallbackItems] = await Promise.all([
+                Order.aggregate([
+                    { $match: allTimeMatch },
+                    { $group: { _id: null, totalRevenue: { $sum: '$totalPrice' }, totalOrders: { $sum: 1 } } }
+                ]),
+                Order.aggregate([
+                    { $match: allTimeMatch },
+                    {
+                        $group: {
+                            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                            revenue: { $sum: '$totalPrice' },
+                            orders: { $sum: 1 }
+                        }
+                    },
+                    { $sort: { _id: 1 } },
+                    { $limit: 14 }
+                ]),
+                Order.aggregate([
+                    { $match: allTimeMatch },
+                    { $unwind: '$orderItems' },
+                    {
+                        $group: {
+                            _id: '$orderItems.product',
+                            name: { $first: '$orderItems.name' },
+                            totalSold: { $sum: '$orderItems.qty' },
+                            revenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.qty'] } }
+                        }
+                    },
+                    { $sort: { totalSold: -1 } },
+                    { $limit: 10 }
+                ])
             ]);
+
             if (allTimeOverview.length > 0) {
                 curRevenue = allTimeOverview[0].totalRevenue || 0;
                 curOrders = allTimeOverview[0].totalOrders || 0;
+            }
+            if (revenueTrend.length === 0) {
+                revenueTrend = fallbackTrend || [];
+            }
+            if (popularItems.length === 0) {
+                popularItems = fallbackItems || [];
             }
         }
 
@@ -187,197 +305,16 @@ export const getDashboardAnalytics = async (req, res) => {
         const ordersChange = calculateChange(curOrders, prevOrders);
         const avgChange = calculateChange(curAvg, prevAvg);
 
-        // 3. Revenue Trend
-        let revenueTrend = await Order.aggregate([
-            { $match: currentPeriodMatch },
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                    revenue: { $sum: '$totalPrice' },
-                    orders: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ]);
-
-        if (revenueTrend.length === 0 && userRestaurantId) {
-            const fallbackMatch = {
-                status: { $nin: ['Cancelled', 'Refunded'] },
-                restaurantId: new mongoose.Types.ObjectId(userRestaurantId)
-            };
-            revenueTrend = await Order.aggregate([
-                { $match: fallbackMatch },
-                {
-                    $group: {
-                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-                        revenue: { $sum: '$totalPrice' },
-                        orders: { $sum: 1 }
-                    }
-                },
-                { $sort: { _id: 1 } },
-                { $limit: 14 }
-            ]);
-        }
-
-        // 4. Popular Items
-        let popularItems = await Order.aggregate([
-            { $match: currentPeriodMatch },
-            { $unwind: '$orderItems' },
-            {
-                $group: {
-                    _id: '$orderItems.product',
-                    name: { $first: '$orderItems.name' },
-                    totalSold: { $sum: '$orderItems.qty' },
-                    revenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.qty'] } }
-                }
-            },
-            { $sort: { totalSold: -1 } },
-            { $limit: 10 }
-        ]);
-
-        if (popularItems.length === 0 && userRestaurantId) {
-            const fallbackMatch = {
-                status: { $nin: ['Cancelled', 'Refunded'] },
-                restaurantId: new mongoose.Types.ObjectId(userRestaurantId)
-            };
-            popularItems = await Order.aggregate([
-                { $match: fallbackMatch },
-                { $unwind: '$orderItems' },
-                {
-                    $group: {
-                        _id: '$orderItems.product',
-                        name: { $first: '$orderItems.name' },
-                        totalSold: { $sum: '$orderItems.qty' },
-                        revenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.qty'] } }
-                    }
-                },
-                { $sort: { totalSold: -1 } },
-                { $limit: 10 }
-            ]);
-        }
-
         const categoryData = popularItems.map(item => ({
             name: item.name,
             value: item.totalSold
         })).slice(0, 4);
 
-        // QR Ordering Analytics
-        const restIdObj = userRestaurantId ? new mongoose.Types.ObjectId(userRestaurantId) : null;
-        let activeTables = 0;
-        let currentOrders = 0;
-        let pendingOrders = 0;
-        let preparingOrders = 0;
-        let readyOrders = 0;
-        let servedOrders = 0;
-        let completedOrders = 0;
-        let avgPrepTime = 15;
+        const avgDurationVal = Array.isArray(prepTimeAvg) && prepTimeAvg.length > 0 ? Math.round(prepTimeAvg[0].avgDuration || 15) : 15;
+        const totalDeliveryEarnings = Array.isArray(earningsSum) && earningsSum.length > 0 ? earningsSum[0].total : 0;
+        const activeCustomers = Array.isArray(distinctPhones) && distinctPhones.length > 0 ? distinctPhones.length : (curOrders > 0 ? 1 : 0);
 
-        if (restIdObj) {
-            try {
-                const Table = mongoose.model('Table');
-                activeTables = await Table.countDocuments({ 
-                    restaurantId: restIdObj, 
-                    status: { $in: ['Occupied', 'Reserved', 'Billing'] } 
-                });
-                
-                currentOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: { $in: ['Pending', 'Preparing', 'Ready'] }
-                });
-
-                pendingOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: 'Pending'
-                });
-
-                preparingOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: 'Preparing'
-                });
-
-                readyOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: 'Ready'
-                });
-
-                servedOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: 'Served'
-                });
-
-                completedOrders = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    status: { $in: ['Served', 'Delivered'] },
-                    isPaid: true
-                });
-
-                const prepTimeAvg = await Order.aggregate([
-                    { $match: { restaurantId: restIdObj, status: { $in: ['Ready', 'Served', 'Delivered', 'Picked Up', 'Completed'] } } },
-                    { $project: { duration: { $divide: [ { $subtract: [ "$updatedAt", "$createdAt" ] }, 60000 ] } } },
-                    { $match: { duration: { $gte: 1, $lte: 90 } } },
-                    { $group: { _id: null, avgDuration: { $avg: "$duration" } } }
-                ]);
-                avgPrepTime = prepTimeAvg.length > 0 ? Math.round(prepTimeAvg[0].avgDuration || 15) : 15;
-            } catch (qrErr) {
-                console.error("Failed to aggregate QR stats", qrErr);
-            }
-        }
-
-        // Delivery Analytics
-        let onlinePartners = 0;
-        let activeDeliveries = 0;
-        let pendingAssignments = 0;
-        let completedDeliveries = 0;
-        let totalDeliveryEarnings = 0;
-
-        if (restIdObj) {
-            try {
-                const DeliveryPartner = mongoose.model('DeliveryPartner');
-                onlinePartners = await DeliveryPartner.countDocuments({
-                    restaurantId: restIdObj,
-                    status: 'Online',
-                    verificationStatus: 'Approved'
-                });
-
-                activeDeliveries = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    orderType: 'Delivery',
-                    deliveryStatus: { $in: ['Accepted', 'Picked Up', 'On the Way'] }
-                });
-
-                pendingAssignments = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    orderType: 'Delivery',
-                    deliveryStatus: 'Pending Assignment'
-                });
-
-                completedDeliveries = await Order.countDocuments({
-                    restaurantId: restIdObj,
-                    orderType: 'Delivery',
-                    status: 'Delivered'
-                });
-
-                const earningsSum = await Order.aggregate([
-                    { $match: { restaurantId: restIdObj, orderType: 'Delivery', status: 'Delivered' } },
-                    { $group: { _id: null, total: { $sum: '$deliveryCharge' } } }
-                ]);
-                totalDeliveryEarnings = earningsSum.length > 0 ? earningsSum[0].total : 0;
-            } catch (delErr) {
-                console.error("Failed to aggregate delivery stats", delErr);
-            }
-        }
-
-        // Distinct customer calculation from actual orders
-        let activeCustomers = 0;
-        if (restIdObj && curOrders > 0) {
-            const distinctPhones = await Order.distinct('customerPhone', {
-                ...currentPeriodMatch,
-                customerPhone: { $exists: true, $ne: '' }
-            });
-            activeCustomers = distinctPhones.length > 0 ? distinctPhones.length : curOrders;
-        }
-
-        res.json({
+        const responsePayload = {
             overview: {
                 totalRevenue: curRevenue,
                 revenueChange,
@@ -399,7 +336,7 @@ export const getDashboardAnalytics = async (req, res) => {
                 readyOrders,
                 servedOrders,
                 completedOrders,
-                avgPrepTime
+                avgPrepTime: avgDurationVal
             },
             deliveryAnalytics: {
                 onlinePartners,
@@ -408,7 +345,10 @@ export const getDashboardAnalytics = async (req, res) => {
                 completedDeliveries,
                 totalDeliveryEarnings
             }
-        });
+        };
+
+        analyticsResponseCache.set(cacheKey, { timestamp: Date.now(), data: responsePayload });
+        res.json(responsePayload);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -423,7 +363,7 @@ export const getProfitAndLoss = async (req, res) => {
         if (!restaurantId) return res.status(400).json({ message: 'Restaurant ID required' });
 
         const restObjId = new mongoose.Types.ObjectId(restaurantId);
-        const restaurantDoc = await Restaurant.findById(restaurantId).select('name currency logo');
+        const restaurantDoc = await Restaurant.findById(restaurantId).select('name currency').lean();
         const { start, end } = parseDateFilter(req.query.period, req.query.startDate, req.query.endDate);
 
         const orderMatch = {
@@ -439,7 +379,7 @@ export const getProfitAndLoss = async (req, res) => {
         if (req.user.role === 'BranchManager' && req.user.branchId) {
             orderMatch.branchId = new mongoose.Types.ObjectId(req.user.branchId);
             expenseMatch.branchId = new mongoose.Types.ObjectId(req.user.branchId);
-        } else if (req.query.branchId && req.query.branchId !== 'All') {
+        } else if (req.query.branchId && req.query.branchId !== 'All' && req.query.branchId !== 'undefined' && req.query.branchId !== 'null' && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
             orderMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
             expenseMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
         }
@@ -821,7 +761,7 @@ export const getDailyEarnings = async (req, res) => {
         if (req.user.role === 'BranchManager' && req.user.branchId) {
             orderMatch.branchId = new mongoose.Types.ObjectId(req.user.branchId);
             expenseMatch.branchId = new mongoose.Types.ObjectId(req.user.branchId);
-        } else if (req.query.branchId && req.query.branchId !== 'All') {
+        } else if (req.query.branchId && req.query.branchId !== 'All' && req.query.branchId !== 'undefined' && req.query.branchId !== 'null' && mongoose.Types.ObjectId.isValid(req.query.branchId)) {
             orderMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
             expenseMatch.branchId = new mongoose.Types.ObjectId(req.query.branchId);
         }

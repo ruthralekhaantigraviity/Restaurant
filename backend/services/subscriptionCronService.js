@@ -37,14 +37,14 @@ export const runSubscriptionAudit = async () => {
                 const ownerEmail = rest.ownerId?.email;
                 const ownerName = rest.ownerId?.name || rest.name;
                 if (ownerEmail) {
-                    await sendTrialExpiringReminderEmail({
+                    sendTrialExpiringReminderEmail({
                         email: ownerEmail,
                         name: ownerName,
                         restaurantName: rest.name,
                         hoursRemaining: 24,
                         trialEndDate: rest.subscription.trialEndDate,
                         plan: rest.subscription.plan
-                    });
+                    }).catch(err => console.error(`[Subscription Cron Error] 24h reminder failed:`, err.message));
                 }
                 rest.subscription.reminderSent24h = true;
                 await rest.save();
@@ -85,13 +85,13 @@ export const runSubscriptionAudit = async () => {
                 const ownerEmail = rest.ownerId?.email;
                 const ownerName = rest.ownerId?.name || rest.name;
                 if (ownerEmail) {
-                    await sendTrialExpiredAndFrozenEmail({
+                    sendTrialExpiredAndFrozenEmail({
                         email: ownerEmail,
                         name: ownerName,
                         restaurantName: rest.name,
                         expiredDate: rest.subscription.trialEndDate,
                         plan: rest.subscription.plan
-                    });
+                    }).catch(err => console.error(`[Subscription Cron Error] Trial freeze email failed:`, err.message));
                 }
             } catch (err) {
                 console.error(`[Subscription Cron Error] Trial freeze failed for ${rest.name}:`, err.message);
@@ -133,13 +133,13 @@ export const runSubscriptionAudit = async () => {
                 const ownerEmail = rest.ownerId?.email;
                 const ownerName = rest.ownerId?.name || rest.name;
                 if (ownerEmail) {
-                    await sendSubscriptionExpiredEmail({
+                    sendSubscriptionExpiredEmail({
                         email: ownerEmail,
                         name: ownerName,
                         restaurantName: rest.name,
                         plan: rest.subscription?.plan,
                         expiryDate: rest.subscription?.subscriptionEndDate || rest.subscription?.expiryDate
-                    });
+                    }).catch(err => console.error(`[Subscription Cron Error] Paid expiry email failed:`, err.message));
                 }
             } catch (err) {
                 console.error(`[Subscription Cron Error] Paid expiry failed for ${rest.name}:`, err.message);

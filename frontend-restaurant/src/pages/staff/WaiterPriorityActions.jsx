@@ -95,11 +95,14 @@ const WaiterPriorityActions = () => {
             clearInterval(interval);
             clearTimeout(reconnectTimer);
             if (ws) {
-                ws.onopen = null;
                 ws.onmessage = null;
                 ws.onerror = null;
                 ws.onclose = null;
-                try { ws.close(1000, 'Unmount'); } catch (_) {}
+                if (ws.readyState === WebSocket.CONNECTING) {
+                    ws.onopen = () => { try { ws.close(1000, 'Unmount'); } catch (_) {} };
+                } else if (ws.readyState === WebSocket.OPEN) {
+                    try { ws.close(1000, 'Unmount'); } catch (_) {}
+                }
             }
         };
     }, [api, user]);

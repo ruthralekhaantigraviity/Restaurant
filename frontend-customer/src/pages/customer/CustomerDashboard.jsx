@@ -6,7 +6,8 @@ import {
     Crown, Sparkles, Plus, Trash2,
     ChevronRight, LogOut, Wallet, Star, ShieldAlert,
     MapPin, Phone, Lock, Clock, Gift, User,
-    Bike, Store, BellRing, Menu, X, ChevronDown, ChevronUp
+    Bike, Store, BellRing, Menu, X, ChevronDown, ChevronUp,
+    Camera, Edit2, Eye, ArrowLeft, CreditCard, Check, Mail
 } from 'lucide-react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import defaultApi, { getApiUrl, PROD_API_URL } from '../../utils/axiosInstance';
@@ -35,8 +36,8 @@ const CustomerDashboard = () => {
     const [activeTab, setActiveTab] = useState(() => {
         try {
             const t = new URLSearchParams(window.location.search).get('tab');
-            return t || 'overview';
-        } catch { return 'overview'; }
+            return t || 'profile';
+        } catch { return 'profile'; }
     });
     const [isNavDrawerOpen, setIsNavDrawerOpen] = useState(false);
     const [orders, setOrders] = useState(() => {
@@ -118,6 +119,17 @@ const [profilePhone, setProfilePhone] = useState(user?.phoneNumber || '');
 const [profileAddress, setProfileAddress] = useState(user?.address || '');
 const [currentPassword, setCurrentPassword] = useState('');
 const [newPassword, setNewPassword] = useState('');
+const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+const [isAddressesModalOpen, setIsAddressesModalOpen] = useState(false);
+const [isPaymentMethodsModalOpen, setIsPaymentMethodsModalOpen] = useState(false);
+const [recentlyViewed, setRecentlyViewed] = useState(() => {
+    try {
+        const stored = localStorage.getItem('restosys_recently_viewed');
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+});
 
 // Synchronize profile name fields if user object loads late
 useEffect(() => {
@@ -635,7 +647,7 @@ const handleSubmitCustomerReview = async (e) => {
             rating: reviewRating,
             reviewText: reviewText.trim()
         });
-        toast.success(res.data?.message || "Review submitted! It is now live on our landing page.");
+        toast.success(res.data?.message || "Review submitted! It will appear on the landing page once approved by our team.");
         setReviewText('');
         setReviewRating(5);
         fetchMyReviews();
@@ -676,6 +688,7 @@ const handleUpdateProfile = async (e) => {
         toast.success("Profile updated successfully!");
         setCurrentPassword('');
         setNewPassword('');
+        setIsEditProfileOpen(false);
     } catch (error) {
         console.error("Profile update failed", error);
         toast.error("Failed to update profile details");
@@ -712,6 +725,7 @@ const location = useLocation();
 const navigate = useNavigate();
 const activeTabRef = useRef(null);
 const contentScrollRef = useRef(null);
+const tabBarScrollRef = useRef(null);
 
 // Listen to custom tab change events and URL parameter changes
 useEffect(() => {
@@ -732,11 +746,9 @@ useEffect(() => {
 }, [location.search, activeTab]);
 
 useEffect(() => {
-    if (activeTabRef.current) {
-        activeTabRef.current.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-    }
+    // Keep tab changes completely stable: do not scroll or shift window or buttons
     if (contentScrollRef.current) {
-        contentScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        contentScrollRef.current.scrollTo({ top: 0, behavior: 'instant' });
     }
 }, [activeTab]);
 
@@ -744,73 +756,32 @@ const activeTabObj = CUSTOMER_DASHBOARD_TABS.find(t => t.id === activeTab) || CU
 const ActiveTabIcon = activeTabObj?.icon || LayoutGrid;
 
 return (
-    <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-1 sm:pt-4 pb-0 h-[calc(100vh-140px)] md:h-[calc(100vh-115px)] flex flex-col overflow-hidden animate-in fade-in duration-300 text-slate-800">
-        {/* Slide-out Navigation Drawer for Dashboard Sections */}
-        <CustomerNavDrawer
-            isOpen={isNavDrawerOpen}
-            onClose={() => setIsNavDrawerOpen(false)}
-            activeTab={activeTab}
-            onSelectTab={(tabId) => {
-                setActiveTab(tabId);
-                navigate(`/profile?tab=${tabId}`, { replace: true });
-            }}
-        />
-
-        {/* Dashboard Sub-Header Navigation Toolbar with Hamburger Menu */}
+    <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-1 sm:pt-4 pb-0 flex flex-col text-slate-800">
+        {/* Dashboard Navigation Bar - All Tabs Directly Visible & Stationary (No Overlapping, No Sliding, No Jitter) */}
         <div className="shrink-0 mb-3 z-30">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3">
-                {/* Left: Hamburger Button + Current Active Section */}
-                <div className="flex items-center gap-2.5 min-w-0">
-                    <button
-                        type="button"
-                        onClick={() => setIsNavDrawerOpen(true)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black text-slate-800 hover:text-[#FF5A1F] bg-slate-100 hover:bg-orange-50 active:bg-orange-100 border border-slate-200 hover:border-orange-200 transition-all cursor-pointer shrink-0 shadow-2xs"
-                        title="Open Customer Dashboard Navigation Menu"
-                        aria-label="Open Navigation Menu"
-                    >
-                        <Menu size={18} className="text-slate-800 stroke-[2.2]" />
-                        <span className="font-bold">Menu</span>
-                    </button>
-
-                    <div className="h-6 w-px bg-slate-200 shrink-0" />
-
-                    {/* Current Active Section Name & Icon */}
-                    {activeTabObj && (
-                        <div className="flex items-center gap-2 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#FF5A1F] border border-orange-200/60 flex items-center justify-center shrink-0">
-                                <ActiveTabIcon size={15} />
-                            </div>
-                            <div className="min-w-0 text-left">
-                                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block leading-tight">
-                                    {activeTabObj.name}
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-medium truncate hidden sm:block">
-                                    {activeTabObj.desc}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Right: Quick Tab Pills for Faster Navigation (Tablet/Desktop) */}
-                <div className="hidden md:flex items-center gap-1 overflow-x-auto no-scrollbar">
-                    {CUSTOMER_DASHBOARD_TABS.slice(0, 5).map(tab => {
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-1.5 sm:p-2 border border-slate-200/90 shadow-xs">
+                <div ref={tabBarScrollRef} className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+                    {CUSTOMER_DASHBOARD_TABS.map(tab => {
                         const isTabActive = activeTab === tab.id;
                         const TabIcon = tab.icon;
                         return (
                             <button
                                 key={tab.id}
+                                ref={isTabActive ? activeTabRef : null}
                                 type="button"
                                 onClick={() => {
+                                    if (activeTab === tab.id) return;
                                     setActiveTab(tab.id);
                                     navigate(`/profile?tab=${tab.id}`, { replace: true });
                                 }}
-                                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${isTabActive
-                                    ? 'bg-[#FF5A1F] text-white shadow-xs'
-                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer select-none transition-none ${
+                                    isTabActive
+                                        ? 'bg-[#FF5A1F] text-white border border-[#FF5A1F]'
+                                        : 'text-slate-600 bg-slate-50 hover:bg-orange-50 hover:text-[#FF5A1F] border border-slate-200/80 hover:border-orange-200'
+                                }`}
+                                title={tab.desc}
                             >
-                                <TabIcon size={13} />
+                                <TabIcon size={14} className={isTabActive ? 'text-white' : 'text-slate-500'} />
                                 <span>{tab.name}</span>
                             </button>
                         );
@@ -850,16 +821,6 @@ return (
                         </div>
 
                         <div className="flex gap-2 w-full sm:w-auto relative z-10">
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    logout();
-                                }}
-                                className="flex-1 sm:flex-initial px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                            >
-                                <LogOut size={14} /> Log Out
-                            </button>
                             <Link
                                 to="/menu"
                                 className="flex-1 sm:flex-initial px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#FF5A1F] hover:bg-[#e04f1a] text-white font-bold shadow-sm shadow-[#FF5A1F]/30 hover:shadow-md transition-all flex items-center justify-center gap-1 text-xs cursor-pointer"
@@ -1121,6 +1082,112 @@ return (
                                                     <Plus size={12} /> Add Funds
                                                 </button>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Services & Account Hub */}
+                                    <div className="bg-white rounded-2xl p-3.5 sm:p-4 shadow-xs border border-slate-200/90 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                                                <User className="text-[#FF5A1F]" size={16} /> Account &amp; Services
+                                            </h4>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('profile');
+                                                    navigate('/profile?tab=profile');
+                                                }}
+                                                className="text-xs font-bold text-[#FF5A1F] hover:underline flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <span>My Profile</span>
+                                                <ChevronRight size={13} />
+                                            </button>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('orders');
+                                                    navigate('/profile?tab=orders');
+                                                }}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-orange-50/70 border border-slate-200/80 hover:border-orange-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 group-hover:text-[#FF5A1F] flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <ShoppingBag size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">My Orders</span>
+                                                <span className="text-[9px] text-slate-400 mt-0.5">{orders.length} orders</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('favorites');
+                                                    navigate('/profile?tab=favorites');
+                                                }}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-pink-50/70 border border-slate-200/80 hover:border-pink-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-rose-500 flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <Heart size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">Wishlist</span>
+                                                <span className="text-[9px] text-slate-400 mt-0.5">{wishlist.length} items</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsAddressesModalOpen(true)}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-blue-50/70 border border-slate-200/80 hover:border-blue-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-blue-600 flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <MapPin size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">Saved Addresses</span>
+                                                <span className="text-[9px] text-slate-400 mt-0.5">Delivery</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('wallet');
+                                                    navigate('/profile?tab=wallet');
+                                                }}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-amber-50/70 border border-slate-200/80 hover:border-amber-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-amber-600 flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <Wallet size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">Connect Wallet</span>
+                                                <span className="text-[9px] font-black text-amber-700 bg-amber-100/80 px-1.5 py-0.2 rounded-full mt-0.5">₹{Math.round(walletBalance || 0)}</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsPaymentMethodsModalOpen(true)}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-indigo-600 flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <CreditCard size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">Payment Methods</span>
+                                                <span className="text-[9px] text-slate-400 mt-0.5">UPI &amp; Cards</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('reservations');
+                                                    navigate('/profile?tab=reservations');
+                                                }}
+                                                className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-50 hover:bg-orange-50/70 border border-slate-200/80 hover:border-orange-200 transition-all text-center group cursor-pointer"
+                                            >
+                                                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 group-hover:text-[#FF5A1F] flex items-center justify-center mb-1.5 shadow-2xs">
+                                                    <Calendar size={16} />
+                                                </div>
+                                                <span className="text-[11px] font-bold text-slate-800 leading-tight">My Bookings</span>
+                                                <span className="text-[9px] text-slate-400 mt-0.5">{reservations.length} tables</span>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -2152,11 +2219,11 @@ return (
                                                                                             <div>
                                                                                                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-50 text-[#FF5A1F] text-[9px] sm:text-[10px] font-black uppercase tracking-wider mb-1">
                                                                                                     <Sparkles size={11} />
-                                                                                                    <span>Featured On Landing Page</span>
+                                                                                                    <span>Landing Page Testimonials</span>
                                                                                                 </div>
                                                                                                 <h3 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight font-sans">Share Your FoodNest Story</h3>
                                                                                                 <p className="text-gray-500 text-[11px] sm:text-xs mt-0.5">
-                                                                                                    Your reviews are featured live under <strong>"What Our Customers Say"</strong> on our main customer landing page!
+                                                                                                    Submitted reviews are verified by our team and featured under <strong>"What Our Customers Say"</strong> once approved!
                                                                                                 </p>
                                                                                             </div>
                                                                                             <Link
@@ -2227,7 +2294,7 @@ return (
                                                                                                     ) : (
                                                                                                         <>
                                                                                                             <Sparkles size={14} />
-                                                                                                            <span>Publish Review</span>
+                                                                                                            <span>Submit Review for Approval</span>
                                                                                                         </>
                                                                                                     )}
                                                                                                 </button>
@@ -2256,8 +2323,14 @@ return (
                                                                                                                         <Star key={i} size={11} className="fill-amber-400" />
                                                                                                                     ))}
                                                                                                                 </div>
-                                                                                                                <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded-full">
-                                                                                                                    Live
+                                                                                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                                                                                                    rev.status === 'Approved'
+                                                                                                                        ? 'bg-emerald-100 text-emerald-800'
+                                                                                                                        : rev.status === 'Rejected'
+                                                                                                                            ? 'bg-rose-100 text-rose-800'
+                                                                                                                            : 'bg-amber-100 text-amber-800'
+                                                                                                                }`}>
+                                                                                                                    {rev.status === 'Approved' ? 'Approved (Live)' : rev.status === 'Rejected' ? 'Rejected' : 'Pending Approval'}
                                                                                                                 </span>
                                                                                                                 <span className="text-[9px] text-slate-400">
                                                                                                                     {new Date(rev.createdAt).toLocaleDateString()}
@@ -2282,102 +2355,401 @@ return (
                                                                                 </div>
                                                                             )}
 
-                                                                            {/* Tab: Profile & Settings */}
+                                                                            {/* Tab: Profile & Settings - Placed First */}
                                                                             {activeTab === 'profile' && (
-                                                                                <div className="space-y-6 min-w-0 pr-1.5 flex-1">
-                                                                                    <ThemeSettingCard />
-                                                                                    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-6">
-                                                                                        <div>
-                                                                                            <h3 className="text-lg font-bold text-gray-900">Profile & Settings</h3>
-                                                                                            <p className="text-gray-500 text-xs mt-0.5">Manage your contact name, phone, address, and password settings</p>
-                                                                                        </div>
-
-                                                                                        <form onSubmit={handleUpdateProfile} className="space-y-4 min-w-0 pr-1.5 flex-1">
-                                                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                                                <div className="space-y-1 min-w-0 pr-1.5 flex-1">
-                                                                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Full Name</label>
-                                                                                                    <div className="relative">
-                                                                                                        <span className="absolute left-3.5 top-3 text-gray-400"><User size={14} /></span>
-                                                                                                        <input
-                                                                                                            type="text"
-                                                                                                            value={profileName}
-                                                                                                            onChange={(e) => setProfileName(e.target.value)}
-                                                                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-orange-500 font-bold"
-                                                                                                        />
-                                                                                                    </div>
+                                                                                <div className="space-y-6 min-w-0 pr-1.5 flex-1 text-left">
+                                                                                    {/* Profile Header Summary Card */}
+                                                                                    <div className="bg-white rounded-3xl p-5 sm:p-7 shadow-xs border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                                                        <div className="flex items-center gap-4 min-w-0">
+                                                                                            <div className="relative shrink-0">
+                                                                                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-950 text-white flex items-center justify-center font-black text-2xl sm:text-3xl ring-3 ring-amber-400 shadow-md">
+                                                                                                    <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
                                                                                                 </div>
-                                                                                                <div className="space-y-1 min-w-0 pr-1.5 flex-1">
-                                                                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Phone Number</label>
-                                                                                                    <div className="relative">
-                                                                                                        <span className="absolute left-3.5 top-3 text-gray-400"><Phone size={14} /></span>
-                                                                                                        <input
-                                                                                                            type="tel"
-                                                                                                            inputMode="numeric"
-                                                                                                            maxLength={10}
-                                                                                                            pattern="[6-9][0-9]{9}"
-                                                                                                            value={profilePhone}
-                                                                                                            onChange={(e) => setProfilePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                                                                                            placeholder="10-digit mobile number"
-                                                                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-orange-500"
-                                                                                                        />
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div className="space-y-1 col-span-full">
-                                                                                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Default Delivery Address</label>
-                                                                                                    <div className="relative">
-                                                                                                        <span className="absolute left-3.5 top-3 text-gray-400"><MapPin size={14} /></span>
-                                                                                                        <input
-                                                                                                            type="text"
-                                                                                                            placeholder="Street name, floor, city, postal code..."
-                                                                                                            value={profileAddress}
-                                                                                                            onChange={(e) => setProfileAddress(e.target.value)}
-                                                                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-orange-500"
-                                                                                                        />
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <div className="border-t border-gray-100 pt-5 space-y-4">
-                                                                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Security Update (Optional)</p>
-                                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                                                    <div className="space-y-1 min-w-0 pr-1.5 flex-1">
-                                                                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Current Password</label>
-                                                                                                        <div className="relative">
-                                                                                                            <span className="absolute left-3.5 top-3 text-gray-400"><Lock size={14} /></span>
-                                                                                                            <input
-                                                                                                                type="password"
-                                                                                                                value={currentPassword}
-                                                                                                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                                                                                                placeholder="••••••••"
-                                                                                                                className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-orange-500"
-                                                                                                            />
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    <div className="space-y-1 min-w-0 pr-1.5 flex-1">
-                                                                                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">New Password</label>
-                                                                                                        <div className="relative">
-                                                                                                            <span className="absolute left-3.5 top-3 text-gray-400"><Lock size={14} /></span>
-                                                                                                            <input
-                                                                                                                type="password"
-                                                                                                                value={newPassword}
-                                                                                                                onChange={(e) => setNewPassword(e.target.value)}
-                                                                                                                placeholder="Minimum 6 characters"
-                                                                                                                className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:outline-none focus:border-orange-500"
-                                                                                                            />
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <div className="flex justify-end pt-2">
                                                                                                 <button
-                                                                                                    type="submit"
-                                                                                                    className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-orange-600/10 transition-colors"
+                                                                                                    type="button"
+                                                                                                    onClick={() => setIsEditProfileOpen(true)}
+                                                                                                    className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center border-2 border-white shadow-xs cursor-pointer transition-colors"
+                                                                                                    title="Edit Profile"
                                                                                                 >
-                                                                                                    Save Profile Changes
+                                                                                                    <Camera size={13} strokeWidth={2.5} />
                                                                                                 </button>
                                                                                             </div>
-                                                                                        </form>
+                                                                                            <div className="min-w-0 text-left">
+                                                                                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200/80 text-[#FF5A1F] text-[10px] font-extrabold mb-1">
+                                                                                                    <Sparkles size={11} className="text-amber-500" />
+                                                                                                    <span>{tierName}</span>
+                                                                                                </div>
+                                                                                                <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight truncate">
+                                                                                                    {user?.name || profileName || 'Customer'}
+                                                                                                </h2>
+                                                                                                <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
+                                                                                                    {user?.email || 'customer@example.com'}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="flex items-center gap-2 self-start sm:self-center">
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => setIsEditProfileOpen(prev => !prev)}
+                                                                                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 hover:border-orange-200 bg-white hover:bg-orange-50/70 text-slate-700 hover:text-[#FF5A1F] text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                                                                                            >
+                                                                                                <Edit2 size={13} />
+                                                                                                <span>{isEditProfileOpen ? 'Cancel Edit' : 'Edit Profile'}</span>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    {/* Profile Details (View Mode vs Edit Mode) */}
+                                                                                    {!isEditProfileOpen ? (
+                                                                                        <div className="space-y-6">
+                                                                                            {/* ACCOUNT Navigation Section (Matches Image 3) */}
+                                                                                            <div className="space-y-2">
+                                                                                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 pl-1 text-left">ACCOUNT</h3>
+                                                                                                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs divide-y divide-slate-100 overflow-hidden">
+                                                                                                    {/* My Orders */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setActiveTab('orders');
+                                                                                                            navigate('/profile?tab=orders', { replace: true });
+                                                                                                        }}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#FF5A1F] flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <ShoppingBag size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-[#FF5A1F] transition-colors">My Orders</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium">Track active orders & order history</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <ChevronRight size={16} className="text-slate-400 group-hover:text-[#FF5A1F] group-hover:translate-x-0.5 transition-all" />
+                                                                                                    </button>
+
+                                                                                                    {/* Wishlist */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsWishlistOpen ? setIsWishlistOpen(true) : null}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-pink-50 text-pink-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <Heart size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-pink-600 transition-colors">Wishlist</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium">{wishlist?.length || 0} saved favorite dishes</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <ChevronRight size={16} className="text-slate-400 group-hover:text-pink-500 group-hover:translate-x-0.5 transition-all" />
+                                                                                                    </button>
+
+                                                                                                    {/* Saved Addresses */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsAddressesModalOpen(true)}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <MapPin size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Saved Addresses</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium truncate max-w-xs sm:max-w-md">{profileAddress || user?.address || 'Manage home, office & delivery addresses'}</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <ChevronRight size={16} className="text-slate-400 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                                                                                                    </button>
+
+                                                                                                    {/* Connect Wallet & Balance */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setActiveTab('wallet');
+                                                                                                            navigate('/profile?tab=wallet', { replace: true });
+                                                                                                        }}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <Wallet size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Connect Wallet & Balance</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium">Digital food wallet & transaction credits</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div className="flex items-center gap-2">
+                                                                                                            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-black">
+                                                                                                                ₹{walletBalance.toFixed(0)}
+                                                                                                            </span>
+                                                                                                            <ChevronRight size={16} className="text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+                                                                                                        </div>
+                                                                                                    </button>
+
+                                                                                                    {/* Payment Methods */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsPaymentMethodsModalOpen(true)}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <CreditCard size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Payment Methods</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium">UPI, Cards & NetBanking options</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <ChevronRight size={16} className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+                                                                                                    </button>
+
+                                                                                                    {/* My Bookings */}
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => {
+                                                                                                            setActiveTab('reservations');
+                                                                                                            navigate('/profile?tab=reservations', { replace: true });
+                                                                                                        }}
+                                                                                                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors text-left cursor-pointer group"
+                                                                                                    >
+                                                                                                        <div className="flex items-center gap-3.5">
+                                                                                                            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                                                                                                <Calendar size={18} />
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <span className="text-sm font-bold text-slate-800 group-hover:text-purple-600 transition-colors">My Bookings</span>
+                                                                                                                <p className="text-[11px] text-slate-400 font-medium">Reserved dining tables & confirmations</p>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <ChevronRight size={16} className="text-slate-400 group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all" />
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            {/* MY ACTIVITY Section (Matches Image 3) */}
+                                                                                            <div className="space-y-2">
+                                                                                                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 pl-1 text-left">MY ACTIVITY</h3>
+                                                                                                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5">
+                                                                                                    <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                                                                                                        <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                                                                                            <Eye size={17} />
+                                                                                                        </div>
+                                                                                                        <h4 className="text-sm font-bold text-slate-800">Recently Viewed</h4>
+                                                                                                    </div>
+                                                                                                    <div className="py-6 flex flex-col items-center justify-center text-center space-y-2">
+                                                                                                        <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                                                                                                            <Clock size={20} />
+                                                                                                        </div>
+                                                                                                        <p className="text-xs font-bold text-slate-500">No recently viewed items</p>
+                                                                                                        <p className="text-[11px] text-slate-400">Items you explore on the menu will show up here</p>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            {/* Personal Details Information */}
+                                                                                            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/90 space-y-6">
+                                                                                                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                                                                                    <div>
+                                                                                                        <h3 className="text-base sm:text-lg font-bold text-slate-900">Personal Information</h3>
+                                                                                                        <p className="text-slate-500 text-xs mt-0.5">Your contact details and default delivery address</p>
+                                                                                                    </div>
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsEditProfileOpen(true)}
+                                                                                                        className="flex items-center gap-1.5 text-xs font-bold text-[#FF5A1F] hover:underline cursor-pointer"
+                                                                                                    >
+                                                                                                        <Edit2 size={12} />
+                                                                                                        <span>Edit Details</span>
+                                                                                                    </button>
+                                                                                                </div>
+
+                                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1">
+                                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                                            <User size={12} className="text-slate-400" /> Full Name
+                                                                                                        </span>
+                                                                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                                                                                            {profileName || user?.name || 'Not provided'}
+                                                                                                        </p>
+                                                                                                    </div>
+
+                                                                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1">
+                                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                                            <Phone size={12} className="text-slate-400" /> Mobile Number
+                                                                                                        </span>
+                                                                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                                                                                            {profilePhone || user?.phoneNumber || 'No phone number added'}
+                                                                                                        </p>
+                                                                                                    </div>
+
+                                                                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1">
+                                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                                            <Mail size={12} className="text-slate-400" /> Email Address
+                                                                                                        </span>
+                                                                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                                                                                            {user?.email || 'Not provided'}
+                                                                                                        </p>
+                                                                                                    </div>
+
+                                                                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1">
+                                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                                            <Lock size={12} className="text-slate-400" /> Account Security
+                                                                                                        </span>
+                                                                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                                                                                            •••••••• (Protected)
+                                                                                                        </p>
+                                                                                                    </div>
+
+                                                                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-1 col-span-full">
+                                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                                                            <MapPin size={12} className="text-slate-400" /> Default Delivery Address
+                                                                                                        </span>
+                                                                                                        <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                                                                                                            {profileAddress || user?.address || 'No default delivery address set yet'}
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <div className="pt-2 flex justify-end">
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsEditProfileOpen(true)}
+                                                                                                        className="px-5 py-2.5 bg-[#FF5A1F] hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                                                                                                    >
+                                                                                                        <Edit2 size={13} />
+                                                                                                        <span>Edit Profile</span>
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-orange-200/90 space-y-6 animate-in fade-in duration-200">
+                                                                                            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                                                                                <div>
+                                                                                                    <h3 className="text-base sm:text-lg font-bold text-slate-900">Edit Profile &amp; Settings</h3>
+                                                                                                    <p className="text-slate-500 text-xs mt-0.5">Update your contact name, phone, address, and password settings</p>
+                                                                                                </div>
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    onClick={() => setIsEditProfileOpen(false)}
+                                                                                                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer"
+                                                                                                >
+                                                                                                    <X size={16} />
+                                                                                                </button>
+                                                                                            </div>
+
+                                                                                            <form onSubmit={handleUpdateProfile} className="space-y-4 min-w-0 pr-1.5 flex-1">
+                                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                                                    <div className="space-y-1 min-w-0 pr-1.5 flex-1">
+                                                                                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Full Name</label>
+                                                                                                        <div className="relative">
+                                                                                                            <span className="absolute left-3.5 top-3 text-slate-400"><User size={14} /></span>
+                                                                                                            <input
+                                                                                                                type="text"
+                                                                                                                value={profileName}
+                                                                                                                onChange={(e) => setProfileName(e.target.value)}
+                                                                                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-[#FF5A1F] font-bold"
+                                                                                                                placeholder="Your full name"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div className="space-y-1 min-w-0 pr-1.5 flex-1">
+                                                                                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Phone Number</label>
+                                                                                                        <div className="relative">
+                                                                                                            <span className="absolute left-3.5 top-3 text-slate-400"><Phone size={14} /></span>
+                                                                                                            <input
+                                                                                                                type="tel"
+                                                                                                                inputMode="numeric"
+                                                                                                                maxLength={10}
+                                                                                                                pattern="[6-9][0-9]{9}"
+                                                                                                                value={profilePhone}
+                                                                                                                onChange={(e) => setProfilePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                                                                                placeholder="10-digit mobile number"
+                                                                                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-[#FF5A1F]"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div className="space-y-1 col-span-full">
+                                                                                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Default Delivery Address</label>
+                                                                                                        <div className="relative">
+                                                                                                            <span className="absolute left-3.5 top-3 text-slate-400"><MapPin size={14} /></span>
+                                                                                                            <input
+                                                                                                                type="text"
+                                                                                                                placeholder="Street name, floor, city, postal code..."
+                                                                                                                value={profileAddress}
+                                                                                                                onChange={(e) => setProfileAddress(e.target.value)}
+                                                                                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-[#FF5A1F]"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <div className="border-t border-slate-100 pt-5 space-y-4">
+                                                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Security Update (Optional)</p>
+                                                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                                                        <div className="space-y-1 min-w-0 pr-1.5 flex-1">
+                                                                                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Current Password</label>
+                                                                                                            <div className="relative">
+                                                                                                                <span className="absolute left-3.5 top-3 text-slate-400"><Lock size={14} /></span>
+                                                                                                                <input
+                                                                                                                    type="password"
+                                                                                                                    value={currentPassword}
+                                                                                                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                                                                                                    placeholder="••••••••"
+                                                                                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-[#FF5A1F]"
+                                                                                                                />
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <div className="space-y-1 min-w-0 pr-1.5 flex-1">
+                                                                                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">New Password</label>
+                                                                                                            <div className="relative">
+                                                                                                                <span className="absolute left-3.5 top-3 text-slate-400"><Lock size={14} /></span>
+                                                                                                                <input
+                                                                                                                    type="password"
+                                                                                                                    value={newPassword}
+                                                                                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                                                                                    placeholder="Minimum 6 characters"
+                                                                                                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-[#FF5A1F]"
+                                                                                                                />
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <div className="flex justify-end gap-3 pt-2">
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={() => setIsEditProfileOpen(false)}
+                                                                                                        className="px-5 py-2.5 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                                                                                                    >
+                                                                                                        Cancel
+                                                                                                    </button>
+                                                                                                    <button
+                                                                                                        type="submit"
+                                                                                                        className="px-6 py-2.5 bg-[#FF5A1F] hover:bg-orange-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-[#FF5A1F]/20 transition-colors cursor-pointer"
+                                                                                                    >
+                                                                                                        Save Profile Changes
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </form>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    <ThemeSettingCard />
+                                                                                    <div className="flex justify-center pt-1">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={logout}
+                                                                                            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors cursor-pointer"
+                                                                                        >
+                                                                                            <LogOut size={14} />
+                                                                                            <span>Sign Out of Account</span>
+                                                                                        </button>
                                                                                     </div>
                                                                                 </div>
                                                                             )}
@@ -2473,6 +2845,196 @@ return (
                                                                                     className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-orange-600/10 transition-all cursor-pointer text-center"
                                                                                 >
                                                                                     Deposit
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Saved Addresses Modal */}
+                                                                {isAddressesModalOpen && (
+                                                                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                                                                        <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full border border-gray-100 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 text-left">
+                                                                            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                                                                                <div className="flex items-center gap-3">
+                                                                                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                                                                        <MapPin size={20} />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <h3 className="font-extrabold text-slate-900 text-base">Saved Addresses</h3>
+                                                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Manage Delivery Locations</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setIsAddressesModalOpen(false)}
+                                                                                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer"
+                                                                                >
+                                                                                    <X size={16} />
+                                                                                </button>
+                                                                            </div>
+
+                                                                            <div className="space-y-3">
+                                                                                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5">
+                                                                                    <div className="flex items-center justify-between">
+                                                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Default Address</span>
+                                                                                        <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
+                                                                                    </div>
+                                                                                    <p className="text-xs font-bold text-slate-800">
+                                                                                        {profileAddress || user?.address || 'No default address saved yet'}
+                                                                                    </p>
+                                                                                </div>
+
+                                                                                <div className="space-y-1">
+                                                                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Update Delivery Address</label>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        placeholder="House / Flat No, Street, Landmark, City..."
+                                                                                        value={profileAddress}
+                                                                                        onChange={(e) => setProfileAddress(e.target.value)}
+                                                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium focus:bg-white focus:outline-none focus:border-[#FF5A1F]"
+                                                                                    />
+                                                                                </div>
+
+                                                                                <div className="flex items-center justify-between pt-1">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={handleDetectLocation}
+                                                                                        disabled={isDetectingLocation}
+                                                                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF5A1F] hover:underline cursor-pointer"
+                                                                                    >
+                                                                                        <Navigation size={13} />
+                                                                                        <span>Use Current GPS Location</span>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="flex gap-2.5 pt-2">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setIsAddressesModalOpen(false)}
+                                                                                    className="flex-1 py-2.5 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all cursor-pointer text-center"
+                                                                                >
+                                                                                    Close
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={async (e) => {
+                                                                                        await handleUpdateProfile(e);
+                                                                                        setIsAddressesModalOpen(false);
+                                                                                    }}
+                                                                                    className="flex-1 py-2.5 bg-[#FF5A1F] hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer text-center"
+                                                                                >
+                                                                                    Save Address
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Payment Methods Modal */}
+                                                                {isPaymentMethodsModalOpen && (
+                                                                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                                                                        <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full border border-gray-100 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 text-left">
+                                                                            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                                                                                <div className="flex items-center gap-3">
+                                                                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                                                                        <CreditCard size={20} />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <h3 className="font-extrabold text-slate-900 text-base">Payment Methods</h3>
+                                                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Accepted Gateways &amp; Options</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setIsPaymentMethodsModalOpen(false)}
+                                                                                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer"
+                                                                                >
+                                                                                    <X size={16} />
+                                                                                </button>
+                                                                            </div>
+
+                                                                            <div className="space-y-2.5">
+                                                                                {/* 1. UPI */}
+                                                                                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center font-black text-xs shadow-2xs">
+                                                                                            UPI
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h5 className="text-xs font-bold text-slate-900">UPI Payments</h5>
+                                                                                            <p className="text-[10px] text-slate-400">Google Pay, PhonePe, Paytm, BHIM</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                                                        Instant
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                {/* 2. Customer Wallet */}
+                                                                                <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/90 flex items-center justify-between">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-9 h-9 rounded-xl bg-white border border-amber-200 text-amber-600 flex items-center justify-center shadow-2xs">
+                                                                                            <Wallet size={16} />
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h5 className="text-xs font-bold text-slate-900">RestoSys Wallet</h5>
+                                                                                            <p className="text-[10px] text-amber-800 font-bold">Balance: ₹{walletBalance.toFixed(2)}</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => {
+                                                                                            setIsPaymentMethodsModalOpen(false);
+                                                                                            setIsAddFundsOpen(true);
+                                                                                        }}
+                                                                                        className="px-2.5 py-1 rounded-lg bg-[#FF5A1F] text-white text-[10px] font-bold shadow-2xs hover:bg-orange-600 cursor-pointer"
+                                                                                    >
+                                                                                        Top Up
+                                                                                    </button>
+                                                                                </div>
+
+                                                                                {/* 3. Cards */}
+                                                                                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-blue-600 flex items-center justify-center shadow-2xs">
+                                                                                            <CreditCard size={16} />
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h5 className="text-xs font-bold text-slate-900">Credit &amp; Debit Cards</h5>
+                                                                                            <p className="text-[10px] text-slate-400">Visa, Mastercard, RuPay, Maestro</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                                                                                        Supported
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                {/* 4. Cash on Delivery / Pay at Counter */}
+                                                                                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex items-center justify-between">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-2xs font-bold text-xs">
+                                                                                            COD
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h5 className="text-xs font-bold text-slate-900">Cash on Delivery / Counter</h5>
+                                                                                            <p className="text-[10px] text-slate-400">Pay cash upon delivery or dine-in</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                                                                                        Available
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="pt-2">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setIsPaymentMethodsModalOpen(false)}
+                                                                                    className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer text-center"
+                                                                                >
+                                                                                    Done
                                                                                 </button>
                                                                             </div>
                                                                         </div>

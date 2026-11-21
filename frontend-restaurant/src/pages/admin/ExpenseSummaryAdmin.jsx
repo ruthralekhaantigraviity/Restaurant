@@ -424,19 +424,19 @@ const ExpenseSummaryAdmin = () => {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6 font-sans">
             {/* Header */}
-            <div className="py-2 mb-4 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 border-b border-slate-200/50 dark:border-slate-800/50">
-                <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">
-                        <Receipt size={14} /> Financial Operations & Expenses
+            <div className="py-2 mb-4 flex flex-col xl:flex-row xl:justify-between xl:items-center gap-4 border-b border-slate-200/50 dark:border-slate-800/50 pb-5">
+                <div className="space-y-1 max-w-4xl">
+                    <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                        <Receipt size={14} /> Financial Operations &amp; Expenses
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                        Rent, Bills & Expenses Management
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                        Rent, Bills &amp; Expenses Management
                     </h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                         Comprehensive ledger for recurring rent, utility bills, supplier expenses, and staff salaries with strict liability and payment auditing.
                     </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2.5 shrink-0 justify-start sm:justify-end">
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start xl:self-center">
                     <button 
                         onClick={handleGenerateRecurring}
                         className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer whitespace-nowrap"
@@ -670,7 +670,7 @@ const ExpenseSummaryAdmin = () => {
                                                             Recurring
                                                         </span>
                                                     )}
-                                                    {e.source && e.source !== 'Manual' && (
+                                                    {e.source && e.source !== 'Manual' && e.source !== 'Recurring' && !e.isRecurring && (
                                                         <span className="text-[10px] text-slate-400 font-semibold">
                                                             via {e.source}
                                                         </span>

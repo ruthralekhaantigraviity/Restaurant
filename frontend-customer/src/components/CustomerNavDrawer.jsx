@@ -8,7 +8,7 @@ import {
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 
 export const CUSTOMER_DASHBOARD_TABS = [
-    { id: 'overview', name: 'Overview', icon: LayoutGrid, desc: 'Activity & Quick Stats' },
+    { id: 'profile', name: 'Profile & Settings', icon: User, desc: 'Account Details & Password' },
     { id: 'outlets', name: 'Nearby Outlets', icon: Store, desc: 'Verified Outlets & Locations' },
     { id: 'orders', name: 'Orders & Tracking', icon: ShoppingBag, desc: 'Live Kitchen & Order Status' },
     { id: 'reservations', name: 'Reservations', icon: Calendar, desc: 'Table Bookings & History' },
@@ -17,8 +17,7 @@ export const CUSTOMER_DASHBOARD_TABS = [
     { id: 'wallet', name: 'Wallet', icon: Wallet, desc: 'Balance & Deposit Funds' },
     { id: 'offers', name: 'Offers & Coupons', icon: Gift, desc: 'Discounts & Promos' },
     { id: 'feedback', name: 'Feedback & Inquiries', icon: MessageSquare, desc: 'Support Tickets & Help' },
-    { id: 'reviews', name: 'My Reviews & Story', icon: Star, desc: 'Ratings & Testimonials' },
-    { id: 'profile', name: 'Profile & Settings', icon: Settings, desc: 'Account Details & Password' }
+    { id: 'reviews', name: 'My Reviews & Story', icon: Star, desc: 'Ratings & Testimonials' }
 ];
 
 const CustomerNavDrawer = ({ isOpen, onClose, activeTab, onSelectTab }) => {

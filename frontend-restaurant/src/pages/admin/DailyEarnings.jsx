@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { 
     DollarSign, ShoppingBag, TrendingUp, TrendingDown, Calendar, 
     Clock, CheckCircle2, AlertCircle, RefreshCw, Layers, CreditCard,
-    ArrowUpRight, ArrowDownRight, Info, Download
+    ArrowUpRight, ArrowDownRight, Info, Download, UtensilsCrossed,
+    Users, Building2, Sliders
 } from 'lucide-react';
 import { 
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -304,34 +305,81 @@ const DailyEarnings = () => {
             </div>
 
             {/* Daily Expense Breakdown Details */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs p-6 space-y-4">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    Daily Expense Allocation Summary ({data?.dateLabel || selectedDate})
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                    <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-                        <span className="text-slate-400 block mb-1">Material & Food Cost:</span>
-                        <span className="text-base font-bold text-slate-900 dark:text-white">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs p-6 sm:p-7 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1 border-b border-slate-100 dark:border-slate-700/50">
+                    <div>
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                            Daily Expense Allocation Summary
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            Accrued &amp; logged liabilities for <span className="font-semibold text-slate-600 dark:text-slate-300">{data?.dateLabel || selectedDate}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Material & Food Cost */}
+                    <div className="group relative p-4 rounded-2xl bg-gradient-to-br from-white to-amber-50/30 dark:from-slate-800 dark:to-amber-950/10 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Material &amp; Food Cost</span>
+                            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                <UtensilsCrossed size={15} />
+                            </div>
+                        </div>
+                        <div className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                             ₹{(expenses.materialCosts || 0).toLocaleString('en-IN')}
-                        </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                            Raw ingredients &amp; kitchen supplies
+                        </div>
                     </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-                        <span className="text-slate-400 block mb-1">Staff Expenses:</span>
-                        <span className="text-base font-bold text-slate-900 dark:text-white">
+
+                    {/* Staff Expenses */}
+                    <div className="group relative p-4 rounded-2xl bg-gradient-to-br from-white to-blue-50/30 dark:from-slate-800 dark:to-blue-950/10 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Staff Expenses</span>
+                            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                <Users size={15} />
+                            </div>
+                        </div>
+                        <div className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                             ₹{(expenses.staffExpenses || 0).toLocaleString('en-IN')}
-                        </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                            Daily accrued wages &amp; payouts
+                        </div>
                     </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-                        <span className="text-slate-400 block mb-1">Rent & Utilities:</span>
-                        <span className="text-base font-bold text-slate-900 dark:text-white">
+
+                    {/* Rent & Utilities */}
+                    <div className="group relative p-4 rounded-2xl bg-gradient-to-br from-white to-purple-50/30 dark:from-slate-800 dark:to-purple-950/10 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rent &amp; Utilities</span>
+                            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                <Building2 size={15} />
+                            </div>
+                        </div>
+                        <div className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                             ₹{(expenses.rentAndUtilities || 0).toLocaleString('en-IN')}
-                        </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                            Premises, power &amp; broadband
+                        </div>
                     </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-                        <span className="text-slate-400 block mb-1">Other Operating Costs:</span>
-                        <span className="text-base font-bold text-slate-900 dark:text-white">
+
+                    {/* Other Operating Costs */}
+                    <div className="group relative p-4 rounded-2xl bg-gradient-to-br from-white to-emerald-50/30 dark:from-slate-800 dark:to-emerald-950/10 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Other Operating Costs</span>
+                            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <Sliders size={15} />
+                            </div>
+                        </div>
+                        <div className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                             ₹{(expenses.otherExpenses || 0).toLocaleString('en-IN')}
-                        </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                            Maintenance, taxes &amp; logistics
+                        </div>
                     </div>
                 </div>
             </div>

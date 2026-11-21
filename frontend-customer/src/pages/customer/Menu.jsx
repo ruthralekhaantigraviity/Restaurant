@@ -4,13 +4,11 @@ import { Search, Heart, ShoppingBag, Star, Filter, Info, Flame, Leaf } from 'luc
 import { useCart } from '../../context/CartContext';
 import { getItemImage, getFallbackFoodImage } from '../../utils/imageHelper';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
-import defaultApi, { PROD_API_URL } from '../../utils/axiosInstance';
+import defaultApi, { getApiUrl, PROD_API_URL } from '../../utils/axiosInstance';
 import DishDetailModal from '../../components/DishDetailModal';
 import toast from 'react-hot-toast';
 
 import { useLocation } from 'react-router-dom';
-
-const baseCategories = ['All', 'Mains & Meals', 'Starters', 'Salads', 'Desserts', 'Beverages'];
 
 const Menu = () => {
     const { addToCart, wishlist, toggleWishlist } = useCart();
@@ -67,7 +65,7 @@ const Menu = () => {
         } catch { }
     }, [location.search]);
 
-    // Dynamic categories from all loaded menu items
+    // Dynamic categories purely extracted from live database menu items
     const categories = useMemo(() => {
         const itemCategories = new Set();
         menuItems.forEach(item => {
@@ -76,9 +74,8 @@ const Menu = () => {
                 if (trimmed) itemCategories.add(trimmed);
             }
         });
-        return ['All', 'Mains & Meals', 'Starters', 'Desserts', 'Beverages', ...Array.from(itemCategories).filter(c =>
-            !['main', 'mains', 'meal', 'meals', 'starter', 'starters', 'dessert', 'desserts', 'beverage', 'beverages'].includes(c.toLowerCase())
-        )];
+        const sortedCats = Array.from(itemCategories).sort((a, b) => a.localeCompare(b));
+        return ['All', ...sortedCats];
     }, [menuItems]);
 
     useEffect(() => {
@@ -91,9 +88,10 @@ const Menu = () => {
         }, 12000);
 
         const fetchMenu = async () => {
-            // 1. Direct reliable fetch from live production cloud API (no staff auth interference)
+            const activeApiUrl = getApiUrl ? getApiUrl() : '/api';
+            // 1. Direct reliable fetch from active backend API
             try {
-                const directRes = await axios.get(`${PROD_API_URL}/menu`, { timeout: 15000 });
+                const directRes = await axios.get(`${activeApiUrl}/menu`, { timeout: 6000 });
                 if (isMounted && Array.isArray(directRes.data) && directRes.data.length > 0) {
                     setMenuItems(directRes.data);
                     if (isMounted) setLoading(false);
@@ -104,12 +102,12 @@ const Menu = () => {
                     return;
                 }
             } catch (directErr) {
-                console.warn('Direct production menu fetch notice:', directErr?.message || directErr);
+                console.warn('Active menu fetch notice:', directErr?.message || directErr);
             }
 
             // 2. Same-origin fallback
             try {
-                const sameOriginRes = await axios.get('/api/menu', { timeout: 12000 });
+                const sameOriginRes = await axios.get('/api/menu', { timeout: 6000 });
                 if (isMounted && Array.isArray(sameOriginRes.data) && sameOriginRes.data.length > 0) {
                     setMenuItems(sameOriginRes.data);
                     if (isMounted) setLoading(false);
@@ -130,10 +128,20 @@ const Menu = () => {
                         sessionStorage.setItem('foodnest_menu_cache', JSON.stringify(data));
                         sessionStorage.setItem('restosys_live_menu_cache', JSON.stringify(data));
                     } catch { }
+                    return;
                 }
             } catch (error) {
                 console.warn('Initial menu fetch notice:', error?.message || error);
-            } finally {
+            }
+
+            // 4. Fallback to cloud production API if local was unreachable
+            try {
+                const prodRes = await axios.get(`${PROD_API_URL}/menu`, { timeout: 10000 });
+                if (isMounted && Array.isArray(prodRes.data) && prodRes.data.length > 0) {
+                    setMenuItems(prodRes.data);
+                }
+            } catch (_) { }
+            finally {
                 if (isMounted) setLoading(false);
             }
         };
@@ -148,7 +156,8 @@ const Menu = () => {
     useEffect(() => {
         if (!loading && menuItems.length === 0) {
             const retryTimer = setTimeout(() => {
-                axios.get(`${PROD_API_URL}/menu`, { timeout: 15000 })
+                const url = getApiUrl ? getApiUrl() : '/api';
+                axios.get(`${url}/menu`, { timeout: 6000 })
                     .then(res => {
                         if (Array.isArray(res.data) && res.data.length > 0) {
                             setMenuItems(res.data);
@@ -363,8 +372,13 @@ const Menu = () => {
                                 <button
                                     onClick={() => {
                                         setLoading(true);
-                                        axios.get(`${PROD_API_URL}/menu`, { timeout: 10000 })
+                                        const url = getApiUrl ? getApiUrl() : '/api';
+                                        axios.get(`${url}/menu`, { timeout: 6000 })
                                             .then(r => { if (Array.isArray(r.data)) setMenuItems(r.data); })
+                                            .catch(() => {
+                                                return axios.get(`${PROD_API_URL}/menu`, { timeout: 10000 })
+                                                    .then(r => { if (Array.isArray(r.data)) setMenuItems(r.data); });
+                                            })
                                             .finally(() => setLoading(false));
                                     }}
                                     className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"

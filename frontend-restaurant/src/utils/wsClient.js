@@ -88,7 +88,15 @@ export const createReconnectingWebSocket = ({
         if (ws) {
             try {
                 ws.onclose = null;
-                ws.close();
+                ws.onerror = null;
+                ws.onmessage = null;
+                if (ws.readyState === WebSocket.CONNECTING) {
+                    ws.onopen = () => {
+                        try { ws.close(1000, 'Unmount'); } catch (_) { }
+                    };
+                } else if (ws.readyState === WebSocket.OPEN) {
+                    ws.close(1000, 'Unmount');
+                }
             } catch {
                 // ignore
             }

@@ -10,9 +10,9 @@ const SuperAdminDashboard = () => {
     const location = useLocation();
     const cachedOverview = (() => {
         try {
-            const raw = sessionStorage.getItem('restosys_superadmin_overview_cache');
+            const raw = localStorage.getItem('restosys_superadmin_overview_cache') || sessionStorage.getItem('restosys_superadmin_overview_cache');
             const parsed = raw ? JSON.parse(raw) : null;
-            if (parsed && Array.isArray(parsed.restaurants) && parsed.restaurants.length > 0) {
+            if (parsed && (parsed.stats || (Array.isArray(parsed.restaurants) && parsed.restaurants.length > 0))) {
                 return parsed;
             }
             return null;
@@ -35,6 +35,7 @@ const SuperAdminDashboard = () => {
     const [billingDemos, setBillingDemos] = useState(() => cachedOverview?.billingDemos || []);
     const [loading, setLoading] = useState(false);
     const [viewingRestaurant, setViewingRestaurant] = useState(null);
+    const [viewingInquiry, setViewingInquiry] = useState(null);
     const [restSearchQuery, setRestSearchQuery] = useState('');
     const [planFilter, setPlanFilter] = useState('All');
     const [confirmDeleteInquiry, setConfirmDeleteInquiry] = useState(null);
@@ -94,7 +95,7 @@ const SuperAdminDashboard = () => {
                     return { data: { data: [] } };
                 })
             ]);
-            
+
             const rData = Array.isArray(restsRes.data) ? restsRes.data : [];
             let resolvedStats = statsRes.data;
 
@@ -138,7 +139,7 @@ const SuperAdminDashboard = () => {
 
             if (rData.length > 0 || (resolvedStats && resolvedStats.totalRestaurants > 0)) {
                 try {
-                    sessionStorage.setItem('restosys_superadmin_overview_cache', JSON.stringify({
+                    const cachePayload = JSON.stringify({
                         stats: resolvedStats || stats,
                         restaurants: rData.length > 0 ? rData : restaurants,
                         verifications: verifsRes.data || [],
@@ -146,8 +147,10 @@ const SuperAdminDashboard = () => {
                         tickets: ticketsRes.data || [],
                         notifications: notifsRes.data || [],
                         billingDemos: demosRes.data?.data || []
-                    }));
-                } catch (_) {}
+                    });
+                    localStorage.setItem('restosys_superadmin_overview_cache', cachePayload);
+                    sessionStorage.setItem('restosys_superadmin_overview_cache', cachePayload);
+                } catch (_) { }
             }
         } catch (error) {
             console.error("Failed to fetch super admin data", error);
@@ -189,7 +192,7 @@ const SuperAdminDashboard = () => {
         const nextStatus = currentStatus === 'New' ? 'In Progress' : currentStatus === 'In Progress' ? 'Resolved' : 'New';
         try {
             await api.put(`/inquiries/admin/${id}`, { status: nextStatus });
-            setInquiries(inquiries.map(inq => 
+            setInquiries(inquiries.map(inq =>
                 inq._id === id ? { ...inq, status: nextStatus } : inq
             ));
             toast.success(`Inquiry status updated to ${nextStatus}!`);
@@ -218,7 +221,7 @@ const SuperAdminDashboard = () => {
         const nextStatus = currentStatus === 'Open' ? 'In Progress' : currentStatus === 'In Progress' ? 'Resolved' : 'Open';
         try {
             await api.put(`/super-admin/tickets/${id}`, { status: nextStatus });
-            setTickets(tickets.map(tkt => 
+            setTickets(tickets.map(tkt =>
                 tkt._id === id ? { ...tkt, status: nextStatus } : tkt
             ));
             toast.success(`Ticket status updated to ${nextStatus}!`);
@@ -231,7 +234,7 @@ const SuperAdminDashboard = () => {
         const newStatus = currentStatus === 'Active' ? 'Frozen' : 'Active';
         try {
             await api.put(`/super-admin/restaurants/${id}/subscription`, { status: newStatus });
-            setRestaurants(restaurants.map(r => 
+            setRestaurants(restaurants.map(r =>
                 r._id === id ? { ...r, subscription: { ...r.subscription, status: newStatus } } : r
             ));
             toast.success(`Account status updated to ${newStatus}!`);
@@ -240,9 +243,9 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    if (loading) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
+    if (loading && !cachedOverview && !restaurants.length) return <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>;
 
-    const pendingVerifications = verifications.filter(v => 
+    const pendingVerifications = verifications.filter(v =>
         v.status === 'Pending' || v.status === 'Under Review' || v.restaurantId?.approvalStatus === 'Pending'
     );
 
@@ -250,7 +253,7 @@ const SuperAdminDashboard = () => {
         if (!r.subscription?.expiryDate) return false;
         const diffTime = new Date(r.subscription.expiryDate) - new Date();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 30 && r.subscription?.status !== 'Cancelled';
+        return diffDays <= 2 && r.subscription?.status !== 'Cancelled';
     });
 
     return (
@@ -293,8 +296,8 @@ const SuperAdminDashboard = () => {
                                 </p>
                             </div>
                         </div>
-                        <Link 
-                            to="/super-admin/billing-demos" 
+                        <Link
+                            to="/super-admin/billing-demos"
                             className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-blue-600/20 flex items-center gap-2 shrink-0 hover:-translate-y-0.5"
                         >
                             Review & Configure <ArrowRight size={14} />
@@ -364,8 +367,8 @@ const SuperAdminDashboard = () => {
                             const diffTime = new Date(r.subscription.expiryDate) - new Date();
                             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                             return (
-                                <div 
-                                    key={r._id} 
+                                <div
+                                    key={r._id}
                                     className="flex justify-between items-center bg-white border border-red-100/50 p-4 rounded-2xl shadow-sm cursor-pointer hover:shadow-md hover:border-red-200 transition-all"
                                     onClick={() => setViewingRestaurant(r)}
                                     title="Click to view subscription details"
@@ -384,15 +387,14 @@ const SuperAdminDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-block ${
-                                            diffDays < 0 
-                                            ? 'bg-red-100 text-red-700 border border-red-200' 
+                                        <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-block ${diffDays < 0
+                                            ? 'bg-red-100 text-red-700 border border-red-200'
                                             : 'bg-orange-100 text-orange-700 border border-orange-200'
-                                        }`}>
-                                            {diffDays < 0 
-                                                ? `Expired ${Math.abs(diffDays)}d ago` 
-                                                : diffDays === 0 
-                                                    ? 'Expires today!' 
+                                            }`}>
+                                            {diffDays < 0
+                                                ? `Expired ${Math.abs(diffDays)}d ago`
+                                                : diffDays === 0
+                                                    ? 'Expires today!'
                                                     : `Expires in ${diffDays}d`
                                             }
                                         </span>
@@ -416,13 +418,13 @@ const SuperAdminDashboard = () => {
                 ].map((stat, idx) => {
                     const Icon = stat.icon;
                     return (
-                        <div key={idx} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 flex items-center gap-3.5 sm:gap-5 transition-all hover:-translate-y-1 hover:shadow-md">
-                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center ${stat.bg} ${stat.color} shrink-0`}>
+                        <div key={idx} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 flex items-start gap-3.5 sm:gap-5 transition-all hover:-translate-y-1 hover:shadow-md">
+                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center ${stat.bg} ${stat.color} shrink-0 mt-0.5`}>
                                 <Icon size={24} className="sm:w-7 sm:h-7" />
                             </div>
-                            <div className="min-w-0">
-                                <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block leading-tight break-words">{stat.label}</p>
-                                <h3 className="text-lg sm:text-xl font-black text-gray-900 truncate">{stat.value}</h3>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider h-8 sm:h-9 flex items-start leading-tight break-words">{stat.label}</p>
+                                <h3 className="text-lg sm:text-xl font-black text-gray-900 truncate mt-1">{stat.value}</h3>
                             </div>
                         </div>
                     );
@@ -482,16 +484,14 @@ const SuperAdminDashboard = () => {
                                     <button
                                         key={tab.key}
                                         onClick={() => setPlanFilter(tab.key)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                                            isActive
-                                                ? 'bg-gray-900 text-white shadow-sm'
-                                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                        }`}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isActive
+                                            ? 'bg-gray-900 text-white shadow-sm'
+                                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                            }`}
                                     >
                                         <span>{tab.label}</span>
-                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
-                                            isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-                                        }`}>
+                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                                            }`}>
                                             {tab.count}
                                         </span>
                                     </button>
@@ -539,8 +539,8 @@ const SuperAdminDashboard = () => {
                                     const planLower = (restaurant.subscription?.plan || 'basic').toLowerCase();
                                     const isEnterprise = planLower === 'enterprise';
                                     const isPro = planLower === 'pro' || planLower === 'professional';
-                                    const planPrice = restaurant.subscription?.price 
-                                        ? `₹${restaurant.subscription.price.toLocaleString('en-IN')}` 
+                                    const planPrice = restaurant.subscription?.price
+                                        ? `₹${restaurant.subscription.price.toLocaleString('en-IN')}`
                                         : isEnterprise ? '₹12,999' : isPro ? '₹5,999' : '₹2,999';
                                     const cycle = restaurant.subscription?.billingCycle || 'monthly';
                                     const expiry = restaurant.subscription?.expiryDate;
@@ -553,7 +553,7 @@ const SuperAdminDashboard = () => {
 
                                     return (
                                         <tr key={restaurant._id} className="hover:bg-gray-50/80 transition-colors">
-                                            <td className="p-4">
+                                            <td className="p-4 align-middle">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                                         {restaurant.logo ? (
@@ -565,30 +565,29 @@ const SuperAdminDashboard = () => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <span className="font-bold text-gray-900 block text-sm">{restaurant.name}</span>
-                                                        <span className="text-[11px] font-semibold text-gray-500 block">{outletFormat}</span>
+                                                        <span className="font-bold text-gray-900 block text-sm leading-tight">{restaurant.name}</span>
+                                                        <span className="text-[11px] font-semibold text-gray-500 block mt-0.5">{outletFormat}</span>
                                                         {restaurant.address && (
-                                                            <span className="text-[10px] text-gray-400 block truncate max-w-[180px]">{restaurant.address}</span>
+                                                            <span className="text-[10px] text-gray-400 block truncate max-w-[180px] mt-0.5">{restaurant.address}</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="p-4">
-                                                <div className="text-xs font-bold text-gray-900">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
-                                                <div className="text-[11px] text-gray-500">{restaurant.ownerId?.email || 'N/A'}</div>
+                                            <td className="p-4 align-middle">
+                                                <div className="text-xs font-bold text-gray-900 leading-tight">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
+                                                <div className="text-[11px] text-gray-500 mt-0.5">{restaurant.ownerId?.email || 'N/A'}</div>
                                                 {restaurant.phone && (
-                                                    <div className="text-[10px] text-gray-400 font-medium">📞 {restaurant.phone}</div>
+                                                    <div className="text-[10px] text-gray-400 font-medium mt-0.5">📞 {restaurant.phone}</div>
                                                 )}
                                             </td>
-                                            <td className="p-4">
+                                            <td className="p-4 align-middle whitespace-nowrap">
                                                 <div className="flex flex-col gap-1 items-start">
-                                                    <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${
-                                                        isEnterprise 
-                                                            ? 'bg-purple-50 text-purple-700 border-purple-200' 
-                                                            : isPro 
-                                                                ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                                                                : 'bg-gray-50 text-gray-700 border-gray-200'
-                                                    }`}>
+                                                    <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${isEnterprise
+                                                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                        : isPro
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                                                        }`}>
                                                         {restaurant.subscription?.plan || 'Basic'}
                                                     </span>
                                                     <span className="text-[11px] font-bold text-gray-700">
@@ -596,7 +595,7 @@ const SuperAdminDashboard = () => {
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="p-4">
+                                            <td className="p-4 align-middle whitespace-nowrap">
                                                 {hasCustomPOS ? (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
                                                         <Sparkles size={12} className="text-emerald-600" /> Custom POS
@@ -607,16 +606,15 @@ const SuperAdminDashboard = () => {
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="p-4">
+                                            <td className="p-4 align-middle whitespace-nowrap min-w-[130px]">
                                                 {diffDays !== null ? (
                                                     <div>
-                                                        <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold inline-block border ${
-                                                            diffDays < 0
-                                                                ? 'bg-red-50 text-red-700 border-red-200'
-                                                                : diffDays <= 7
-                                                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                        }`}>
+                                                        <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap inline-flex items-center gap-1 border ${diffDays < 0
+                                                            ? 'bg-red-50 text-red-700 border-red-200'
+                                                            : diffDays <= 7
+                                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                            }`}>
                                                             {diffDays < 0 ? `Expired ${Math.abs(diffDays)}d ago` : diffDays === 0 ? 'Expires today' : `${diffDays} days left`}
                                                         </span>
                                                         <span className="text-[10px] text-gray-400 block mt-0.5">
@@ -627,16 +625,15 @@ const SuperAdminDashboard = () => {
                                                     <span className="text-xs text-gray-400 font-medium">Ongoing</span>
                                                 )}
                                             </td>
-                                            <td className="p-4">
-                                                <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
-                                                    restaurant.subscription?.status === 'Active' 
-                                                    ? 'bg-green-50 text-green-700 border-green-200' 
+                                            <td className="p-4 align-middle whitespace-nowrap">
+                                                <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${restaurant.subscription?.status === 'Active'
+                                                    ? 'bg-green-50 text-green-700 border-green-200'
                                                     : 'bg-red-50 text-red-700 border-red-200'
-                                                }`}>
+                                                    }`}>
                                                     {restaurant.subscription?.status || 'Active'}
                                                 </span>
                                             </td>
-                                            <td className="p-4 text-right">
+                                            <td className="p-4 align-middle text-right whitespace-nowrap">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => setViewingRestaurant(restaurant)}
@@ -645,13 +642,12 @@ const SuperAdminDashboard = () => {
                                                     >
                                                         <Eye size={16} />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleFreezeAccount(restaurant._id, restaurant.subscription?.status)}
-                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                                                            restaurant.subscription?.status === 'Active' 
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${restaurant.subscription?.status === 'Active'
                                                             ? 'text-red-600 bg-red-50 hover:bg-red-100'
                                                             : 'text-green-600 bg-green-50 hover:bg-green-100'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {restaurant.subscription?.status === 'Active' ? 'Freeze' : 'Unfreeze'}
                                                     </button>
@@ -678,9 +674,115 @@ const SuperAdminDashboard = () => {
                                 const q = restSearchQuery.toLowerCase();
                                 return (r.name || '').toLowerCase().includes(q) || (r.ownerId?.name || '').toLowerCase().includes(q);
                             }).length === 0 && (
+                                    <tr>
+                                        <td colSpan="7" className="p-8 text-center text-gray-500">
+                                            No subscribed restaurants match your filter or search query.
+                                        </td>
+                                    </tr>
+                                )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Public Inquiries Section */}
+            <div id="inquiries" className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-6">
+                <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Public Inquiries & Demo Leads</h2>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-700">
+                                {inquiries.length} {inquiries.length === 1 ? 'Lead' : 'Leads'}
+                            </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Walkthrough demo bookings and sales inquiries submitted from landing pages.</p>
+                    </div>
+                    <Link to="/super-admin/billing-demos?tab=leads" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
+                        Manage All Leads &amp; Demos <ArrowRight size={16} />
+                    </Link>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-[750px] text-left border-collapse table-fixed">
+                        <thead>
+                            <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+                                <th className="p-4 font-bold w-[34%]">Contact Details</th>
+                                <th className="p-4 font-bold w-[18%] whitespace-nowrap">Subject</th>
+                                <th className="p-4 font-bold w-[18%]">Message</th>
+                                <th className="p-4 font-bold w-[14%] text-center whitespace-nowrap">Status</th>
+                                <th className="p-4 font-bold text-right w-[16%] whitespace-nowrap">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {inquiries.map(inq => {
+                                const phoneDisplay = (inq.phone && inq.phone !== 'N/A' && inq.phone !== 'null' && inq.phone !== 'undefined')
+                                    ? inq.phone
+                                    : (inq.customerId?.phoneNumber || inq.customerId?.phone || inq.restaurantId?.phone || 'Not Provided');
+                                return (
+                                    <tr key={inq._id} className="hover:bg-gray-50/80 transition-colors text-sm">
+                                        <td className="p-4 align-middle">
+                                            <div className="truncate">
+                                                <span className="font-bold text-gray-900 block leading-tight truncate">{inq.name}</span>
+                                                {inq.restaurantName && (
+                                                    <span className="text-xs text-gray-500 block font-semibold mt-0.5 truncate">{inq.restaurantName}</span>
+                                                )}
+                                                <span className="text-[11px] text-gray-400 block mt-0.5 truncate">{inq.email}</span>
+                                                <span className="text-[11px] text-gray-600 block font-medium mt-0.5 truncate">📞 {phoneDisplay}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 align-middle whitespace-nowrap">
+                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-block ${inq.subject === 'Sales' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                inq.subject === 'Support' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                    inq.subject === 'Demo' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                                        'bg-gray-50 text-gray-700 border-gray-100'
+                                                }`}>
+                                                {inq.subject}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 align-middle">
+                                            <p className="text-xs text-gray-600 font-medium leading-relaxed line-clamp-2 break-words" title={inq.message}>
+                                                {inq.message}
+                                            </p>
+                                        </td>
+                                        <td className="p-4 align-middle text-center whitespace-nowrap">
+                                            <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border inline-block ${inq.status === 'Resolved' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                inq.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                    'bg-blue-50 text-blue-700 border-blue-100'
+                                                }`}>
+                                                {inq.status}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 align-middle text-right whitespace-nowrap">
+                                            <div className="flex items-center justify-end gap-1.5">
+                                                <button
+                                                    onClick={() => setViewingInquiry(inq)}
+                                                    className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-[0.97]"
+                                                    title="View Full Details"
+                                                >
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleUpdateInquiryStatus(inq._id, inq.status)}
+                                                    className="px-3 py-1.5 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
+                                                >
+                                                    {inq.status === 'New' ? 'Start Progress' : inq.status === 'In Progress' ? 'Resolve' : 'Reopen'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteInquiry(inq._id, inq.name)}
+                                                    className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-[0.97]"
+                                                    title="Delete Inquiry"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {inquiries.length === 0 && (
                                 <tr>
-                                    <td colSpan="7" className="p-8 text-center text-gray-500">
-                                        No subscribed restaurants match your filter or search query.
+                                    <td colSpan="5" className="p-10 text-center">
+                                        <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
+                                        <p className="text-gray-500 font-medium text-lg">No inquiries received yet.</p>
                                     </td>
                                 </tr>
                             )}
@@ -689,232 +791,136 @@ const SuperAdminDashboard = () => {
                 </div>
             </div>
 
-        {/* Public Inquiries Section */}
-        <div id="inquiries" className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-6">
-            <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Public Inquiries & Demo Leads</h2>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-700">
-                            {inquiries.length} {inquiries.length === 1 ? 'Lead' : 'Leads'}
-                        </span>
+            {/* Customer Support Enquiries (Tickets) */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-gray-50/50">
+                    <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Customer Support Enquiries (Tickets)</h2>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Support tickets submitted by registered restaurant partners/customers.</p>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Walkthrough demo bookings and sales inquiries submitted from landing pages.</p>
+                    <Link to="/super-admin/support" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
+                        Open Support Console <ArrowRight size={16} />
+                    </Link>
                 </div>
-                <Link to="/super-admin/billing-demos?tab=leads" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
-                    Manage All Leads &amp; Demos <ArrowRight size={16} />
-                </Link>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                            <th className="p-5 font-bold">Contact Details</th>
-                            <th className="p-5 font-bold">Subject</th>
-                            <th className="p-5 font-bold">Message</th>
-                            <th className="p-5 font-bold">Status</th>
-                            <th className="p-5 font-bold text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {inquiries.map(inq => (
-                            <tr key={inq._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                <td className="p-5">
-                                    <div>
-                                        <span className="font-bold text-gray-900 block">{inq.name}</span>
-                                        <span className="text-xs text-gray-500 block font-semibold">{inq.restaurantName}</span>
-                                        <span className="text-[11px] text-gray-400 block">{inq.email}</span>
-                                        <span className="text-[11px] text-gray-500 block font-semibold">📞 {inq.phone}</span>
-                                    </div>
-                                </td>
-                                <td className="p-5">
-                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
-                                        inq.subject === 'Sales' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                        inq.subject === 'Support' ? 'bg-red-50 text-red-700 border-red-100' :
-                                        inq.subject === 'Demo' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                                        'bg-gray-50 text-gray-700 border-gray-100'
-                                    }`}>
-                                        {inq.subject}
-                                    </span>
-                                </td>
-                                <td className="p-5 max-w-xs">
-                                    <p className="text-xs text-gray-600 font-medium leading-relaxed line-clamp-3" title={inq.message}>
-                                        {inq.message}
-                                    </p>
-                                </td>
-                                <td className="p-5">
-                                    <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${
-                                        inq.status === 'Resolved' ? 'bg-green-50 text-green-700 border-green-100' :
-                                        inq.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                        'bg-blue-50 text-blue-700 border-blue-100'
-                                    }`}>
-                                        {inq.status}
-                                    </span>
-                                </td>
-                                <td className="p-5 text-right whitespace-nowrap">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <button 
-                                            onClick={() => handleUpdateInquiryStatus(inq._id, inq.status)}
-                                            className="px-3.5 py-1.5 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
-                                        >
-                                            {inq.status === 'New' ? 'Start Progress' : inq.status === 'In Progress' ? 'Resolve' : 'Reopen'}
-                                        </button>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+                                <th className="p-5 font-bold">Ticket ID / Restaurant</th>
+                                <th className="p-5 font-bold">Category</th>
+                                <th className="p-5 font-bold">Priority</th>
+                                <th className="p-5 font-bold">Subject / Description</th>
+                                <th className="p-5 font-bold">Status</th>
+                                <th className="p-5 font-bold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {tickets.slice(0, 10).map(tkt => (
+                                <tr key={tkt._id} className="hover:bg-gray-50/80 transition-colors text-sm">
+                                    <td className="p-5">
+                                        <div>
+                                            <span className="font-bold text-blue-600 block">{tkt.ticketId}</span>
+                                            <span className="text-xs text-gray-900 block font-semibold">{tkt.restaurantId?.name || 'Platform Customer'}</span>
+                                            <span className="text-[11px] text-gray-400 block">{tkt.restaurantId?.email || 'N/A'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-5">
+                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">
+                                            {tkt.category}
+                                        </span>
+                                    </td>
+                                    <td className="p-5">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase border ${tkt.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
+                                            tkt.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                tkt.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                                    'bg-green-100 text-green-700 border-green-200'
+                                            }`}>
+                                            {tkt.priority}
+                                        </span>
+                                    </td>
+                                    <td className="p-5 max-w-xs">
+                                        <div>
+                                            <span className="font-bold text-gray-900 block truncate">{tkt.subject}</span>
+                                            <span className="text-xs text-gray-500 line-clamp-2 mt-0.5" title={tkt.description}>{tkt.description}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-5">
+                                        <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${tkt.status === 'Resolved' || tkt.status === 'Closed' ? 'bg-green-50 text-green-700 border-green-100' :
+                                            tkt.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                'bg-blue-50 text-blue-700 border-blue-100'
+                                            }`}>
+                                            {tkt.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-5 text-right whitespace-nowrap space-x-2">
                                         <button
-                                            onClick={() => handleDeleteInquiry(inq._id, inq.name)}
-                                            className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-[0.97]"
-                                            title="Delete Inquiry"
+                                            onClick={() => handleUpdateTicketStatus(tkt._id, tkt.status)}
+                                            className="px-3 py-1 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
                                         >
-                                            <Trash2 size={16} />
+                                            {tkt.status === 'Open' ? 'In Progress' : tkt.status === 'In Progress' ? 'Resolve' : 'Reopen'}
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {inquiries.length === 0 && (
-                            <tr>
-                                <td colSpan="5" className="p-10 text-center">
-                                    <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
-                                    <p className="text-gray-500 font-medium text-lg">No inquiries received yet.</p>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {/* Customer Support Enquiries (Tickets) */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-gray-50/50">
-                <div>
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Customer Support Enquiries (Tickets)</h2>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Support tickets submitted by registered restaurant partners/customers.</p>
+                                        <Link
+                                            to={`/super-admin/support/tickets/${tkt._id}`}
+                                            className="px-3 py-1 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all active:scale-[0.97] inline-block"
+                                        >
+                                            View Details
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                            {tickets.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" className="p-10 text-center">
+                                        <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
+                                        <p className="text-gray-500 font-medium text-lg">No support enquiries received yet.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-                <Link to="/super-admin/support" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
-                    Open Support Console <ArrowRight size={16} />
-                </Link>
             </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                            <th className="p-5 font-bold">Ticket ID / Restaurant</th>
-                            <th className="p-5 font-bold">Category</th>
-                            <th className="p-5 font-bold">Priority</th>
-                            <th className="p-5 font-bold">Subject / Description</th>
-                            <th className="p-5 font-bold">Status</th>
-                            <th className="p-5 font-bold text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {tickets.slice(0, 10).map(tkt => (
-                            <tr key={tkt._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                <td className="p-5">
-                                    <div>
-                                        <span className="font-bold text-blue-600 block">{tkt.ticketId}</span>
-                                        <span className="text-xs text-gray-900 block font-semibold">{tkt.restaurantId?.name || 'Platform Customer'}</span>
-                                        <span className="text-[11px] text-gray-400 block">{tkt.restaurantId?.email || 'N/A'}</span>
-                                    </div>
-                                </td>
-                                <td className="p-5">
-                                    <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">
-                                        {tkt.category}
-                                    </span>
-                                </td>
-                                <td className="p-5">
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase border ${
-                                        tkt.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
-                                        tkt.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                                        tkt.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                                        'bg-green-100 text-green-700 border-green-200'
-                                    }`}>
-                                        {tkt.priority}
-                                    </span>
-                                </td>
-                                <td className="p-5 max-w-xs">
-                                    <div>
-                                        <span className="font-bold text-gray-900 block truncate">{tkt.subject}</span>
-                                        <span className="text-xs text-gray-500 line-clamp-2 mt-0.5" title={tkt.description}>{tkt.description}</span>
-                                    </div>
-                                </td>
-                                <td className="p-5">
-                                    <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${
-                                        tkt.status === 'Resolved' || tkt.status === 'Closed' ? 'bg-green-50 text-green-700 border-green-100' :
-                                        tkt.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                        'bg-blue-50 text-blue-700 border-blue-100'
-                                    }`}>
-                                        {tkt.status}
-                                    </span>
-                                </td>
-                                <td className="p-5 text-right whitespace-nowrap space-x-2">
-                                    <button 
-                                        onClick={() => handleUpdateTicketStatus(tkt._id, tkt.status)}
-                                        className="px-3 py-1 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
-                                    >
-                                        {tkt.status === 'Open' ? 'In Progress' : tkt.status === 'In Progress' ? 'Resolve' : 'Reopen'}
-                                    </button>
-                                    <Link 
-                                        to={`/super-admin/support/tickets/${tkt._id}`}
-                                        className="px-3 py-1 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all active:scale-[0.97] inline-block"
-                                    >
-                                        View Details
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                        {tickets.length === 0 && (
-                            <tr>
-                                <td colSpan="6" className="p-10 text-center">
-                                    <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
-                                    <p className="text-gray-500 font-medium text-lg">No support enquiries received yet.</p>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        {/* System & Broadcast Notifications Preview */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900 font-sans tracking-tight">Recent System Notifications</h2>
-                    <p className="text-sm text-gray-500 mt-1">Platform broadcasts, system alerts, and automated activity notifications.</p>
+            {/* System & Broadcast Notifications Preview */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 font-sans tracking-tight">Recent System Notifications</h2>
+                        <p className="text-sm text-gray-500 mt-1">Platform broadcasts, system alerts, and automated activity notifications.</p>
+                    </div>
+                    <Link to="/super-admin/notifications" className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl">
+                        View Full Notifications <ArrowRight size={16} />
+                    </Link>
                 </div>
-                <Link to="/super-admin/notifications" className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl">
-                    View Full Notifications <ArrowRight size={16} />
-                </Link>
-            </div>
-            <div className="divide-y divide-gray-50">
-                {notifications.slice(0, 5).map(n => (
-                    <div key={n._id} className="p-5 flex items-start justify-between gap-4 hover:bg-gray-50/50 transition-colors">
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <Bell size={18} />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider">{n.type || 'System'}</span>
-                                    {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                <div className="divide-y divide-gray-50">
+                    {notifications.slice(0, 5).map(n => (
+                        <div key={n._id} className="p-5 flex items-start justify-between gap-4 hover:bg-gray-50/50 transition-colors">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Bell size={18} />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">{n.desc}</p>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider">{n.type || 'System'}</span>
+                                        {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">{n.desc}</p>
+                                </div>
                             </div>
+                            <span className="text-[11px] text-gray-400 font-medium shrink-0">
+                                {new Date(n.createdAt).toLocaleDateString()}
+                            </span>
                         </div>
-                        <span className="text-[11px] text-gray-400 font-medium shrink-0">
-                            {new Date(n.createdAt).toLocaleDateString()}
-                        </span>
-                    </div>
-                ))}
-                {notifications.length === 0 && (
-                    <div className="p-10 text-center">
-                        <Bell className="mx-auto text-gray-300 mb-3" size={40} />
-                        <p className="text-gray-500 font-medium text-lg">No notifications found.</p>
-                    </div>
-                )}
+                    ))}
+                    {notifications.length === 0 && (
+                        <div className="p-10 text-center">
+                            <Bell className="mx-auto text-gray-300 mb-3" size={40} />
+                            <p className="text-gray-500 font-medium text-lg">No notifications found.</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
 
             {/* View Details Modal */}
             {viewingRestaurant && (
@@ -950,7 +956,7 @@ const SuperAdminDashboard = () => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="space-y-2.5 text-sm">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Subscription Tier:</span>
@@ -969,17 +975,16 @@ const SuperAdminDashboard = () => {
                                     <span className="text-gray-900 font-black">
                                         ₹{(viewingRestaurant.subscription?.price || (
                                             (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'enterprise' ? 12999 :
-                                            (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
+                                                (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
                                         )).toLocaleString('en-IN')} / {viewingRestaurant.subscription?.billingCycle === 'yearly' ? 'year' : 'month'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Subscription Status:</span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${
-                                        viewingRestaurant.subscription?.status === 'Active' 
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                            : 'bg-red-50 text-red-700 border-red-200'
-                                    }`}>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.subscription?.status === 'Active'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : 'bg-red-50 text-red-700 border-red-200'
+                                        }`}>
                                         {viewingRestaurant.subscription?.status || 'Active'}
                                     </span>
                                 </div>
@@ -1031,13 +1036,98 @@ const SuperAdminDashboard = () => {
                                     {viewingRestaurant.address}
                                 </div>
                             )}
-                            
-                            <button 
+
+                            <button
                                 onClick={() => setViewingRestaurant(null)}
                                 className="w-full mt-2 py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
                             >
                                 Close Details
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Inquiry Detail Modal */}
+            {viewingInquiry && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setViewingInquiry(null)} />
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                                    <MessageSquare size={18} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900 text-base">Inquiry &amp; Lead Details</h3>
+                                    <p className="text-[11px] text-gray-400">Received {new Date(viewingInquiry.createdAt).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setViewingInquiry(null)}
+                                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Sender Name</span>
+                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.name}</span>
+                                </div>
+                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Restaurant / Org</span>
+                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.restaurantName || 'N/A'}</span>
+                                </div>
+                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Email Address</span>
+                                    <a href={`mailto:${viewingInquiry.email}`} className="font-bold text-blue-600 block mt-0.5 hover:underline truncate">{viewingInquiry.email || 'N/A'}</a>
+                                </div>
+                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Phone Number</span>
+                                    <span className="font-bold text-gray-900 block mt-0.5">
+                                        {viewingInquiry.phone && viewingInquiry.phone !== 'N/A'
+                                            ? viewingInquiry.phone
+                                            : (viewingInquiry.customerId?.phoneNumber || viewingInquiry.customerId?.phone || viewingInquiry.restaurantId?.phone || 'Not Provided')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100">
+                                <div className="flex items-center justify-between mb-1">
+                                    <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Subject</span>
+                                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white border border-blue-200 text-blue-800">{viewingInquiry.subject}</span>
+                                </div>
+                                <p className="text-xs font-semibold text-gray-800">{viewingInquiry.subject}</p>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-bold text-gray-700 block mb-1.5">Full Message</label>
+                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-700 leading-relaxed font-normal whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                    {viewingInquiry.message || 'No message content provided.'}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 pt-2">
+                                <button
+                                    onClick={() => {
+                                        handleUpdateInquiryStatus(viewingInquiry._id, viewingInquiry.status);
+                                        setViewingInquiry(prev => ({
+                                            ...prev,
+                                            status: prev.status === 'New' ? 'In Progress' : prev.status === 'In Progress' ? 'Resolved' : 'In Progress'
+                                        }));
+                                    }}
+                                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-xs"
+                                >
+                                    Mark as {viewingInquiry.status === 'New' ? 'In Progress' : viewingInquiry.status === 'In Progress' ? 'Resolved' : 'In Progress'}
+                                </button>
+                                <button
+                                    onClick={() => setViewingInquiry(null)}
+                                    className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

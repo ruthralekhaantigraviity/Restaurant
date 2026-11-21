@@ -30,6 +30,18 @@ const generateToken = (id) => {
     });
 };
 
+// Safe cross-site / local cookie configuration
+const getAuthCookieOptions = (overrides = {}) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        ...overrides,
+    };
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -328,12 +340,7 @@ export const registerUser = async (req, res) => {
             const token = generateToken(user._id);
             
             const cookieName = loginType === 'customer' ? 'jwt_customer' : 'jwt_staff';
-            res.cookie(cookieName, token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV !== 'development',
-                sameSite: 'none',
-                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            });
+            res.cookie(cookieName, token, getAuthCookieOptions());
 
             res.status(201).json({
                 _id: user._id,
@@ -434,12 +441,7 @@ export const loginUser = async (req, res) => {
             
             // Set cookie (optional, for HttpOnly cookie approach)
             const cookieName = loginType === 'customer' ? 'jwt_customer' : 'jwt_staff';
-            res.cookie(cookieName, token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-                sameSite: 'none', // Allow cross-site cookies for Vercel/Render
-                maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-            });
+            res.cookie(cookieName, token, getAuthCookieOptions());
 
             // Trigger Real-Time Login Notification Email in background
             try {
@@ -474,12 +476,10 @@ export const loginUser = async (req, res) => {
 // @route   POST /api/auth/logout
 // @access  Private
 export const logoutUser = (req, res) => {
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'none',
+    const cookieOptions = getAuthCookieOptions({
         expires: new Date(0),
-    };
+        maxAge: 0,
+    });
     res.cookie('jwt_staff', '', cookieOptions);
     res.cookie('jwt_customer', '', cookieOptions);
     res.cookie('jwt', '', cookieOptions); // Clear old cookie just in case

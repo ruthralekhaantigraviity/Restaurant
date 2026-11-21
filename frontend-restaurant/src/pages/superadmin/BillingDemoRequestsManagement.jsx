@@ -864,46 +864,53 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 uppercase tracking-wider font-bold">
-                                        <th className="p-5">Lead / Contact Info</th>
-                                        <th className="p-5">Restaurant &amp; Outlet</th>
-                                        <th className="p-5">Request Type</th>
-                                        <th className="p-5">Walkthrough Details</th>
-                                        <th className="p-5">Date Received</th>
-                                        <th className="p-5">Status</th>
-                                        <th className="p-5 text-right">Actions</th>
+                                        <th className="py-3.5 px-4 w-60">Lead / Contact Info</th>
+                                        <th className="py-3.5 px-4 w-52">Restaurant &amp; Outlet</th>
+                                        <th className="py-3.5 px-4 w-36 whitespace-nowrap">Request Type</th>
+                                        <th className="py-3.5 px-4">Walkthrough Details</th>
+                                        <th className="py-3.5 px-4 w-36 whitespace-nowrap">Date Received</th>
+                                        <th className="py-3.5 px-4 w-24 text-center whitespace-nowrap">Status</th>
+                                        <th className="py-3.5 px-4 w-44 text-right whitespace-nowrap">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                                     {filteredInquiries.map((inq) => {
-                                        const cleanPhone = (inq.phone || '').replace(/\D/g, '');
+                                        const resolvedPhone = (inq.phone && inq.phone !== 'N/A' && inq.phone !== 'null' && inq.phone !== 'undefined')
+                                            ? inq.phone
+                                            : (inq.customerId?.phoneNumber || inq.customerId?.phone || inq.restaurantId?.phone || null);
+                                        const cleanPhone = (resolvedPhone || '').replace(/\D/g, '');
                                         return (
                                             <tr key={inq._id} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/40 transition-colors text-sm">
-                                                <td className="p-5">
+                                                <td className="py-3.5 px-4 align-middle">
                                                     <div>
                                                         <span className="font-bold text-gray-900 dark:text-white block text-sm">
                                                             {inq.name}
                                                         </span>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <a
-                                                                href={`tel:${inq.phone}`}
-                                                                className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md"
-                                                            >
-                                                                <Phone size={11} /> {inq.phone}
-                                                            </a>
-                                                            {cleanPhone && (
+                                                        {resolvedPhone ? (
+                                                            <div className="flex items-center gap-2 mt-1">
                                                                 <a
-                                                                    href={`https://wa.me/${cleanPhone}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-md"
+                                                                    href={`tel:${resolvedPhone}`}
+                                                                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md"
                                                                 >
-                                                                    WhatsApp
+                                                                    <Phone size={11} /> {resolvedPhone}
                                                                 </a>
-                                                            )}
-                                                        </div>
+                                                                {cleanPhone && (
+                                                                    <a
+                                                                        href={`https://wa.me/${cleanPhone}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-md"
+                                                                    >
+                                                                        WhatsApp
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[11px] text-gray-400 block mt-1 font-medium">📞 Not Provided</span>
+                                                        )}
                                                     </div>
                                                 </td>
-                                                <td className="p-5">
+                                                <td className="py-3.5 px-4 align-middle">
                                                     <div className="flex items-center gap-2">
                                                         <Building2 size={16} className="text-gray-400 shrink-0" />
                                                         <span className="font-bold text-gray-800 dark:text-gray-200">
@@ -911,7 +918,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="p-5">
+                                                <td className="py-3.5 px-4 align-middle whitespace-nowrap">
                                                     <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-flex items-center gap-1 ${
                                                         inq.subject === 'Demo'
                                                             ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
@@ -923,12 +930,12 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                         {inq.subject || 'Demo'}
                                                     </span>
                                                 </td>
-                                                <td className="p-5 max-w-sm">
+                                                <td className="py-3.5 px-4 align-middle max-w-sm">
                                                     <p className="text-xs text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
                                                         {inq.message}
                                                     </p>
                                                 </td>
-                                                <td className="p-5 whitespace-nowrap text-xs text-gray-500 font-medium">
+                                                <td className="py-3.5 px-4 align-middle whitespace-nowrap text-xs text-gray-500 font-medium">
                                                     {inq.createdAt ? new Date(inq.createdAt).toLocaleString('en-IN', {
                                                         month: 'short',
                                                         day: 'numeric',
@@ -936,7 +943,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                         minute: '2-digit'
                                                     }) : 'Recently'}
                                                 </td>
-                                                <td className="p-5 whitespace-nowrap">
+                                                <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
                                                     <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
                                                         inq.status === 'Resolved'
                                                             ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300'
@@ -947,7 +954,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                         {inq.status || 'New'}
                                                     </span>
                                                 </td>
-                                                <td className="p-5 text-right whitespace-nowrap">
+                                                <td className="py-3.5 px-4 align-middle text-right whitespace-nowrap">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button
                                                             type="button"

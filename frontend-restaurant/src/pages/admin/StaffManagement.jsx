@@ -22,8 +22,9 @@ import {
     Search, Plus, Filter, Mail, Phone, Calendar, Clock, 
     MoreVertical, ShieldCheck, MapPin, X, Trash2, Edit2, 
     CheckCircle2, AlertCircle, DollarSign, FileText, Printer, 
-    CreditCard, ArrowRight, UserCheck, Users, ChevronRight, History,
-    CalendarDays, FileSpreadsheet, Check, Ban, Settings2, Sliders, Eye, EyeOff, RefreshCw, Download
+    CreditCard, ArrowRight, UserCheck, Users, ChevronRight, ChevronDown, History,
+    CalendarDays, FileSpreadsheet, Check, Ban, Settings2, Sliders, SlidersHorizontal, Eye, EyeOff, RefreshCw, Download,
+    Banknote, TrendingDown, Wallet, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -115,8 +116,8 @@ const StaffManagement = () => {
 
     // Keep url in sync
     useEffect(() => {
-        const tabParam = searchParams.get('tab');
-        if (tabParam && ['staff', 'attendance', 'payroll', 'leaves', 'reports'].includes(tabParam)) {
+        const tabParam = searchParams.get('tab') || 'staff';
+        if (['staff', 'attendance', 'payroll', 'leaves', 'reports'].includes(tabParam)) {
             setActiveTab(tabParam);
         }
     }, [searchParams]);
@@ -190,6 +191,18 @@ const StaffManagement = () => {
         reason: ''
     });
 
+    // Attendance Details & Status Update Modal state
+    const [selectedAttendanceEmployee, setSelectedAttendanceEmployee] = useState(null);
+    const [attendanceDetailsForm, setAttendanceDetailsForm] = useState({
+        status: 'Present',
+        checkInTime: '09:00',
+        checkOutTime: '18:00',
+        lateMinutes: 0,
+        overtimeHours: 0,
+        notes: ''
+    });
+    const [isSavingAttendanceDetails, setIsSavingAttendanceDetails] = useState(false);
+
     // TAB 3: Payroll State
     const currentYear = new Date().getFullYear();
     const currentMonthName = new Date().toLocaleString('en-US', { month: 'long' });
@@ -200,6 +213,7 @@ const StaffManagement = () => {
     const [payrollPreview, setPayrollPreview] = useState(null);
     const [isCalculatingPayroll, setIsCalculatingPayroll] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [isDisbursingPayment, setIsDisbursingPayment] = useState(false);
     const [selectedPayrollForPayment, setSelectedPayrollForPayment] = useState(null);
     const [paymentForm, setPaymentForm] = useState({
         amount: '',
@@ -208,6 +222,7 @@ const StaffManagement = () => {
         notes: ''
     });
     const [isSalarySlipModalOpen, setIsSalarySlipModalOpen] = useState(false);
+    const [loadingSlipId, setLoadingSlipId] = useState(null);
     const [salarySlipData, setSalarySlipData] = useState(null);
 
     // TAB 4: Leave Management (Admin)
@@ -516,6 +531,89 @@ const StaffManagement = () => {
         }
     };
 
+    const handleOpenAttendanceDetails = (emp) => {
+        const savedRecord = attendanceRecords.find(r => (r.employee?._id || r.employee) === emp._id);
+        const current = attendanceMap[emp._id] || (savedRecord ? {
+            status: savedRecord.status,
+            checkInTime: formatTimeHHMM(savedRecord.checkIn || savedRecord.checkInTime),
+            checkOutTime: formatTimeHHMM(savedRecord.checkOut || savedRecord.checkOutTime),
+            lateMinutes: savedRecord.lateMinutes || 0,
+            overtimeHours: savedRecord.overtimeHours || 0,
+            notes: savedRecord.notes || '',
+            isSaved: true
+        } : {
+            status: 'Not Marked',
+            checkInTime: '',
+            checkOutTime: '',
+            lateMinutes: 0,
+            overtimeHours: 0,
+            notes: '',
+            isSaved: false
+        });
+
+        setSelectedAttendanceEmployee(emp);
+        setAttendanceDetailsForm({
+            status: current.status === 'Not Marked' ? 'Present' : current.status,
+            checkInTime: current.checkInTime || '09:00',
+            checkOutTime: current.checkOutTime || '18:00',
+            lateMinutes: current.lateMinutes || 0,
+            overtimeHours: current.overtimeHours || 0,
+            notes: current.notes || ''
+        });
+    };
+
+    const handleSaveAttendanceDetails = async (e) => {
+        if (e) e.preventDefault();
+        if (!selectedAttendanceEmployee) return;
+        setIsSavingAttendanceDetails(true);
+        try {
+            const shiftHrs = selectedAttendanceEmployee.salaryConfig?.dailyWorkHours || 8;
+            const cIn = attendanceDetailsForm.checkInTime;
+            const cOut = attendanceDetailsForm.checkOutTime;
+            const computedOt = (cIn && cOut) ? calculateOvertimeHours(cIn, cOut, shiftHrs) : 0;
+            const finalOt = attendanceDetailsForm.overtimeHours ? Number(attendanceDetailsForm.overtimeHours) : computedOt;
+
+            const checkInISO = toIsoSafe(attendanceDate, attendanceDetailsForm.checkInTime);
+            const checkOutISO = toIsoSafe(attendanceDate, attendanceDetailsForm.checkOutTime);
+
+            await api.post('/staff/attendance/bulk', {
+                date: attendanceDate,
+                records: [{
+                    employeeId: selectedAttendanceEmployee._id,
+                    status: attendanceDetailsForm.status,
+                    checkInTime: checkInISO,
+                    checkOutTime: checkOutISO,
+                    lateMinutes: Number(attendanceDetailsForm.lateMinutes) || 0,
+                    overtimeHours: finalOt,
+                    notes: attendanceDetailsForm.notes || ''
+                }]
+            });
+
+            // Update local state immediately
+            setAttendanceMap(prev => ({
+                ...prev,
+                [selectedAttendanceEmployee._id]: {
+                    status: attendanceDetailsForm.status,
+                    checkInTime: attendanceDetailsForm.checkInTime,
+                    checkOutTime: attendanceDetailsForm.checkOutTime,
+                    lateMinutes: Number(attendanceDetailsForm.lateMinutes) || 0,
+                    overtimeHours: finalOt,
+                    notes: attendanceDetailsForm.notes || '',
+                    isSaved: true
+                }
+            }));
+
+            toast.success(`Attendance updated for ${selectedAttendanceEmployee.name}`);
+            setSelectedAttendanceEmployee(null);
+            fetchAttendanceForDate();
+        } catch (error) {
+            console.error('Failed to update attendance details', error);
+            toast.error(error.response?.data?.message || 'Error updating attendance details');
+        } finally {
+            setIsSavingAttendanceDetails(false);
+        }
+    };
+
     // ── Payroll Loading & Generation ─────────────────────────────────────────
     const fetchPayrollRecords = async () => {
         try {
@@ -747,26 +845,32 @@ const StaffManagement = () => {
     };
 
     const handleRecordPayrollPayment = async (e) => {
-        e.preventDefault();
-        if (!selectedPayrollForPayment) return;
+        if (e && e.preventDefault) e.preventDefault();
+        if (!selectedPayrollForPayment || isDisbursingPayment) return;
         const amt = Number(paymentForm.amount);
-        if (amt <= 0) {
+        if (amt <= 0 || isNaN(amt)) {
             toast.error('Please enter a valid disbursement amount');
             return;
         }
-        if (amt > selectedPayrollForPayment.balanceDue) {
+        if (amt > (selectedPayrollForPayment.balanceDue ?? selectedPayrollForPayment.calculations?.netSalaryPayable ?? Infinity)) {
             toast.error(`Amount cannot exceed pending salary balance of ₹${selectedPayrollForPayment.balanceDue}`);
             return;
         }
+        if (!paymentForm.paymentReference?.trim()) {
+            toast.error('Transaction Ref / Cheque # is required to disburse payment');
+            return;
+        }
 
+        setIsDisbursingPayment(true);
         try {
             await api.post(`/staff/payroll/${selectedPayrollForPayment._id}/pay`, {
                 amount: amt,
                 paymentMethod: paymentForm.paymentMethod,
-                paymentReference: paymentForm.paymentReference,
+                reference: paymentForm.paymentReference.trim(),
+                paymentReference: paymentForm.paymentReference.trim(),
                 notes: paymentForm.notes
             });
-            toast.success(`Salary payment of ₹${amt} disbursed and logged to expenses!`);
+            toast.success(`Salary payment of ₹${amt.toLocaleString('en-IN')} disbursed and logged to expenses!`);
             setIsPaymentModalOpen(false);
             setSelectedPayrollForPayment(null);
             setPaymentForm({ amount: '', paymentMethod: 'Bank Transfer', paymentReference: '', notes: '' });
@@ -774,18 +878,144 @@ const StaffManagement = () => {
         } catch (error) {
             console.error('Failed to record salary payment', error);
             toast.error(error.response?.data?.message || 'Error recording salary payment');
+        } finally {
+            setIsDisbursingPayment(false);
         }
     };
 
-    const handleOpenSalarySlip = async (pId) => {
-        try {
-            const res = await api.get(`/staff/payroll/${pId}`);
-            setSalarySlipData(res.data);
+    const handleOpenSalarySlip = async (pOrId) => {
+        const isObject = pOrId && typeof pOrId === 'object';
+        const id = isObject ? (pOrId._id || pOrId.id) : pOrId;
+
+        // Instant optimistic open if payroll row object was passed directly
+        if (isObject) {
+            setSalarySlipData(pOrId);
             setIsSalarySlipModalOpen(true);
+        }
+
+        if (!id) {
+            if (!isObject) toast.error('Invalid payroll ID');
+            return;
+        }
+
+        setLoadingSlipId(id);
+        try {
+            const res = await api.get(`/staff/payroll/${id}`);
+            if (res.data) {
+                setSalarySlipData(res.data);
+                setIsSalarySlipModalOpen(true);
+            }
         } catch (error) {
             console.error('Failed to load salary slip', error);
-            toast.error('Failed to load salary slip');
+            if (!isObject) {
+                toast.error(error.response?.data?.message || 'Failed to load salary slip. Please try again.');
+            }
+        } finally {
+            setLoadingSlipId(null);
         }
+    };
+
+    const handlePrintSalarySlip = () => {
+        const printArea = document.getElementById('printable-salary-slip-content');
+        if (!printArea) {
+            window.print();
+            return;
+        }
+
+        const employeeName = salarySlipData?.employee?.name || 'Staff';
+        const title = `Salary Slip - ${employeeName}`;
+
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'fixed';
+        printFrame.style.top = '-9999px';
+        printFrame.style.left = '-9999px';
+        printFrame.style.width = '800px';
+        printFrame.style.height = '1050px';
+        printFrame.style.border = 'none';
+        document.body.appendChild(printFrame);
+
+        const doc = printFrame.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <title>${title}</title>
+                <style>
+                    @media print {
+                        body { margin: 0; padding: 16px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                        @page { size: A4 portrait; margin: 10mm; }
+                    }
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                        color: #0f172a;
+                        background: #ffffff;
+                        padding: 16px;
+                        font-size: 13px;
+                    }
+                    * { box-sizing: border-box; }
+                    .grid { display: grid; }
+                    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                    .gap-3 { gap: 12px; }
+                    .gap-4 { gap: 16px; }
+                    .p-2\.5 { padding: 10px; }
+                    .p-3 { padding: 12px; }
+                    .p-4 { padding: 16px; }
+                    .py-2 { padding-top: 8px; padding-bottom: 8px; }
+                    .py-4 { padding-top: 16px; padding-bottom: 16px; }
+                    .rounded-xl { border-radius: 12px; }
+                    .border { border: 1px solid #e2e8f0; }
+                    .border-b { border-bottom: 1px solid #e2e8f0; }
+                    .border-t { border-top: 1px solid #e2e8f0; }
+                    .bg-slate-50 { background-color: #f8fafc; }
+                    .bg-emerald-50 { background-color: #ecfdf5; }
+                    .bg-red-50 { background-color: #fef2f2; }
+                    .text-slate-400 { color: #94a3b8; }
+                    .text-slate-500 { color: #64748b; }
+                    .text-slate-900 { color: #0f172a; }
+                    .text-emerald-700 { color: #047857; }
+                    .text-red-700 { color: #b91c1c; }
+                    .font-bold { font-weight: 700; }
+                    .font-black { font-weight: 900; }
+                    .flex { display: flex; }
+                    .items-center { align-items: center; }
+                    .justify-between { justify-content: space-between; }
+                    table { width: 100%; border-collapse: collapse; }
+                </style>
+            </head>
+            <body>
+                <div style="max-width: 650px; margin: 0 auto;">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #0f172a;">${restaurant?.name || 'Restaurant Business'}</h2>
+                            <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin: 2px 0 0 0; letter-spacing: 0.05em;">Official Salary Slip</p>
+                        </div>
+                        <div style="text-align: right; font-size: 11px; color: #64748b;">
+                            <div>Date: ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                        </div>
+                    </div>
+                    ${printArea.innerHTML}
+                </div>
+            </body>
+            </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+            try {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+            } catch (err) {
+                console.error('Iframe print error, falling back to window.print', err);
+                window.print();
+            }
+            setTimeout(() => {
+                if (document.body.contains(printFrame)) {
+                    document.body.removeChild(printFrame);
+                }
+            }, 1000);
+        }, 150);
     };
 
     const [isSubmittingStaff, setIsSubmittingStaff] = useState(false);
@@ -1007,16 +1237,6 @@ const StaffManagement = () => {
                     }`}
                 >
                     <DollarSign size={16} /> Payroll & Salary Disbursements
-                </button>
-                <button
-                    onClick={() => handleTabChange('reports')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
-                        activeTab === 'reports'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                >
-                    <FileSpreadsheet size={16} /> Payroll Reports & Summary
                 </button>
             </div>
 
@@ -1283,64 +1503,88 @@ const StaffManagement = () => {
                                                     <span className="text-xs text-slate-400">{emp.employeeId || formatRoleName(emp.role)}</span>
                                                 </td>
                                                 <td className="py-4 px-6">
-                                                    <div className="flex flex-wrap items-center gap-1">
-                                                        {current.status === 'Not Marked' && (
-                                                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 mr-1">
-                                                                Not Marked
-                                                            </span>
-                                                        )}
-                                                        {ATTENDANCE_STATUSES.map(st => (
-                                                            <button
-                                                                key={st}
-                                                                type="button"
-                                                                onClick={() => handleAttendanceStatusToggle(emp._id, st)}
-                                                                className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                                                                    current.status === st 
-                                                                        ? getAttendancePill(st) 
-                                                                        : 'bg-white dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
-                                                                }`}
-                                                            >
-                                                                {st}
-                                                            </button>
-                                                        ))}
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleOpenAttendanceDetails(emp)}
+                                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs hover:shadow-xs hover:scale-[1.02] active:scale-[0.98] ${
+                                                                current.status === 'Present'
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100'
+                                                                    : current.status === 'Absent'
+                                                                    ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 hover:bg-red-100'
+                                                                    : current.status === 'Leave'
+                                                                    ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 hover:bg-amber-100'
+                                                                    : current.status === 'Half-day'
+                                                                    ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-100'
+                                                                    : current.status === 'Holiday'
+                                                                    ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-100'
+                                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                                                            }`}
+                                                            title="Click to view & update attendance details"
+                                                        >
+                                                            <span className={`w-2 h-2 rounded-full ${
+                                                                current.status === 'Present' ? 'bg-emerald-500' :
+                                                                current.status === 'Absent' ? 'bg-red-500' :
+                                                                current.status === 'Leave' ? 'bg-amber-500' :
+                                                                current.status === 'Half-day' ? 'bg-blue-500' :
+                                                                current.status === 'Holiday' ? 'bg-purple-500' : 'bg-slate-400'
+                                                            }`} />
+                                                            <span>{current.status || 'Not Marked'}</span>
+                                                            <SlidersHorizontal size={12} className="opacity-60 ml-0.5" />
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-6">
-                                                    <input 
-                                                        type="time"
-                                                        value={current.checkInTime || ''}
-                                                        onChange={(e) => handleAttendanceFieldChange(emp._id, 'checkInTime', e.target.value)}
-                                                        disabled={current.status === 'Absent' || current.status === 'Leave' || current.status === 'Holiday'}
-                                                        className="px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
-                                                    />
+                                                    {(current.status === 'Present' || current.status === 'Half-day') ? (
+                                                        <input 
+                                                            type="time"
+                                                            value={current.checkInTime || ''}
+                                                            onChange={(e) => handleAttendanceFieldChange(emp._id, 'checkInTime', e.target.value)}
+                                                            className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold"
+                                                        />
+                                                    ) : current.status === 'Absent' ? (
+                                                        <span className="text-xs text-red-500 font-medium italic">Absent</span>
+                                                    ) : current.status === 'Leave' ? (
+                                                        <span className="text-xs text-amber-500 font-medium italic">On Leave</span>
+                                                    ) : current.status === 'Holiday' ? (
+                                                        <span className="text-xs text-purple-500 font-medium italic">Holiday</span>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400 italic">Not marked</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-4 px-6">
-                                                    <input 
-                                                        type="time"
-                                                        value={current.checkOutTime || ''}
-                                                        onChange={(e) => handleAttendanceFieldChange(emp._id, 'checkOutTime', e.target.value)}
-                                                        disabled={current.status === 'Absent' || current.status === 'Leave' || current.status === 'Holiday'}
-                                                        className="px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
-                                                    />
+                                                    {(current.status === 'Present' || current.status === 'Half-day') ? (
+                                                        <input 
+                                                            type="time"
+                                                            value={current.checkOutTime || ''}
+                                                            onChange={(e) => handleAttendanceFieldChange(emp._id, 'checkOutTime', e.target.value)}
+                                                            className="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400">-</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-4 px-6">
-                                                    <input 
-                                                        type="number"
-                                                        min="0"
-                                                        value={current.lateMinutes || 0}
-                                                        onChange={(e) => handleAttendanceFieldChange(emp._id, 'lateMinutes', e.target.value)}
-                                                        className="w-16 px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-center"
-                                                    />
+                                                    {(current.status === 'Present' || current.status === 'Half-day') ? (
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            value={current.lateMinutes || 0}
+                                                            onChange={(e) => handleAttendanceFieldChange(emp._id, 'lateMinutes', e.target.value)}
+                                                            className="w-16 px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-center"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400">-</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-4 px-6">
-                                                    <input 
-                                                        type="number"
-                                                        step="0.5"
-                                                        min="0"
-                                                        value={current.overtimeHours || 0}
-                                                        onChange={(e) => handleAttendanceFieldChange(emp._id, 'overtimeHours', e.target.value)}
-                                                        className="w-16 px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-center font-bold text-emerald-600"
-                                                    />
+                                                    {(current.status === 'Present' || current.status === 'Half-day') ? (
+                                                        <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                                                            {current.overtimeHours ? `${current.overtimeHours} hrs` : '0 hrs'}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400">-</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-4 px-6">
                                                     <input 
@@ -1348,23 +1592,30 @@ const StaffManagement = () => {
                                                         placeholder="Notes..."
                                                         value={current.notes || ''}
                                                         onChange={(e) => handleAttendanceFieldChange(emp._id, 'notes', e.target.value)}
-                                                        className="w-32 px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
+                                                        className="w-32 px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs"
                                                     />
                                                 </td>
                                                 <td className="py-4 px-6 text-right">
-                                                    {existingRecord ? (
+                                                    <div className="flex items-center justify-end gap-2">
                                                         <button 
-                                                            onClick={() => handleOpenCorrectionModal(existingRecord)}
-                                                            className="text-xs text-blue-600 hover:underline font-bold flex items-center justify-end gap-1"
-                                                            title="Authorized Attendance Correction"
+                                                            type="button"
+                                                            onClick={() => handleOpenAttendanceDetails(emp)}
+                                                            className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                                                            title="View & update details"
                                                         >
-                                                            <History size={13} /> Correct
+                                                            <SlidersHorizontal size={12} /> Details
                                                         </button>
-                                                    ) : current.isSaved ? (
-                                                            <span className="text-xs text-emerald-600 font-bold flex items-center gap-1"><Check size={12}/> Clocked In</span>
-                                                        ) : (
-                                                            <span className="text-xs text-slate-400 font-medium">Not Clocked In</span>
+                                                        {existingRecord && (
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => handleOpenCorrectionModal(existingRecord)}
+                                                                className="text-xs text-blue-600 hover:underline font-bold flex items-center gap-1 cursor-pointer ml-1"
+                                                                title="Authorized Attendance Correction"
+                                                            >
+                                                                <History size={12} /> Audit
+                                                            </button>
                                                         )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -1721,11 +1972,20 @@ const StaffManagement = () => {
                                                                 </button>
                                                             )}
                                                             <button 
-                                                                onClick={() => handleOpenSalarySlip(p._id)}
-                                                                className="p-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-                                                                title="Generate Printable Salary Slip"
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleOpenSalarySlip(p);
+                                                                }}
+                                                                disabled={loadingSlipId === (p._id || p.id)}
+                                                                className="p-1.5 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                                                title="View & Print Salary Slip"
                                                             >
-                                                                <FileText size={15} />
+                                                                {loadingSlipId === (p._id || p.id) ? (
+                                                                    <RefreshCw size={15} className="animate-spin text-emerald-600 dark:text-emerald-400" />
+                                                                ) : (
+                                                                    <FileText size={15} />
+                                                                )}
                                                             </button>
                                                             {p.paymentStatus !== 'Paid' && (
                                                                 <button
@@ -1821,36 +2081,91 @@ const StaffManagement = () => {
 
                     {/* Report KPI Cards */}
                     {payrollReportsData && (
-                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Net Payable</span>
-                                <span className="text-2xl font-black text-slate-900 dark:text-white mt-1 block font-mono">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                            {/* Card 1: Total Net Payable */}
+                            <div className="bg-gradient-to-br from-indigo-500/10 via-white to-white dark:from-indigo-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-indigo-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">Total Net Payable</span>
+                                    <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20 shadow-2xs">
+                                        <Wallet size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                                     ₹{payrollReportsData.totalNetPayable?.toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1">
+                                    Total payroll liability
+                                </div>
                             </div>
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Disbursed (Paid)</span>
-                                <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block font-mono">
+
+                            {/* Card 2: Total Disbursed (Paid) */}
+                            <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white dark:from-emerald-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-emerald-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Total Disbursed (Paid)</span>
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-2xs">
+                                        <CheckCircle2 size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
                                     ₹{payrollReportsData.totalPaid?.toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[11px] font-medium text-emerald-600/70 dark:text-emerald-400/70 mt-1">
+                                    Disbursed to staff accounts
+                                </div>
                             </div>
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Outstanding Due</span>
-                                <span className="text-2xl font-black text-amber-500 mt-1 block font-mono">
+
+                            {/* Card 3: Outstanding Due */}
+                            <div className="bg-gradient-to-br from-amber-500/10 via-white to-white dark:from-amber-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-amber-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">Outstanding Due</span>
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-2xs">
+                                        <Clock size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-amber-500 dark:text-amber-400 font-mono tracking-tight">
                                     ₹{payrollReportsData.totalDue?.toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[11px] font-medium text-amber-600/70 dark:text-amber-400/70 mt-1">
+                                    Pending disbursement
+                                </div>
                             </div>
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total LOP Deductions</span>
-                                <span className="text-2xl font-black text-rose-500 mt-1 block font-mono">
+
+                            {/* Card 4: Total LOP Deductions */}
+                            <div className="bg-gradient-to-br from-rose-500/10 via-white to-white dark:from-rose-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-rose-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-black text-rose-700 dark:text-rose-300 uppercase tracking-wider">Total LOP Deductions</span>
+                                    <div className="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shadow-2xs">
+                                        <TrendingDown size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-rose-500 dark:text-rose-400 font-mono tracking-tight">
                                     ₹{payrollReportsData.totalLOPDeductions?.toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[11px] font-medium text-rose-600/70 dark:text-rose-400/70 mt-1">
+                                    Leave-without-pay adjustments
+                                </div>
                             </div>
-                            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Paid vs Pending Batches</span>
-                                <span className="text-lg font-black text-slate-900 dark:text-white mt-1 block">
-                                    <span className="text-emerald-600">{payrollReportsData.paidCount} Paid</span> / <span className="text-amber-500">{payrollReportsData.pendingCount} Pending</span>
-                                </span>
+
+                            {/* Card 5: Paid vs Pending Batches */}
+                            <div className="bg-gradient-to-br from-cyan-500/10 via-white to-white dark:from-cyan-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-cyan-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-black text-cyan-700 dark:text-cyan-300 uppercase tracking-wider">Batch Progress</span>
+                                    <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center border border-cyan-500/20 shadow-2xs">
+                                        <Layers size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-lg font-black text-slate-900 dark:text-white mt-1 flex items-center gap-1.5 flex-wrap">
+                                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40 text-sm font-black">
+                                        {payrollReportsData.paidCount} Paid
+                                    </span>
+                                    <span className="text-slate-400 font-bold">/</span>
+                                    <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40 text-sm font-black">
+                                        {payrollReportsData.pendingCount} Pending
+                                    </span>
+                                </div>
+                                <div className="text-[11px] font-medium text-cyan-600/70 dark:text-cyan-400/70 mt-1">
+                                    Disbursed vs awaiting
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1992,7 +2307,6 @@ const StaffManagement = () => {
                                         <option value="Waiter">Waiter</option>
                                         <option value="Cashier">Cashier</option>
                                         <option value="DeliveryPartner">Delivery Partner</option>
-                                        <option value="Staff">General Staff</option>
                                     </select>
                                 </div>
                                 <div>
@@ -2241,7 +2555,6 @@ const StaffManagement = () => {
                                 <input 
                                     type="number"
                                     step="any"
-                                    max={selectedPayrollForPayment.balanceDue}
                                     required
                                     value={paymentForm.amount}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
@@ -2254,7 +2567,7 @@ const StaffManagement = () => {
                                 <select 
                                     value={paymentForm.paymentMethod}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium"
                                 >
                                     <option value="Bank Transfer">Direct Bank Transfer / NEFT</option>
                                     <option value="Cash">Cash</option>
@@ -2264,13 +2577,17 @@ const StaffManagement = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Transaction Ref / Cheque #</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1 flex items-center justify-between">
+                                    <span>Transaction Ref / Cheque # <span className="text-red-500">*</span></span>
+                                    <span className="text-[10px] lowercase font-normal text-slate-400">Required for verification</span>
+                                </label>
                                 <input 
                                     type="text"
+                                    required
                                     value={paymentForm.paymentReference}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentReference: e.target.value })}
-                                    placeholder="e.g. UTR / Ref No."
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                                    placeholder="e.g. UTR / IMPS / Cheque / Ref No."
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                                 />
                             </div>
 
@@ -2278,15 +2595,29 @@ const StaffManagement = () => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsPaymentModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                                    disabled={isDisbursingPayment}
+                                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
                                 >
                                     Cancel
                                 </button>
                                 <button 
                                     type="submit"
-                                    className="px-5 py-2 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs"
+                                    disabled={isDisbursingPayment || !paymentForm.paymentReference?.trim()}
+                                    title={!paymentForm.paymentReference?.trim() ? "Enter Transaction Ref / Cheque # to enable disbursement" : "Disburse salary"}
+                                    className={`px-5 py-2.5 text-sm font-bold rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer ${
+                                        paymentForm.paymentReference?.trim() && !isDisbursingPayment
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-900/10'
+                                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                                    }`}
                                 >
-                                    Disburse & Log Expense
+                                    {isDisbursingPayment ? (
+                                        <>
+                                            <RefreshCw size={14} className="animate-spin" />
+                                            <span>Disbursing...</span>
+                                        </>
+                                    ) : (
+                                        <span>Disburse &amp; Log Expense</span>
+                                    )}
                                 </button>
                             </div>
                         </form>
@@ -2295,134 +2626,156 @@ const StaffManagement = () => {
             )}
 
             {/* MODAL 4: PRINTABLE SALARY SLIP */}
-            {isSalarySlipModalOpen && salarySlipData && (
-                <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border border-slate-200 text-slate-900 my-8">
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-                            <div>
-                                <h3 className="text-xl font-black">{restaurant?.name || 'Restaurant Business'}</h3>
-                                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Official Salary Slip</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={() => window.print()}
-                                    className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-800"
-                                >
-                                    <Printer size={14} /> Print Slip
-                                </button>
-                                <button onClick={() => setIsSalarySlipModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                        </div>
+            {isSalarySlipModalOpen && salarySlipData && (() => {
+                const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const formattedPeriod = isNaN(Number(salarySlipData.month)) 
+                    ? `${salarySlipData.month} ${salarySlipData.year}`
+                    : `${monthNames[Number(salarySlipData.month)] || salarySlipData.month} ${salarySlipData.year}`;
 
-                        <div className="py-4 grid grid-cols-2 gap-4 text-xs">
-                            <div>
-                                <div className="text-slate-400">Employee Name:</div>
-                                <div className="font-bold text-sm">{salarySlipData.employee?.name}</div>
-                            </div>
-                            <div>
-                                <div className="text-slate-400">Employee ID:</div>
-                                <div className="font-bold text-sm">{salarySlipData.employee?.employeeId || '-'}</div>
-                            </div>
-                            <div>
-                                <div className="text-slate-400">Designation / Role:</div>
-                                <div className="font-semibold">{formatRoleName(salarySlipData.employee?.role)}</div>
-                            </div>
-                            <div>
-                                <div className="text-slate-400">Pay Period:</div>
-                                <div className="font-semibold">{salarySlipData.month} {salarySlipData.year}</div>
-                            </div>
-                        </div>
-
-                        {/* Attendance Summary */}
-                        <div className="p-3 bg-slate-50 rounded-xl text-xs grid grid-cols-4 gap-2 mb-4">
-                            <div>
-                                <span className="text-slate-400 block">Working Days:</span>
-                                <span className="font-bold">{salarySlipData.attendanceSummary?.totalWorkingDays ?? salarySlipData.attendanceSummary?.totalDays ?? 26}</span>
-                            </div>
-                            <div>
-                                <span className="text-slate-400 block">Present Days:</span>
-                                <span className="font-bold text-emerald-600">{salarySlipData.attendanceSummary?.presentDays || 0}</span>
-                            </div>
-                            <div>
-                                <span className="text-slate-400 block">Absent Days:</span>
-                                <span className="font-bold text-red-600">{salarySlipData.attendanceSummary?.absentDays || 0}</span>
-                            </div>
-                            <div>
-                                <span className="text-slate-400 block">Overtime Hours:</span>
-                                <span className="font-bold text-blue-600">{salarySlipData.attendanceSummary?.overtimeHours || 0} hrs</span>
-                            </div>
-                        </div>
-
-                        {/* Earnings & Deductions Table */}
-                        <div className="border border-slate-200 rounded-xl overflow-hidden text-xs mb-4">
-                            <div className="grid grid-cols-2 bg-slate-100 font-bold p-2.5">
-                                <div>Earnings & Allowances</div>
-                                <div>Deductions & Adjustments</div>
-                            </div>
-                            <div className="grid grid-cols-2 divide-x divide-slate-200 p-3 gap-2">
-                                <div className="space-y-1.5">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Basic Earned:</span>
-                                        <span className="font-semibold">₹{(salarySlipData.calculations?.earnedBasic ?? salarySlipData.earnedBasicSalary ?? salarySlipData.basicSalary ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Overtime Pay:</span>
-                                        <span className="font-semibold text-emerald-600">+₹{(salarySlipData.calculations?.overtimePay ?? salarySlipData.overtimePay ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Bonuses:</span>
-                                        <span className="font-semibold">+₹{(salarySlipData.calculations?.bonuses ?? salarySlipData.bonuses ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Allowances:</span>
-                                        <span className="font-semibold text-emerald-600">+₹{(salarySlipData.calculations?.allowances ?? salarySlipData.allowances ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="flex justify-between pt-1 border-t border-slate-200 font-bold">
-                                        <span className="text-slate-700">Gross Salary:</span>
-                                        <span className="text-slate-900">₹{(salarySlipData.calculations?.grossSalary ?? salarySlipData.grossPayable ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
+                return (
+                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                        <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 text-slate-900 my-8">
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-900">{restaurant?.name || 'Restaurant Business'}</h3>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Official Salary Slip</p>
                                 </div>
-                                <div className="space-y-1.5 pl-2">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Total Deductions:</span>
-                                        <span className="font-semibold text-red-600">-₹{(salarySlipData.calculations?.deductions ?? salarySlipData.totalDeductions ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Salary Advances:</span>
-                                        <span className="font-semibold text-red-600">-₹{(salarySlipData.calculations?.advances ?? 0).toLocaleString('en-IN')}</span>
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        type="button"
+                                        onClick={handlePrintSalarySlip}
+                                        className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-slate-800 transition-all cursor-pointer shadow-xs"
+                                    >
+                                        <Printer size={14} /> Print Slip
+                                    </button>
+                                    <button onClick={() => setIsSalarySlipModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                                        <X size={20} />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="bg-slate-50 p-3 border-t border-slate-200 flex justify-between font-bold text-sm">
-                                <span>Net Salary Payable:</span>
-                                <span className="text-emerald-700 text-base">₹{(salarySlipData.calculations?.netSalaryPayable ?? salarySlipData.netPayable ?? 0).toLocaleString('en-IN')}</span>
-                            </div>
-                        </div>
 
-                        {/* Payment Status Summary */}
-                        <div className="p-3 bg-slate-50 rounded-xl text-xs space-y-1">
-                            <div className="flex justify-between">
-                                <span>Total Disbursed:</span>
-                                <span className="font-bold text-emerald-600">₹{salarySlipData.paidAmount?.toLocaleString('en-IN')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Outstanding Due:</span>
-                                <span className="font-bold text-amber-600">₹{salarySlipData.balanceDue?.toLocaleString('en-IN')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Payment Status:</span>
-                                <span className="font-bold">{salarySlipData.paymentStatus}</span>
-                            </div>
-                        </div>
+                            <div id="printable-salary-slip-content">
+                                <div className="py-4 grid grid-cols-2 gap-3 text-xs border-b border-slate-100">
+                                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <div className="text-slate-400 font-medium">Employee Name:</div>
+                                        <div className="font-bold text-sm text-slate-900">{salarySlipData.employee?.name}</div>
+                                    </div>
+                                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <div className="text-slate-400 font-medium">Employee ID:</div>
+                                        <div className="font-bold text-sm text-slate-900">{salarySlipData.employee?.employeeId || '-'}</div>
+                                    </div>
+                                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <div className="text-slate-400 font-medium">Designation / Role:</div>
+                                        <div className="font-bold text-slate-800">{formatRoleName(salarySlipData.employee?.role)}</div>
+                                    </div>
+                                    <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-200/50">
+                                        <div className="text-emerald-700 font-medium">Pay Period:</div>
+                                        <div className="font-black text-emerald-800 text-sm">{formattedPeriod}</div>
+                                    </div>
+                                </div>
 
-                        <div className="pt-6 mt-4 border-t border-slate-200 text-center text-[10px] text-slate-400">
-                            Computer generated salary slip. Confirmed and verified against actual attendance logs.
+                                {/* Attendance Summary - Prominently Highlighted */}
+                                <div className="py-3">
+                                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Attendance Summary</div>
+                                    <div className="grid grid-cols-4 gap-2 text-xs">
+                                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                                            <span className="text-slate-500 block text-[10px] font-semibold">Working Days</span>
+                                            <span className="font-black text-sm text-slate-800">{salarySlipData.attendanceSummary?.totalWorkingDays ?? salarySlipData.attendanceSummary?.totalDays ?? 26}</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                                            <span className="text-emerald-700 block text-[10px] font-semibold">Present Days</span>
+                                            <span className="font-black text-sm text-emerald-700">{salarySlipData.attendanceSummary?.presentDays || 0}</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-center">
+                                            <span className="text-rose-700 block text-[10px] font-semibold">Absent Days</span>
+                                            <span className="font-black text-sm text-rose-700">{salarySlipData.attendanceSummary?.absentDays || 0}</span>
+                                        </div>
+                                        <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-center">
+                                            <span className="text-blue-700 block text-[10px] font-semibold">Overtime</span>
+                                            <span className="font-black text-sm text-blue-700">{salarySlipData.attendanceSummary?.overtimeHours || 0} hrs</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Earnings & Deductions Table */}
+                                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs mb-4">
+                                    <div className="grid grid-cols-2 bg-slate-100 font-bold p-2.5 border-b border-slate-200">
+                                        <div>Earnings &amp; Allowances</div>
+                                        <div>Deductions &amp; Adjustments</div>
+                                    </div>
+                                    <div className="grid grid-cols-2 divide-x divide-slate-200 p-3 gap-2">
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Basic Earned:</span>
+                                                <span className="font-semibold">₹{(salarySlipData.calculations?.earnedBasic ?? salarySlipData.earnedBasicSalary ?? salarySlipData.basicSalary ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Overtime Pay:</span>
+                                                <span className="font-semibold text-emerald-600">+₹{(salarySlipData.calculations?.overtimePay ?? salarySlipData.overtimePay ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Bonuses:</span>
+                                                <span className="font-semibold">+₹{(salarySlipData.calculations?.bonuses ?? salarySlipData.bonuses ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Allowances:</span>
+                                                <span className="font-semibold text-emerald-600">+₹{(salarySlipData.calculations?.allowances ?? salarySlipData.allowances ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between pt-1 border-t border-slate-200 font-bold">
+                                                <span className="text-slate-700">Gross Salary:</span>
+                                                <span className="text-slate-900">₹{(salarySlipData.calculations?.grossSalary ?? salarySlipData.grossPayable ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5 pl-2">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Total Deductions:</span>
+                                                <span className="font-semibold text-rose-600">-₹{(salarySlipData.calculations?.deductions ?? salarySlipData.totalDeductions ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500">Salary Advances:</span>
+                                                <span className="font-semibold text-rose-600">-₹{(salarySlipData.calculations?.advances ?? 0).toLocaleString('en-IN')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Net Salary Payable - Executive Highlight Banner */}
+                                <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 text-white p-4 rounded-2xl flex items-center justify-between shadow-md mb-4">
+                                    <div>
+                                        <span className="text-[11px] font-bold text-emerald-100 uppercase tracking-wider block">Net Salary Payable</span>
+                                        <span className="text-2xl font-black font-mono">
+                                            ₹{(salarySlipData.calculations?.netSalaryPayable ?? salarySlipData.netPayable ?? 0).toLocaleString('en-IN')}
+                                        </span>
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-black uppercase tracking-wider backdrop-blur-xs border border-white/20">
+                                        {salarySlipData.paymentStatus || 'Verified'}
+                                    </span>
+                                </div>
+
+                                {/* Payment Status Summary */}
+                                <div className="p-3 bg-slate-50 rounded-xl text-xs space-y-1.5 border border-slate-200/80">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Total Disbursed:</span>
+                                        <span className="font-bold text-emerald-600">₹{salarySlipData.paidAmount?.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Outstanding Due:</span>
+                                        <span className="font-bold text-amber-600">₹{salarySlipData.balanceDue?.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Payment Status:</span>
+                                        <span className="font-bold">{salarySlipData.paymentStatus}</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 mt-3 border-t border-slate-200 text-center text-[10px] text-slate-400">
+                                    Computer generated salary slip. Confirmed and verified against actual attendance logs.
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* MODAL 5: LOP & PAID LEAVE POLICY CONFIG */}
             {isLOPConfigModalOpen && (
@@ -2534,30 +2887,69 @@ const StaffManagement = () => {
                         </div>
 
                         {/* Preview Summary Strip */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
-                            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Employees</span>
-                                <span className="text-xl font-black text-slate-900 dark:text-white font-mono mt-0.5 block">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 py-4">
+                            {/* Card 1: Employees */}
+                            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-white to-blue-50/40 dark:from-slate-800 dark:to-blue-950/20 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-sm transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Employees</span>
+                                    <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-200/60 dark:border-blue-800/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                        <Users size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                                     {payrollPreview.count || 0}
-                                </span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                                    Eligible batch members
+                                </div>
                             </div>
-                            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Gross Wages</span>
-                                <span className="text-xl font-black text-slate-900 dark:text-white font-mono mt-0.5 block">
+
+                            {/* Card 2: Total Gross Wages */}
+                            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-white to-amber-50/40 dark:from-slate-800 dark:to-amber-950/20 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-sm transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Gross Wages</span>
+                                    <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/60 dark:border-amber-800/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                        <Banknote size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                                     ₹{(payrollPreview.totalGross || 0).toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                                    Base wages + overtime
+                                </div>
                             </div>
-                            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total LOP Deductions</span>
-                                <span className="text-xl font-black text-rose-500 font-mono mt-0.5 block">
+
+                            {/* Card 3: Total LOP Deductions */}
+                            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-white to-rose-50/40 dark:from-slate-800 dark:to-rose-950/20 border border-slate-200/80 dark:border-slate-700/70 shadow-xs hover:shadow-sm transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total LOP Deductions</span>
+                                    <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200/60 dark:border-rose-800/40 flex items-center justify-center text-rose-500">
+                                        <TrendingDown size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-rose-500 font-mono tracking-tight">
                                     -₹{(payrollPreview.totalLOPDeductions || 0).toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                                    Unpaid leave &amp; deductions
+                                </div>
                             </div>
-                            <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/60">
-                                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Net Payable</span>
-                                <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block">
+
+                            {/* Card 4: Total Net Payable */}
+                            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-white to-emerald-50/50 dark:from-slate-800 dark:to-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs hover:shadow-sm transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Total Net Payable</span>
+                                    <div className="w-8 h-8 rounded-xl bg-emerald-100/80 dark:bg-emerald-900/50 border border-emerald-300/60 dark:border-emerald-700/50 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
+                                        <Wallet size={16} />
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono tracking-tight">
                                     ₹{(payrollPreview.totalNetPayable || 0).toLocaleString('en-IN')}
-                                </span>
+                                </div>
+                                <div className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 mt-1 font-medium">
+                                    Net disbursement liability
+                                </div>
                             </div>
                         </div>
 
@@ -3001,6 +3393,223 @@ const StaffManagement = () => {
                     </div>
                 </div>
             )}
+
+            {/* MODAL 10: ATTENDANCE DETAILS & STATUS UPDATE */}
+            {selectedAttendanceEmployee && (() => {
+                const emp = selectedAttendanceEmployee;
+                const shiftHrs = emp.salaryConfig?.dailyWorkHours || 8;
+                const cIn = attendanceDetailsForm.checkInTime;
+                const cOut = attendanceDetailsForm.checkOutTime;
+                let workedHrs = 0;
+                if (cIn && cOut) {
+                    try {
+                        const [inH, inM] = cIn.split(':').map(Number);
+                        const [outH, outM] = cOut.split(':').map(Number);
+                        let diffMin = (outH * 60 + outM) - (inH * 60 + inM);
+                        if (diffMin < 0) diffMin += 24 * 60;
+                        workedHrs = Math.round((diffMin / 60) * 10) / 10;
+                    } catch (e) {}
+                }
+                const computedOt = (cIn && cOut) ? calculateOvertimeHours(cIn, cOut, shiftHrs) : 0;
+                const currentOt = attendanceDetailsForm.overtimeHours ? Number(attendanceDetailsForm.overtimeHours) : computedOt;
+
+                return (
+                    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white my-8">
+                            {/* Header */}
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-black text-lg shadow-xs">
+                                        {emp.name?.charAt(0)?.toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">{emp.name}</h3>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                            {emp.employeeId ? <span className="font-mono font-bold mr-1.5">{emp.employeeId}</span> : null}
+                                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{formatRoleName(emp.role)}</span>
+                                            {emp.branchId?.name ? ` • ${emp.branchId.name}` : ''}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button"
+                                    onClick={() => setSelectedAttendanceEmployee(null)} 
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Sub-bar: Date & Shift Info */}
+                            <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                                    <Calendar size={14} className="text-emerald-600" />
+                                    <span>Date: <strong>{new Date(attendanceDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</strong></span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+                                    <Clock size={13} />
+                                    <span>Standard Shift: <strong>{shiftHrs} hrs</strong></span>
+                                </div>
+                            </div>
+
+                            {/* Form */}
+                            <form onSubmit={handleSaveAttendanceDetails} className="mt-5 space-y-4">
+                                {/* Status Selection */}
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                                        Attendance Status *
+                                    </label>
+                                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                        {['Present', 'Absent', 'Leave', 'Half-day', 'Holiday'].map(st => {
+                                            const isSelected = attendanceDetailsForm.status === st;
+                                            return (
+                                                <button
+                                                    key={st}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        let newIn = attendanceDetailsForm.checkInTime;
+                                                        let newOut = attendanceDetailsForm.checkOutTime;
+                                                        if (st === 'Present' && !newIn) {
+                                                            newIn = '09:00';
+                                                            newOut = '18:00';
+                                                        } else if (st === 'Half-day' && !newIn) {
+                                                            newIn = '09:00';
+                                                            newOut = '13:00';
+                                                        } else if (st === 'Absent' || st === 'Leave' || st === 'Holiday') {
+                                                            newIn = '';
+                                                            newOut = '';
+                                                        }
+                                                        setAttendanceDetailsForm({
+                                                            ...attendanceDetailsForm,
+                                                            status: st,
+                                                            checkInTime: newIn,
+                                                            checkOutTime: newOut
+                                                        });
+                                                    }}
+                                                    className={`py-2 px-2.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
+                                                        isSelected 
+                                                            ? getAttendancePill(st) + ' ring-2 ring-offset-1 ring-emerald-500/50 shadow-xs'
+                                                            : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                                                    }`}
+                                                >
+                                                    {st}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Timing & Hours Details (visible when Present or Half-day) */}
+                                {(attendanceDetailsForm.status === 'Present' || attendanceDetailsForm.status === 'Half-day') ? (
+                                    <div className="p-4 bg-emerald-50/40 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/40 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                                                Shift Timings & Check In/Out
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAttendanceDetailsForm({
+                                                    ...attendanceDetailsForm,
+                                                    checkInTime: '09:00',
+                                                    checkOutTime: '18:00'
+                                                })}
+                                                className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                                            >
+                                                Preset 09:00 - 18:00
+                                            </button>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                                    Check In Time
+                                                </label>
+                                                <input
+                                                    type="time"
+                                                    value={attendanceDetailsForm.checkInTime}
+                                                    onChange={(e) => setAttendanceDetailsForm({ ...attendanceDetailsForm, checkInTime: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                                    Check Out Time
+                                                </label>
+                                                <input
+                                                    type="time"
+                                                    value={attendanceDetailsForm.checkOutTime}
+                                                    onChange={(e) => setAttendanceDetailsForm({ ...attendanceDetailsForm, checkOutTime: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-900 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Live Shift Metrics */}
+                                        <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+                                            <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Worked</span>
+                                                <span className="text-xs font-black text-slate-800 dark:text-white">{workedHrs} hrs</span>
+                                            </div>
+                                            <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                                                <span className="text-[10px] font-bold text-emerald-600 uppercase block">Overtime</span>
+                                                <span className="text-xs font-black text-emerald-600">{currentOt} hrs</span>
+                                            </div>
+                                            <div className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase block">Late Arrival</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={attendanceDetailsForm.lateMinutes}
+                                                    onChange={(e) => setAttendanceDetailsForm({ ...attendanceDetailsForm, lateMinutes: e.target.value })}
+                                                    className="w-14 text-center text-xs font-black text-rose-600 bg-transparent border-b border-rose-300 focus:outline-hidden"
+                                                />
+                                                <span className="text-[10px] text-slate-400 ml-0.5">m</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-700/60 text-xs text-slate-500">
+                                        Status is marked as <strong>{attendanceDetailsForm.status}</strong>. Working hours and check in/out are not required for full-day absence, leave, or holiday.
+                                    </div>
+                                )}
+
+                                {/* Notes / Remarks */}
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                                        Remarks / Shift Notes
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={attendanceDetailsForm.notes}
+                                        onChange={(e) => setAttendanceDetailsForm({ ...attendanceDetailsForm, notes: e.target.value })}
+                                        placeholder="e.g. Approved shift swap, medical reason, or on-site duty"
+                                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                                    />
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedAttendanceEmployee(null)}
+                                        className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSavingAttendanceDetails}
+                                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                                    >
+                                        <CheckCircle2 size={16} />
+                                        {isSavingAttendanceDetails ? 'Saving...' : 'Update & Save Attendance'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 };

@@ -1,4 +1,5 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 
 const CustomerProtectedRoute = ({ children }) => {
@@ -6,6 +7,18 @@ const CustomerProtectedRoute = ({ children }) => {
     const user = auth.user;
     const loading = auth.loading;
     const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!loading) {
+            if (!user) {
+                // Redirect to customer login but save the attempted url
+                navigate('/customer/login', { state: { from: location }, replace: true });
+            } else if (user.role !== 'Customer') {
+                navigate('/customer/login', { replace: true });
+            }
+        }
+    }, [user, loading, location, navigate]);
 
     if (loading) {
         return (
@@ -15,13 +28,8 @@ const CustomerProtectedRoute = ({ children }) => {
         );
     }
 
-    if (!user) {
-        // Redirect to customer login but save the attempted url
-        return <Navigate to="/customer/login" state={{ from: location }} replace />;
-    }
-
-    if (user.role !== 'Customer') {
-        return <Navigate to="/customer/login" replace />;
+    if (!user || user.role !== 'Customer') {
+        return null;
     }
 
     return children;

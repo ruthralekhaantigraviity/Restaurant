@@ -135,7 +135,6 @@ const Sidebar = () => {
                 { name: 'Expenses', path: '/admin/expenses', icon: DollarSign, moduleKey: 'salesReports' },
                 { name: 'Rent & Bills', path: '/admin/expenses?tab=bills', icon: ReceiptText, moduleKey: 'salesReports' },
                 { name: 'Payroll & Salary', path: '/admin/staff?tab=payroll', icon: CreditCard, moduleKey: 'staffManagement' },
-                { name: 'Payroll Reports', path: '/admin/staff?tab=reports', icon: FileSpreadsheet, moduleKey: 'staffManagement' },
                 { name: 'Waiter Tips & Gratuity', path: '/admin/tips', icon: Heart, moduleKey: 'salesReports' },
                 { name: 'Financial Reports', path: '/admin/reports', icon: FileText, moduleKey: 'salesReports' },
             ]
@@ -147,7 +146,7 @@ const Sidebar = () => {
                 { name: 'Taxes & GST', path: '/admin/taxes', icon: ReceiptText, moduleKey: 'posBilling' },
                 { name: 'Material Management', path: '/admin/inventory', icon: PackageSearch, moduleKey: 'inventoryManagement' },
                 { name: 'Suppliers & Vendors', path: '/admin/suppliers', icon: Truck, moduleKey: 'inventoryManagement' },
-                { name: 'Staff Management', path: '/admin/staff', icon: UserCheck, moduleKey: 'staffManagement' },
+                { name: 'Staff Management', path: '/admin/staff?tab=staff', icon: UserCheck, moduleKey: 'staffManagement' },
                 { name: 'Branch Management', path: '/admin/branches', icon: Store, moduleKey: 'staffManagement' },
                 { name: 'Menu Management', path: '/admin/menu', icon: UtensilsCrossed, moduleKey: 'menuManagement' },
                 { name: 'Customer Management', path: '/admin/customers', icon: Users, moduleKey: 'customerManagement' },
@@ -286,11 +285,8 @@ const Sidebar = () => {
                                         if (item.name === 'Payroll & Salary') {
                                             return location.pathname === '/admin/staff' && location.search === '?tab=payroll';
                                         }
-                                        if (item.name === 'Payroll Reports') {
-                                            return location.pathname === '/admin/staff' && location.search === '?tab=reports';
-                                        }
                                         if (item.name === 'Staff Management') {
-                                            return location.pathname === '/admin/staff' && location.search !== '?tab=payroll' && location.search !== '?tab=reports';
+                                            return location.pathname === '/admin/staff' && (location.search === '' || location.search === '?tab=staff');
                                         }
                                         if (item.name === 'Restaurant Settings') {
                                             return location.pathname === '/admin/settings' && location.search === '?tab=operations';

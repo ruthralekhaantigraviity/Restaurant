@@ -430,7 +430,7 @@ const PlatformRestaurants = () => {
 
                                 return (
                                     <tr key={restaurant._id} className={`hover:bg-gray-50/80 transition-colors ${isDeleted ? 'bg-gray-50/40 opacity-75' : ''}`}>
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                                     {restaurant.logo ? (
@@ -447,23 +447,23 @@ const PlatformRestaurants = () => {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <span className={`font-bold block text-sm ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{restaurant.name}</span>
-                                                    <span className="text-[11px] font-semibold text-gray-500 block">{outletFormat}</span>
+                                                    <span className={`font-bold block text-sm leading-tight ${isDeleted ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{restaurant.name}</span>
+                                                    <span className="text-[11px] font-semibold text-gray-500 block mt-0.5">{outletFormat}</span>
                                                     {restaurant.address && (
-                                                        <span className="text-[10px] text-gray-400 block truncate max-w-[180px]">{restaurant.address}</span>
+                                                        <span className="text-[10px] text-gray-400 block truncate max-w-[180px] mt-0.5">{restaurant.address}</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4">
-                                            <div className="text-xs font-bold text-gray-900">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
-                                            <div className="text-[11px] text-gray-500">{restaurant.ownerId?.email || 'N/A'}</div>
+                                        <td className="p-4 align-middle">
+                                            <div className="text-xs font-bold text-gray-900 leading-tight">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
+                                            <div className="text-[11px] text-gray-500 mt-0.5">{restaurant.ownerId?.email || 'N/A'}</div>
                                             {restaurant.phone && (
-                                                <div className="text-[10px] text-gray-400 font-medium">📞 {restaurant.phone}</div>
+                                                <div className="text-[10px] text-gray-400 font-medium mt-0.5">📞 {restaurant.phone}</div>
                                             )}
                                         </td>
                                         {/* Marketplace Visibility Column */}
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle whitespace-nowrap">
                                             {isDeleted ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 text-gray-600 border border-gray-300 rounded-lg text-xs font-bold">
                                                     <Trash2 size={12} className="text-gray-400" /> Soft-Deleted
@@ -486,7 +486,7 @@ const PlatformRestaurants = () => {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle whitespace-nowrap">
                                             <div className="flex flex-col gap-1 items-start">
                                                 <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${
                                                     isEnterprise 
@@ -502,7 +502,7 @@ const PlatformRestaurants = () => {
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle whitespace-nowrap">
                                             {hasCustomPOS ? (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
                                                     <Sparkles size={12} className="text-emerald-600" /> Custom POS
@@ -513,15 +513,15 @@ const PlatformRestaurants = () => {
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle whitespace-nowrap">
                                             {restaurant.approvalStatus === 'Pending' && <span className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold rounded-lg">Pending</span>}
                                             {restaurant.approvalStatus === 'Approved' && <span className="px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-bold rounded-lg">Approved</span>}
                                             {restaurant.approvalStatus === 'Rejected' && <span className="px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 text-xs font-bold rounded-lg">Rejected</span>}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 align-middle whitespace-nowrap min-w-[130px]">
                                             {diffDays !== null ? (
                                                 <div>
-                                                    <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold inline-block border ${
+                                                    <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap inline-flex items-center gap-1 border ${
                                                         diffDays < 0
                                                             ? 'bg-red-50 text-red-700 border-red-200'
                                                             : diffDays <= 7
@@ -538,7 +538,7 @@ const PlatformRestaurants = () => {
                                                 <span className="text-xs text-gray-400 font-medium">Ongoing</span>
                                             )}
                                         </td>
-                                        <td className="p-4 text-right">
+                                        <td className="p-4 align-middle text-right whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-1.5">
                                                 <button 
                                                     onClick={() => setViewingRestaurant(restaurant)} 

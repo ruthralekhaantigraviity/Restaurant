@@ -2,11 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
-import { 
-  Search, MapPin, ChevronDown, ShoppingBag, Heart, Star, 
+import {
+  Search, MapPin, ChevronDown, ShoppingBag, Heart, Star,
   Clock, ShieldCheck, Tag, ArrowRight, Sparkles,
   ChevronLeft, ChevronRight, Truck, CreditCard, UtensilsCrossed,
-  Smartphone, User, Copy, Check, Loader2
+  Smartphone, User, Copy, Check, Loader2, LayoutGrid
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LocationPickerModal from '../../components/LocationPickerModal';
@@ -19,19 +19,8 @@ import { getApiUrl } from '../../utils/axiosInstance';
 // ============================================================================
 // 1. REFERENCE DATA MATCHING SCREENSHOT EXACTLY
 // ============================================================================
-// 1. CUISINES CATEGORIES
+// 1. DYNAMIC DATA INITIALIZATION
 // ============================================================================
-
-const CUISINES_LIST = [
-  { id: 'all', name: 'All', isGrid: true },
-  { id: 'south-indian', name: 'South Indian', image: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?q=80&w=240&auto=format&fit=crop' },
-  { id: 'north-indian', name: 'North Indian', image: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?q=80&w=240&auto=format&fit=crop' },
-  { id: 'chinese', name: 'Chinese', image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=240&auto=format&fit=crop' },
-  { id: 'italian', name: 'Italian', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?q=80&w=240&auto=format&fit=crop' },
-  { id: 'fast-food', name: 'Fast Food', image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=240&auto=format&fit=crop' },
-  { id: 'beverages', name: 'Beverages', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=240&auto=format&fit=crop' },
-  { id: 'desserts', name: 'Desserts', image: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=240&auto=format&fit=crop' }
-];
 
 export default function Explore() {
   const navigate = useNavigate();
@@ -68,7 +57,8 @@ export default function Explore() {
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [activeNav, setActiveNav] = useState('home');
   const [copiedCoupon, setCopiedCoupon] = useState(false);
-  const [activeOffer, setActiveOffer] = useState(null);
+  const [offersList, setOffersList] = useState([]);
+  const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
   const [customerReviews, setCustomerReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [reviewCarouselIndex, setReviewCarouselIndex] = useState(0);
@@ -186,7 +176,7 @@ export default function Explore() {
             deliverySettings: r.deliverySettings ? { radius: r.deliverySettings.radius || 5, location: r.deliverySettings.location } : null
           }));
           localStorage.setItem('foodnest_explore_restaurants_cache', JSON.stringify(slimCache));
-        } catch {}
+        } catch { }
       } else if (restRes.status === 'rejected') {
         console.error('Failed to load restaurants from server:', restRes.reason);
       }
@@ -242,7 +232,7 @@ export default function Explore() {
             image: d.image && d.image.length < 4000 ? d.image : null
           }));
           localStorage.setItem('foodnest_explore_dishes_cache', JSON.stringify(slimDishes));
-        } catch {}
+        } catch { }
       } else if (menuRes.status === 'rejected') {
         console.error('Failed to load menu dishes from server:', menuRes.reason);
       }
@@ -255,19 +245,21 @@ export default function Explore() {
       // 3. Process Offers
       if (offersRes.status === 'fulfilled' && Array.isArray(offersRes.value?.data)) {
         const active = offersRes.value.data.filter((o) => o.status === 'Active' || (!o.status && o.isActive !== false));
-        if (active.length > 0) setActiveOffer(active[0]);
+        setOffersList(active);
       }
 
-      // 4. Process Reviews
+      // 4. Process Reviews (Strictly requires Admin/Manager approval)
       if (reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value?.data?.data)) {
-        const liveReviews = reviewsRes.value.data.data.map((r) => ({
-          id: r._id,
-          name: r.customerName || 'Happy Customer',
-          avatar: r.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customerName || 'Customer')}&background=FF5A1F&color=fff`,
-          rating: Number(r.rating) || 5,
-          text: r.reviewText,
-          createdAt: r.createdAt
-        }));
+        const liveReviews = reviewsRes.value.data.data
+          .filter(r => r.status === 'Approved')
+          .map((r) => ({
+            id: r._id,
+            name: r.customerName || 'Happy Customer',
+            avatar: r.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customerName || 'Customer')}&background=FF5A1F&color=fff`,
+            rating: Number(r.rating) || 5,
+            text: r.reviewText,
+            createdAt: r.createdAt
+          }));
         setCustomerReviews(liveReviews);
       }
       setReviewsLoading(false);
@@ -380,7 +372,7 @@ export default function Explore() {
     setActiveNav(id);
     isManualScrollRef.current = true;
     if (manualScrollTimerRef.current) clearTimeout(manualScrollTimerRef.current);
-    
+
     // Release manual scroll lock after smooth scrolling completes
     manualScrollTimerRef.current = setTimeout(() => {
       isManualScrollRef.current = false;
@@ -413,7 +405,7 @@ export default function Explore() {
         if (user && api) {
           api.put('/users/profile', {
             address: res.formattedLocation
-          }).catch(() => {});
+          }).catch(() => { });
         }
         toast.success('Location set to ' + res.formattedLocation + '!', { icon: '📍' });
       } else {
@@ -438,6 +430,65 @@ export default function Explore() {
       setIsDetectingLocation(false);
     }
   };
+
+  const activeOffer = offersList.length > 0 ? offersList[currentOfferIndex] : null;
+
+  // Auto-slide offers when multiple offers exist
+  useEffect(() => {
+    if (offersList.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentOfferIndex(prev => (prev + 1) % offersList.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [offersList.length]);
+
+  const handleNextOffer = () => {
+    if (offersList.length <= 1) return;
+    setCurrentOfferIndex(prev => (prev + 1) % offersList.length);
+  };
+
+  const handlePrevOffer = () => {
+    if (offersList.length <= 1) return;
+    setCurrentOfferIndex(prev => (prev - 1 + offersList.length) % offersList.length);
+  };
+
+  // Dynamic Cuisines/Categories extracted from live database menu items and restaurants
+  const dynamicCuisines = useMemo(() => {
+    const list = [{ id: 'all', name: 'All', isGrid: true }];
+    const found = new Map();
+
+    dishes.forEach(d => {
+      const cat = d.cuisine || d.category;
+      if (cat && typeof cat === 'string') {
+        const trimmed = cat.trim();
+        const id = trimmed.toLowerCase().replace(/\s+/g, '-');
+        if (!found.has(id)) {
+          found.set(id, {
+            id,
+            name: trimmed,
+            image: d.image || null
+          });
+        }
+      }
+    });
+
+    restaurants.forEach(r => {
+      const cType = r.cuisines || r.cuisineType;
+      if (cType && typeof cType === 'string') {
+        cType.split(',').forEach(c => {
+          const trimmed = c.trim();
+          if (trimmed) {
+            const id = trimmed.toLowerCase().replace(/\s+/g, '-');
+            if (!found.has(id)) {
+              found.set(id, { id, name: trimmed, image: null });
+            }
+          }
+        });
+      }
+    });
+
+    return [...list, ...Array.from(found.values()).slice(0, 11)];
+  }, [dishes, restaurants]);
 
   const handleCopyCoupon = (code) => {
     navigator.clipboard.writeText(code);
@@ -486,8 +537,8 @@ export default function Explore() {
       const qLower = q.toLowerCase();
 
       // Check if query matches restaurant name, dish name, or cuisine
-      const matchesDishOrCuisine = dishes.some(d => 
-        (d.name || '').toLowerCase().includes(qLower) || 
+      const matchesDishOrCuisine = dishes.some(d =>
+        (d.name || '').toLowerCase().includes(qLower) ||
         (d.cuisine || '').toLowerCase().includes(qLower) ||
         (d.category || '').toLowerCase().includes(qLower)
       );
@@ -498,8 +549,8 @@ export default function Explore() {
         const a = (r.address || '').toLowerCase().trim();
         const v = (r.verificationAddress || '').toLowerCase().trim();
         return (c && (c.includes(qLower) || qLower.includes(c))) ||
-               (a && a.includes(qLower)) ||
-               (v && v.includes(qLower));
+          (a && a.includes(qLower)) ||
+          (v && v.includes(qLower));
       })) || ['chennai', 'krishnagiri', 'bangalore', 'bengaluru', 'mumbai', 'delhi', 'hyderabad', 'coimbatore', 'madurai', 'salem', 'hosur'].some(known => qLower.includes(known));
 
       if (isLikelyLocation && !matchesDishOrCuisine) {
@@ -524,7 +575,7 @@ export default function Explore() {
     }
   };
 
-    // Filter restaurants and outlets by detected location and search query (with friendly fallback to all outlets)
+  // Filter restaurants and outlets by detected location and search query (with friendly fallback to all outlets)
   const { filtered: displayedRestaurants, matchingOutletsCount, isLocationFallback } = useMemo(() => {
     const res = filterRestaurantsForLocation(restaurants, location, searchQuery);
     if (res.filtered.length === 0 && restaurants.length > 0 && location && location.trim() && !searchQuery.trim()) {
@@ -555,9 +606,9 @@ export default function Explore() {
 
     let matchesCuisine = selectedCuisine === 'all';
     if (!matchesCuisine) {
-      matchesCuisine = dCuisine.includes(qCuisine) || 
-                       dCat.includes(qCuisine) || 
-                       dName.includes(qCuisine);
+      matchesCuisine = dCuisine.includes(qCuisine) ||
+        dCat.includes(qCuisine) ||
+        dName.includes(qCuisine);
 
       // Smart cuisine mapping for common terms
       if (!matchesCuisine) {
@@ -577,7 +628,7 @@ export default function Explore() {
       }
     }
 
-    const matchesSearch = !searchQuery || 
+    const matchesSearch = !searchQuery ||
       dName.includes(searchQuery.toLowerCase()) ||
       dCuisine.includes(searchQuery.toLowerCase()) ||
       dCat.includes(searchQuery.toLowerCase());
@@ -593,7 +644,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <nav className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] ${isNative ? 'pt-8' : 'pt-[env(safe-area-inset-top,0px)]'}`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-[76px] flex items-center justify-between gap-2 sm:gap-4">
-          
+
           {/* Logo with Utensil Icon & Tagline */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#FF5A1F] text-white flex items-center justify-center shadow-md shadow-[#FF5A1F]/25 group-hover:scale-105 transition-transform">
@@ -623,17 +674,15 @@ export default function Explore() {
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id, item.targetId)}
-                  className={`relative py-1.5 font-semibold transition-colors duration-200 cursor-pointer select-none ${
-                    isActive
-                      ? 'text-[#FF5A1F]'
-                      : 'text-slate-600 hover:text-[#FF5A1F]'
-                  }`}
+                  className={`relative py-1.5 font-semibold transition-colors duration-200 cursor-pointer select-none ${isActive
+                    ? 'text-[#FF5A1F]'
+                    : 'text-slate-600 hover:text-[#FF5A1F]'
+                    }`}
                 >
                   <span>{item.label}</span>
                   <span
-                    className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#FF5A1F] transition-all duration-200 ${
-                      isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
-                    }`}
+                    className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#FF5A1F] transition-all duration-200 ${isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
+                      }`}
                   />
                 </button>
               );
@@ -642,16 +691,15 @@ export default function Explore() {
 
           {/* Right Action Icons: Location, Search, Cart, Login */}
           <div className="flex items-center gap-1.5 sm:gap-3">
-            
+
             {/* GPS Location Button (Hidden on very narrow screens to prevent crushing, integrated into hero/sub-bar) */}
             <button
               onClick={handleGetLocation}
               disabled={isDetectingLocation}
-              className={`hidden sm:flex items-center gap-1.5 text-xs font-bold transition-all px-2.5 py-1.5 rounded-xl border cursor-pointer ${
-                isDetectingLocation
-                  ? 'bg-orange-50 text-[#FF5A1F] border-orange-200 animate-pulse'
-                  : 'text-slate-700 hover:text-[#FF5A1F] hover:bg-orange-50/60 border-slate-200/80 hover:border-orange-200 shadow-xs'
-              }`}
+              className={`hidden sm:flex items-center gap-1.5 text-xs font-bold transition-all px-2.5 py-1.5 rounded-xl border cursor-pointer ${isDetectingLocation
+                ? 'bg-orange-50 text-[#FF5A1F] border-orange-200 animate-pulse'
+                : 'text-slate-700 hover:text-[#FF5A1F] hover:bg-orange-50/60 border-slate-200/80 hover:border-orange-200 shadow-xs'
+                }`}
               title="Click to detect your current location via GPS"
               aria-label="Detect GPS Location"
             >
@@ -670,9 +718,8 @@ export default function Explore() {
                   setTimeout(() => searchInputRef.current?.focus(), 100);
                 }
               }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                isSearchOpen ? 'bg-orange-50 text-[#FF5A1F]' : 'text-slate-600 hover:bg-slate-100 hover:text-[#FF5A1F]'
-              }`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isSearchOpen ? 'bg-orange-50 text-[#FF5A1F]' : 'text-slate-600 hover:bg-slate-100 hover:text-[#FF5A1F]'
+                }`}
               aria-label="Search"
               title="Search menu and restaurants"
             >
@@ -715,7 +762,7 @@ export default function Explore() {
                       <p className="text-xs font-bold text-slate-900 truncate">{user.name || 'Customer'}</p>
                       <p className="text-[11px] text-slate-400 truncate">{user.email || ''}</p>
                     </div>
-                    
+
                     <div className="py-1">
                       <Link
                         to="/profile"
@@ -792,7 +839,7 @@ export default function Explore() {
               </p>
             </div>
           </button>
-          
+
           <button
             type="button"
             onClick={handleGetLocation}
@@ -816,7 +863,7 @@ export default function Explore() {
         {/* Live Search Input Bar */}
         {isSearchOpen && (
           <div className="bg-slate-50 border-t border-slate-100 px-3 sm:px-4 py-2.5 animate-in slide-in-from-top-1">
-            <form 
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 if (searchQuery.trim()) {
@@ -840,9 +887,9 @@ export default function Explore() {
                   className="w-full pl-9 pr-14 py-2 bg-white border border-slate-200 rounded-full text-xs font-medium focus:outline-none focus:border-[#FF5A1F]"
                 />
                 {searchQuery && (
-                  <button 
-                    type="button" 
-                    onClick={() => setSearchQuery('')} 
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
                     className="absolute right-3.5 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     Clear
@@ -873,7 +920,7 @@ export default function Explore() {
       {/* 2. HERO SECTION (RESPONSIVE SEAMLESS FOOD COMPOSITION)                  */}
       {/* ======================================================================= */}
       <section id="home" className="relative w-full overflow-hidden bg-[#FAF6F0]">
-        
+
         {/* Soft Organic Background Glow (Top Left) */}
         <div className="absolute top-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-gradient-to-br from-amber-100/60 via-orange-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 left-1/4 w-80 h-80 bg-orange-50/50 rounded-full blur-3xl pointer-events-none" />
@@ -892,7 +939,7 @@ export default function Explore() {
             }}
             loading="eager"
           />
-          
+
           {/* Multi-layered Feathering & Seamless Atmosphere Gradients */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#FAF6F0]/80 via-transparent to-[#FAF6F0] lg:hidden pointer-events-none" />
           <div className="absolute inset-y-0 left-0 w-full sm:w-60 lg:w-72 bg-gradient-to-r from-[#FAF6F0] via-[#FAF6F0]/90 lg:via-[#FAF6F0]/80 to-transparent pointer-events-none" />
@@ -911,10 +958,10 @@ export default function Explore() {
         {/* Main Content Area */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center py-6 sm:py-10 lg:py-14">
-            
+
             {/* Left Content Column */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-3.5 sm:space-y-5 lg:pr-6">
-              
+
               {/* Fresh & Tasty Tag */}
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[11px] sm:text-xs font-bold">
                 <span className="text-xs sm:text-sm">🌿</span>
@@ -971,7 +1018,7 @@ export default function Explore() {
 
               {/* Trust Highlights (3 Horizontal Pills) */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full max-w-lg pt-1">
-                
+
                 {/* Fast Delivery */}
                 <div className="flex items-center gap-1.5 sm:gap-2.5 bg-white/95 backdrop-blur-xs p-2 sm:p-2.5 rounded-xl border border-slate-100 shadow-xs min-w-0">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-100 text-[#FF5A1F] flex items-center justify-center shrink-0">
@@ -1024,7 +1071,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <section id="featured-restaurants" className="py-4 sm:py-6 bg-white relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Section Header */}
           <div className="flex items-end justify-between mb-5 sm:mb-6">
             <div className="text-left">
@@ -1056,7 +1103,7 @@ export default function Explore() {
                 </button>
               )}
               <Link
-                to="/menu"
+                to="/restaurants"
                 className="text-xs sm:text-sm font-bold text-[#FF5A1F] hover:underline flex items-center gap-1 group"
               >
                 <span>View All</span>
@@ -1133,129 +1180,128 @@ export default function Explore() {
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-              {displayedRestaurants.map((rest, index) => {
-                const outletCount = (rest.branches && rest.branches.length > 0) ? rest.branches.length : 1;
-                const primaryBranch = rest.branches?.[0];
-                const outletAddress = primaryBranch?.location?.address && primaryBranch.location.address !== 'Primary Location'
-                  ? primaryBranch.location.address
-                  : (rest.address && rest.address !== 'Primary Location' ? rest.address : (rest.city ? `${rest.city}, India` : 'Verified Outlet'));
+                {displayedRestaurants.map((rest, index) => {
+                  const outletCount = (rest.branches && rest.branches.length > 0) ? rest.branches.length : 1;
+                  const primaryBranch = rest.branches?.[0];
+                  const outletAddress = primaryBranch?.location?.address && primaryBranch.location.address !== 'Primary Location'
+                    ? primaryBranch.location.address
+                    : (rest.address && rest.address !== 'Primary Location' ? rest.address : (rest.city ? `${rest.city}, India` : 'Verified Outlet'));
 
-                // Delivery radius and customer distance calculation
-                const deliveryRadius = rest.deliverySettings?.radius || 5;
-                const restLat = rest.deliverySettings?.location?.latitude || primaryBranch?.location?.latitude || null;
-                const restLon = rest.deliverySettings?.location?.longitude || primaryBranch?.location?.longitude || null;
-                const distanceKm = (userCoordinates && restLat && restLon)
-                  ? calculateDistanceKm(userCoordinates.latitude, userCoordinates.longitude, restLat, restLon)
-                  : null;
-                const isWithinRadius = distanceKm !== null ? distanceKm <= deliveryRadius : null;
+                  // Delivery radius and customer distance calculation
+                  const deliveryRadius = rest.deliverySettings?.radius || 5;
+                  const restLat = rest.deliverySettings?.location?.latitude || primaryBranch?.location?.latitude || null;
+                  const restLon = rest.deliverySettings?.location?.longitude || primaryBranch?.location?.longitude || null;
+                  const distanceKm = (userCoordinates && restLat && restLon)
+                    ? calculateDistanceKm(userCoordinates.latitude, userCoordinates.longitude, restLat, restLon)
+                    : null;
+                  const isWithinRadius = distanceKm !== null ? distanceKm <= deliveryRadius : null;
 
-                return (
-                  <div
-                    key={rest._id}
-                    onClick={() => navigate(`/restaurant/${rest._id}`)}
-                    className="group bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-left"
-                  >
-                    {/* 16:9 Cover Image or Clean Store Placeholder (Only uploaded images shown) */}
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 flex items-center justify-center">
-                      {rest.image ? (
-                        <img
-                          src={rest.image}
-                          alt={rest.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            if (e.currentTarget.nextElementSibling) {
-                              e.currentTarget.nextElementSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
-                      ) : null}
-                      <div
-                        className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-orange-50/40 text-slate-400 group-hover:text-[#FF5A1F] transition-colors ${
-                          rest.image ? 'hidden' : 'flex'
-                        }`}
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-[#FF5A1F]">
-                          <UtensilsCrossed size={18} />
+                  return (
+                    <div
+                      key={rest._id}
+                      onClick={() => navigate(`/restaurant/${rest._id}`)}
+                      className="group bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-left"
+                    >
+                      {/* 16:9 Cover Image or Clean Store Placeholder (Only uploaded images shown) */}
+                      <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 flex items-center justify-center">
+                        {rest.image ? (
+                          <img
+                            src={rest.image}
+                            alt={rest.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              if (e.currentTarget.nextElementSibling) {
+                                e.currentTarget.nextElementSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-orange-50/40 text-slate-400 group-hover:text-[#FF5A1F] transition-colors ${rest.image ? 'hidden' : 'flex'
+                            }`}
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-white shadow-xs border border-slate-200/60 flex items-center justify-center text-[#FF5A1F]">
+                            <UtensilsCrossed size={18} />
+                          </div>
+                          <span className="text-[11px] font-bold text-slate-600 mt-1.5">{rest.name}</span>
                         </div>
-                        <span className="text-[11px] font-bold text-slate-600 mt-1.5">{rest.name}</span>
-                      </div>
-                      {rest.badge && (
-                        <div className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded shadow-xs ${rest.badgeColor}`}>
-                          {rest.badge}
-                        </div>
-                      )}
-                      
-                      {/* Delivery Radius Badge on Showcase Card */}
-                      <div className="absolute top-2.5 right-2.5 bg-black/65 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/20">
-                        <Truck size={10} className="text-[#FF5A1F]" />
-                        <span>Delivery within {deliveryRadius} km</span>
-                      </div>
+                        {rest.badge && (
+                          <div className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded shadow-xs ${rest.badgeColor}`}>
+                            {rest.badge}
+                          </div>
+                        )}
 
-                      {rest.image && (
-                        <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                          <Sparkles size={10} className="text-amber-300" />
-                          <span>Showcase</span>
+                        {/* Delivery Radius Badge on Showcase Card */}
+                        <div className="absolute top-2.5 right-2.5 bg-black/65 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/20">
+                          <Truck size={10} className="text-[#FF5A1F]" />
+                          <span>Delivery within {deliveryRadius} km</span>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Details */}
-                    <div className="p-3 space-y-1.5">
-                      {/* Rating & Delivery Time */}
-                      <div className="flex items-center gap-1 text-xs text-slate-500 font-semibold">
-                        <div className="flex items-center gap-1 text-slate-800 font-bold">
-                          <Star size={12} className="fill-amber-400 text-amber-400" />
-                          <span>{rest.rating || '4.5'}</span>
-                        </div>
-                        <span className="text-slate-300 mx-1">•</span>
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <Clock size={11} className="text-slate-400" />
-                          <span className="text-[11px] font-medium">{rest.deliveryTime || '25-35 min'}</span>
-                        </div>
-                      </div>
-
-                      {/* Name */}
-                      <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 group-hover:text-[#FF5A1F] transition-colors line-clamp-1">
-                        {rest.name}
-                      </h3>
-
-                      {/* Cuisines & Location pill */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-                        <p className="line-clamp-1 text-[12px]">{rest.cuisines || 'Multi-Cuisine • Pure Veg & Non-Veg'}</p>
-                        {rest.city && (
-                          <span className="text-[10px] text-slate-600 bg-slate-100 font-semibold px-1.5 py-0.5 rounded shrink-0 ml-1">
-                            {rest.city}
-                          </span>
+                        {rest.image && (
+                          <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                            <Sparkles size={10} className="text-amber-300" />
+                            <span>Showcase</span>
+                          </div>
                         )}
                       </div>
 
-                      {/* Outlet Location & Outlets Count */}
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                        <div className="flex items-center gap-1 min-w-0 pr-1 text-slate-600 font-medium truncate">
-                          <MapPin size={12} className="text-[#FF5A1F] shrink-0" />
-                          <span className="truncate">{outletAddress}</span>
+                      {/* Details */}
+                      <div className="p-3 space-y-1.5">
+                        {/* Rating & Delivery Time */}
+                        <div className="flex items-center gap-1 text-xs text-slate-500 font-semibold">
+                          <div className="flex items-center gap-1 text-slate-800 font-bold">
+                            <Star size={12} className="fill-amber-400 text-amber-400" />
+                            <span>{rest.rating || '4.5'}</span>
+                          </div>
+                          <span className="text-slate-300 mx-1">•</span>
+                          <div className="flex items-center gap-1 text-slate-500">
+                            <Clock size={11} className="text-slate-400" />
+                            <span className="text-[11px] font-medium">{rest.deliveryTime || '25-35 min'}</span>
+                          </div>
                         </div>
-                        <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-50 text-[#FF5A1F] border border-orange-200/60">
-                          {outletCount > 1 ? `${outletCount} Outlets` : 'Main Outlet'}
-                        </span>
-                      </div>
 
-                      {/* Location Delivery Radius Status */}
-                      <div className="pt-1.5 flex items-center justify-between text-[11px]">
-                        <div className="flex items-center gap-1 text-slate-600 font-medium truncate">
-                          <Truck size={12} className="text-[#FF5A1F] shrink-0" />
-                          <span>Home Delivery: <strong className="text-slate-800">Available within {deliveryRadius} km</strong></span>
+                        {/* Name */}
+                        <h3 className="text-sm sm:text-[15px] font-bold text-slate-900 group-hover:text-[#FF5A1F] transition-colors line-clamp-1">
+                          {rest.name}
+                        </h3>
+
+                        {/* Cuisines & Location pill */}
+                        <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+                          <p className="line-clamp-1 text-[12px]">{rest.cuisines || 'Multi-Cuisine • Pure Veg & Non-Veg'}</p>
+                          {rest.city && (
+                            <span className="text-[10px] text-slate-600 bg-slate-100 font-semibold px-1.5 py-0.5 rounded shrink-0 ml-1">
+                              {rest.city}
+                            </span>
+                          )}
                         </div>
-                        <span className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-full">
-                          Radius: {deliveryRadius} km
-                        </span>
+
+                        {/* Outlet Location & Outlets Count */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                          <div className="flex items-center gap-1 min-w-0 pr-1 text-slate-600 font-medium truncate">
+                            <MapPin size={12} className="text-[#FF5A1F] shrink-0" />
+                            <span className="truncate">{outletAddress}</span>
+                          </div>
+                          <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-50 text-[#FF5A1F] border border-orange-200/60">
+                            {outletCount > 1 ? `${outletCount} Outlets` : 'Main Outlet'}
+                          </span>
+                        </div>
+
+                        {/* Location Delivery Radius Status */}
+                        <div className="pt-1.5 flex items-center justify-between text-[11px]">
+                          <div className="flex items-center gap-1 text-slate-600 font-medium truncate">
+                            <Truck size={12} className="text-[#FF5A1F] shrink-0" />
+                            <span>Home Delivery: <strong className="text-slate-800">Available within {deliveryRadius} km</strong></span>
+                          </div>
+                          <span className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.5 rounded">
+                            Radius: {deliveryRadius} km
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1269,7 +1315,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <section className="py-3 sm:py-4 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Header */}
           <div className="flex items-end justify-between mb-5 sm:mb-6">
             <div className="text-left">
@@ -1280,18 +1326,11 @@ export default function Explore() {
                 Find your favourite cuisine
               </p>
             </div>
-            <button
-              onClick={() => setSelectedCuisine('all')}
-              className="text-xs sm:text-sm font-bold text-[#FF5A1F] hover:underline flex items-center gap-1 group cursor-pointer"
-            >
-              <span>View All</span>
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
           </div>
 
-          {/* 8 Compact Category Tiles (Horizontal scroll on mobile, grid on desktop) */}
-          <div className="flex sm:grid sm:grid-cols-8 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 gap-3 sm:gap-3.5 no-scrollbar scroll-smooth">
-            {CUISINES_LIST.map((c) => {
+          {/* Dynamic Category Tiles (Horizontal scroll on mobile, responsive grid on desktop) */}
+          <div className="flex sm:grid sm:grid-cols-6 lg:grid-cols-8 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 gap-3 sm:gap-3.5 no-scrollbar scroll-smooth">
+            {dynamicCuisines.map((c) => {
               const isActive = selectedCuisine === c.id;
 
               return (
@@ -1299,34 +1338,28 @@ export default function Explore() {
                   key={c.id}
                   type="button"
                   onClick={() => setSelectedCuisine(c.id)}
-                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-xl transition-all duration-200 cursor-pointer text-center group shrink-0 min-w-[76px] sm:min-w-0 touch-manipulation active:scale-95 ${
-                    isActive
-                      ? 'bg-[#FF5A1F] text-white shadow-md shadow-[#FF5A1F]/20 scale-102'
-                      : 'bg-white text-slate-700 border border-slate-200/80 hover:border-orange-200 hover:shadow-xs'
-                  }`}
+                  className={`flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-xl transition-all duration-200 cursor-pointer text-center group shrink-0 min-w-[76px] sm:min-w-0 touch-manipulation active:scale-95 ${isActive
+                    ? 'bg-[#FF5A1F] text-white shadow-md shadow-[#FF5A1F]/20 scale-102'
+                    : 'bg-white text-slate-700 border border-slate-200/80 hover:border-orange-200 hover:shadow-xs'
+                    }`}
                 >
                   {/* Icon or Food Photo */}
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 overflow-hidden ${
-                    isActive ? 'bg-white/20' : 'bg-transparent'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 overflow-hidden transition-colors ${isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-700 group-hover:bg-orange-50 group-hover:text-[#FF5A1F]'
+                    }`}>
                     {c.isGrid ? (
-                      <div className="grid grid-cols-2 gap-1 p-1">
-                        <span className="w-2 h-2 rounded-xs bg-white" />
-                        <span className="w-2 h-2 rounded-xs bg-white" />
-                        <span className="w-2 h-2 rounded-xs bg-white" />
-                        <span className="w-2 h-2 rounded-xs bg-white" />
-                      </div>
-                    ) : (
-                      <img 
-                        src={c.image} 
-                        alt={c.name} 
+                      <LayoutGrid size={20} className={isActive ? 'text-white' : 'text-slate-700 group-hover:text-[#FF5A1F]'} />
+                    ) : c.image ? (
+                      <img
+                        src={c.image}
+                        alt={c.name}
                         className="w-full h-full object-cover rounded-md group-hover:scale-108 transition-transform"
                       />
+                    ) : (
+                      <UtensilsCrossed size={18} className={isActive ? 'text-white' : 'text-[#FF5A1F]'} />
                     )}
                   </div>
-                  <span className={`text-xs font-bold tracking-tight line-clamp-1 ${
-                    isActive ? 'text-white' : 'text-slate-800 group-hover:text-[#FF5A1F]'
-                  }`}>
+                  <span className={`text-xs font-bold tracking-tight line-clamp-1 ${isActive ? 'text-white' : 'text-slate-800 group-hover:text-[#FF5A1F]'
+                    }`}>
                     {c.name}
                   </span>
                 </button>
@@ -1343,7 +1376,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <section id="popular-dishes" className="py-3 sm:py-4 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Header */}
           <div className="flex items-end justify-between mb-5 sm:mb-6">
             <div className="text-left">
@@ -1426,9 +1459,8 @@ export default function Explore() {
                             toggleWishlist(dish);
                             toast(isFav ? 'Removed from favourites' : 'Added to favourites!', { icon: '❤️' });
                           }}
-                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-xs transition-colors cursor-pointer ${
-                            isFav ? 'bg-red-500 text-white shadow-xs' : 'bg-white/90 text-slate-600 hover:text-red-500 shadow-xs'
-                          }`}
+                          className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-xs transition-colors cursor-pointer ${isFav ? 'bg-red-500 text-white shadow-xs' : 'bg-white/90 text-slate-600 hover:text-red-500 shadow-xs'
+                            }`}
                           aria-label="Wishlist"
                         >
                           <Heart size={12} className={isFav ? 'fill-white' : ''} />
@@ -1486,30 +1518,52 @@ export default function Explore() {
 
 
       {/* ======================================================================= */}
-      {/* 6. PROMOTIONAL BANNER (DYNAMIC OFFER / VOUCHER)                          */}
+      {/* 6. PROMOTIONAL BANNER (DYNAMIC OFFER / VOUCHER CARDS SLIDE)               */}
       {/* ======================================================================= */}
-      <section id="offers" className="py-2.5 sm:py-5 bg-white">
+      <section id="offers" className="py-2.5 sm:py-4 bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#FFF5ED] via-[#FFF9F3] to-[#FFF5ED] border border-orange-200/60 p-4 sm:p-8 lg:p-10 shadow-xs overflow-hidden">
-            
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-center relative z-10">
-              
-              {/* Left Column: Heading & Coupon */}
-              <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start space-y-2 sm:space-y-4">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white border border-orange-200 text-orange-700 text-[11px] sm:text-xs font-bold shadow-xs">
+          <div className="relative rounded-2xl bg-gradient-to-br from-[#FFF5ED] via-[#FFF9F3] to-[#FFF5ED] border border-orange-200/60 p-4 sm:p-5 lg:p-6 shadow-xs overflow-hidden">
+
+            {/* Offer Slide Navigation Buttons (when multiple offers exist) */}
+            {offersList.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevOffer}
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center z-20 transition-all active:scale-95 cursor-pointer border border-orange-200"
+                  title="Previous Offer"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextOffer}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-md flex items-center justify-center z-20 transition-all active:scale-95 cursor-pointer border border-orange-200"
+                  title="Next Offer"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6 items-center relative z-10 px-6 sm:px-8 lg:px-6">
+
+              {/* Left Column: Heading, Discount & Coupon */}
+              <div className="lg:col-span-5 text-center lg:text-left flex flex-col items-center lg:items-start space-y-1.5 sm:space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-orange-200 text-orange-700 text-[11px] font-bold shadow-xs">
                   <span>🌿</span>
-                  <span>Special Offer</span>
+                  <span>{activeOffer?.title || 'Special Offer'} {offersList.length > 1 ? `(${currentOfferIndex + 1} of ${offersList.length})` : ''}</span>
                 </div>
 
-                <h3 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
                   {activeOffer ? (
                     activeOffer.type === 'Percentage' ? `Flat ${activeOffer.discountValue}% OFF` :
-                    activeOffer.type === 'Fixed Amount' ? `Flat ₹${activeOffer.discountValue} OFF` :
-                    'Free Express Delivery'
+                      activeOffer.type === 'Fixed Amount' ? `Flat ₹${activeOffer.discountValue} OFF` :
+                        'Free Express Delivery'
                   ) : (
                     'Special Partner Offers'
                   )}<br />
-                  <span className="text-slate-500 font-semibold text-base sm:text-xl lg:text-2xl">
+                  <span className="text-slate-500 font-semibold text-xs sm:text-base">
                     {activeOffer?.description || (activeOffer?.minSpend > 0 ? `on orders above ₹${activeOffer.minSpend}` : 'available on your next order')}
                   </span>
                 </h3>
@@ -1519,12 +1573,12 @@ export default function Explore() {
                   <div className="pt-0.5">
                     <div
                       onClick={() => handleCopyCoupon(activeOffer.code)}
-                      className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white border border-dashed border-[#FF5A1F] text-[#FF5A1F] font-mono font-bold text-xs sm:text-sm shadow-xs cursor-pointer hover:bg-orange-50/50 transition-colors group"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-dashed border-[#FF5A1F] text-[#FF5A1F] font-mono font-bold text-xs shadow-xs cursor-pointer hover:bg-orange-50/50 transition-colors group"
                       title="Click to copy coupon code"
                     >
                       <span>Use Code:</span>
-                      <span className="text-slate-900 tracking-wider">{activeOffer.code}</span>
-                      <Copy size={13} className="text-[#FF5A1F] group-hover:scale-110 transition-transform" />
+                      <span className="text-slate-900 tracking-wider font-black">{activeOffer.code}</span>
+                      <Copy size={12} className="text-[#FF5A1F] group-hover:scale-110 transition-transform" />
                       {copiedCoupon && <span className="text-[10px] text-emerald-600 font-bold ml-1">Copied!</span>}
                     </div>
                   </div>
@@ -1532,53 +1586,75 @@ export default function Explore() {
               </div>
 
               {/* Center Column: Promo Badge Visual */}
-              <div className="lg:col-span-4 flex items-center justify-center py-1 sm:py-2 lg:py-0">
-                <div className="relative w-28 h-28 sm:w-40 sm:h-40 lg:w-52 lg:h-52 rounded-full overflow-hidden shadow-lg sm:shadow-xl border-3 sm:border-4 border-white shrink-0 bg-gradient-to-tr from-[#FF5A1F] to-[#FF8A00] flex flex-col items-center justify-center text-white p-4 text-center">
-                  <Sparkles size={36} className="text-amber-200 animate-pulse mb-1" />
-                  <span className="text-xl sm:text-2xl font-black tracking-tight">50% OFF</span>
-                  <span className="text-[10px] sm:text-xs font-semibold text-white/90 uppercase tracking-widest mt-0.5">Special Treat</span>
+              <div className="lg:col-span-3 flex items-center justify-center py-1 lg:py-0">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full overflow-hidden shadow-md border-3 border-white shrink-0 bg-gradient-to-tr from-[#FF5A1F] to-[#FF8A00] flex flex-col items-center justify-center text-white p-2 text-center transition-all duration-300">
+                  <Sparkles size={20} className="text-amber-200 animate-pulse mb-0.5" />
+                  <span className="text-base sm:text-lg font-black tracking-tight leading-tight">
+                    {activeOffer?.discountValue ? (
+                      activeOffer.type === 'Percentage' ? `${activeOffer.discountValue}% OFF` : `₹${activeOffer.discountValue} OFF`
+                    ) : '50% OFF'}
+                  </span>
+                  <span className="text-[9px] font-semibold text-white/90 uppercase tracking-widest mt-0.5">
+                    {activeOffer?.code ? 'Promo Deal' : 'Special Treat'}
+                  </span>
                 </div>
               </div>
 
-              {/* Right Column: 3 Perks in a balanced responsive grid */}
-              <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-4 w-full">
-                
+              {/* Right Column: 3 Perks in a balanced compact grid */}
+              <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2 w-full">
+
                 {/* Free Delivery */}
-                <div className="flex items-center gap-2.5 sm:gap-3 bg-white/80 lg:bg-transparent p-2 sm:p-2.5 lg:p-0 rounded-xl sm:rounded-2xl lg:rounded-none border border-orange-100/60 lg:border-none shadow-xs lg:shadow-none text-left">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#FF5A1F] text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Truck size={15} />
+                <div className="flex items-center gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-orange-100/80 shadow-xs text-left">
+                  <div className="w-8 h-8 rounded-lg bg-[#FF5A1F] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Truck size={14} />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">Free Delivery</span>
-                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">on orders above ₹199</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">Free Delivery</span>
+                    <span className="text-[11px] text-slate-400 font-medium leading-tight truncate mt-0.5">on orders above ₹199</span>
                   </div>
                 </div>
 
                 {/* Exclusive Deals */}
-                <div className="flex items-center gap-2.5 sm:gap-3 bg-white/80 lg:bg-transparent p-2 sm:p-2.5 lg:p-0 rounded-xl sm:rounded-2xl lg:rounded-none border border-orange-100/60 lg:border-none shadow-xs lg:shadow-none text-left">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Sparkles size={15} />
+                <div className="flex items-center gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-orange-100/80 shadow-xs text-left">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles size={14} />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">Exclusive Deals</span>
-                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">only on our app</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">Exclusive Deals</span>
+                    <span className="text-[11px] text-slate-400 font-medium leading-tight truncate mt-0.5">multiple offers available</span>
                   </div>
                 </div>
 
                 {/* Easy Payments */}
-                <div className="flex items-center gap-2.5 sm:gap-3 bg-white/80 lg:bg-transparent p-2 sm:p-2.5 lg:p-0 rounded-xl sm:rounded-2xl lg:rounded-none border border-orange-100/60 lg:border-none shadow-xs lg:shadow-none text-left">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#10B981] text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <CreditCard size={15} />
+                <div className="flex items-center gap-3 bg-white p-2.5 sm:p-3 rounded-xl border border-orange-100/80 shadow-xs text-left">
+                  <div className="w-8 h-8 rounded-lg bg-[#10B981] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <CreditCard size={14} />
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">Easy Payments</span>
-                    <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">UPI, Cards, Wallets</span>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">Easy Payments</span>
+                    <span className="text-[11px] text-slate-400 font-medium leading-tight truncate mt-0.5">UPI, Cards, Wallets</span>
                   </div>
                 </div>
 
               </div>
 
             </div>
+
+            {/* Pagination Dots when multiple offers exist */}
+            {offersList.length > 1 && (
+              <div className="flex items-center justify-center gap-1.5 pt-3 relative z-10">
+                {offersList.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setCurrentOfferIndex(idx)}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${idx === currentOfferIndex ? 'w-6 bg-[#FF5A1F]' : 'w-2 bg-orange-200 hover:bg-orange-300'
+                      }`}
+                    title={`View Offer ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
 
           </div>
         </div>
@@ -1590,7 +1666,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <section id="how-it-works" className="py-4 sm:py-6 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Header */}
           <div className="mb-6 text-center sm:text-left">
             <h2 className="text-xl sm:text-[22px] font-bold text-slate-900 tracking-tight">
@@ -1603,7 +1679,7 @@ export default function Explore() {
 
           {/* 4 Steps: 2x2 Grid on Mobile, 4 Columns on Large Screens */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            
+
             {/* Step 1: Choose Restaurant */}
             <div className="flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-orange-50/30 sm:bg-transparent border border-orange-100/50 sm:border-none space-y-2.5 sm:space-y-3">
               <div className="relative">
@@ -1683,7 +1759,7 @@ export default function Explore() {
       {/* ======================================================================= */}
       <section className="py-4 sm:py-6 bg-[#FAFAF8]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Header */}
           <div className="flex items-end justify-between mb-7">
             <div className="text-left">
@@ -1694,17 +1770,20 @@ export default function Explore() {
                 Real people. Real experiences.
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <Link to="/profile" className="hidden sm:inline text-xs font-bold text-[#FF5A1F] hover:underline mr-2">
+              <Link
+                to="/profile?tab=reviews"
+                onClick={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}
+                className="hidden sm:inline text-xs font-bold text-[#FF5A1F] hover:underline mr-2"
+              >
                 Write a Review →
               </Link>
               <button
                 onClick={() => setReviewCarouselIndex(prev => Math.max(0, prev - 1))}
                 disabled={reviewCarouselIndex === 0}
-                className={`w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center transition-colors shadow-xs ${
-                  reviewCarouselIndex === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-[#FF5A1F] cursor-pointer'
-                }`}
+                className={`w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center transition-colors shadow-xs ${reviewCarouselIndex === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-[#FF5A1F] cursor-pointer'
+                  }`}
                 aria-label="Previous"
               >
                 <ChevronLeft size={15} />
@@ -1712,9 +1791,8 @@ export default function Explore() {
               <button
                 onClick={() => setReviewCarouselIndex(prev => Math.min(Math.max(0, customerReviews.length - 3), prev + 1))}
                 disabled={reviewCarouselIndex >= Math.max(0, customerReviews.length - 3)}
-                className={`w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center transition-colors shadow-xs ${
-                  reviewCarouselIndex >= Math.max(0, customerReviews.length - 3) ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-[#FF5A1F] cursor-pointer'
-                }`}
+                className={`w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center transition-colors shadow-xs ${reviewCarouselIndex >= Math.max(0, customerReviews.length - 3) ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-[#FF5A1F] cursor-pointer'
+                  }`}
                 aria-label="Next"
               >
                 <ChevronRight size={15} />
@@ -1733,8 +1811,9 @@ export default function Explore() {
                 Be the first to share your dining experience! Leave your feedback directly from your customer dashboard.
               </p>
               <Link
-                to="/profile"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#FF5A1F] hover:bg-[#e04f1a] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                to="/profile?tab=reviews"
+                onClick={() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' })}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#FF5A1F] hover:bg-[#e04f1a] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
               >
                 Share Your Review
               </Link>
@@ -1792,9 +1871,9 @@ export default function Explore() {
       {/* ======================================================================= */}
       <footer className="bg-[#0D1527] text-slate-400 pt-12 pb-8 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 text-left">
-            
+
             {/* Brand Column */}
             <div className="space-y-3.5">
               <div className="flex items-center gap-2.5">
@@ -1836,9 +1915,9 @@ export default function Explore() {
               </h4>
               <ul className="space-y-2 text-xs font-medium">
                 <li>
-                  <button 
-                    type="button" 
-                    onClick={() => handleNavClick('about', 'how-it-works')} 
+                  <button
+                    type="button"
+                    onClick={() => handleNavClick('about', 'how-it-works')}
                     className="hover:text-[#FF5A1F] transition-colors cursor-pointer text-left no-underline outline-none"
                   >
                     How It Works
@@ -1854,12 +1933,31 @@ export default function Explore() {
                 Download Our App
               </h4>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                <div className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition-colors">
+                <a
+                  href="https://play.google.com/store"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer hover:bg-slate-700 transition-colors shadow-2xs no-underline"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
+                    <path d="M3.609 1.814L13.793 12 3.61 22.186c-.305-.205-.5-.544-.5-.956V2.77c0-.412.195-.751.5-.956z" fill="#00C1A6" />
+                    <path d="M14.847 13.054l2.585 2.586-11.75 6.67 9.165-9.256z" fill="#FF3333" />
+                    <path d="M14.847 10.946L5.682 1.69l11.75 6.67-2.585 2.586z" fill="#0086F0" />
+                    <path d="M17.432 12l2.07 1.176c.72.408.72 1.076 0 1.485L17.432 15.837 15.54 13.882 17.432 12z" fill="#FFBA00" />
+                  </svg>
                   <span>Google Play</span>
-                </div>
-                <div className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition-colors">
+                </a>
+                <a
+                  href="https://www.apple.com/app-store/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer hover:bg-slate-700 transition-colors shadow-2xs no-underline"
+                >
+                  <svg className="w-4 h-4 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.58.66-.99 1.72-.88 2.74 1.01.08 2-.49 2.61-1.24z" />
+                  </svg>
                   <span>App Store</span>
-                </div>
+                </a>
               </div>
             </div>
 

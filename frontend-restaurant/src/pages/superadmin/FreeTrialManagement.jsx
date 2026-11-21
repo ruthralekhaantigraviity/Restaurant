@@ -127,12 +127,18 @@ const FreeTrialManagement = () => {
 
         if (!matchesSearch) return false;
 
+        const isPending = sub.status === 'Pending Approval';
+        const isFrozen = sub.manualFreeze || sub.status === 'Frozen';
+        const isExpired = sub.status === 'Expired';
+        const isRejected = sub.status === 'Rejected';
+        const isActive = sub.status?.toLowerCase() === 'active' || r.status?.toLowerCase() === 'active' || (!isPending && !isFrozen && !isExpired && !isRejected && (sub.trialActive || sub.status === 'Active' || r.isActive || r.approvalStatus === 'Approved'));
+
         if (filterStatus === 'All') return true;
-        if (filterStatus === 'Pending') return sub.status === 'Pending Approval';
-        if (filterStatus === 'Active') return sub.status === 'Active' && sub.trialActive;
-        if (filterStatus === 'Frozen') return sub.status === 'Frozen' || sub.manualFreeze;
-        if (filterStatus === 'Expired') return sub.status === 'Expired';
-        if (filterStatus === 'Rejected') return sub.status === 'Rejected';
+        if (filterStatus === 'Pending') return isPending;
+        if (filterStatus === 'Active') return isActive;
+        if (filterStatus === 'Frozen') return isFrozen;
+        if (filterStatus === 'Expired') return isExpired;
+        if (filterStatus === 'Rejected') return isRejected;
         return true;
     });
 
@@ -140,7 +146,14 @@ const FreeTrialManagement = () => {
     const counts = {
         all: restaurants.length,
         pending: restaurants.filter(r => r.subscription?.status === 'Pending Approval').length,
-        active: restaurants.filter(r => r.subscription?.status === 'Active' && r.subscription?.trialActive).length,
+        active: restaurants.filter(r => {
+            const sub = r.subscription || {};
+            const isPending = sub.status === 'Pending Approval';
+            const isFrozen = sub.manualFreeze || sub.status === 'Frozen';
+            const isExpired = sub.status === 'Expired';
+            const isRejected = sub.status === 'Rejected';
+            return sub.status?.toLowerCase() === 'active' || r.status?.toLowerCase() === 'active' || (!isPending && !isFrozen && !isExpired && !isRejected && (sub.trialActive || sub.status === 'Active' || r.isActive || r.approvalStatus === 'Approved'));
+        }).length,
         frozen: restaurants.filter(r => r.subscription?.status === 'Frozen' || r.subscription?.manualFreeze).length,
         expired: restaurants.filter(r => r.subscription?.status === 'Expired').length,
     };
@@ -263,16 +276,25 @@ const FreeTrialManagement = () => {
                                     const sub = r.subscription || {};
                                     const isPending = sub.status === 'Pending Approval';
                                     const isFrozen = sub.manualFreeze || sub.status === 'Frozen';
-                                    const isActive = sub.status === 'Active' && sub.trialActive;
                                     const isExpired = sub.status === 'Expired';
                                     const isRejected = sub.status === 'Rejected';
+                                    const isActive = sub.status?.toLowerCase() === 'active' || r.status?.toLowerCase() === 'active' || (!isPending && !isFrozen && !isExpired && !isRejected && (sub.trialActive || sub.status === 'Active' || r.isActive || r.approvalStatus === 'Approved'));
+
+                                    // Effective Trial / Expiry Date calculation
+                                    const rawExpiry = sub.trialEndDate || sub.expiryDate || sub.subscriptionEndDate;
+                                    const effectiveExpiry = rawExpiry 
+                                        ? new Date(rawExpiry) 
+                                        : (sub.trialRequestDate 
+                                            ? new Date(new Date(sub.trialRequestDate).getTime() + 7 * 24 * 60 * 60 * 1000) 
+                                            : (r.createdAt 
+                                                ? new Date(new Date(r.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000) 
+                                                : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                              )
+                                          );
 
                                     // Countdown calculation
-                                    let daysLeft = null;
-                                    if (isActive && sub.trialEndDate) {
-                                        const diff = new Date(sub.trialEndDate).getTime() - Date.now();
-                                        daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-                                    }
+                                    const diff = effectiveExpiry.getTime() - Date.now();
+                                    const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 
                                     return (
                                         <tr key={r._id} className="hover:bg-slate-50/50 transition-colors">
@@ -307,29 +329,31 @@ const FreeTrialManagement = () => {
                                                     <span className="text-[11px] text-amber-700 font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 inline-block">
                                                         ⏳ Starts on Approval
                                                     </span>
-                                                ) : isActive ? (
-                                                    <div className="space-y-0.5">
-                                                        <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-block">
-                                                            {daysLeft !== null ? `${daysLeft} days remaining` : 'Active'}
-                                                        </span>
-                                                        <div className="text-[10px] text-slate-400 font-medium">
-                                                            Until {new Date(sub.trialEndDate).toLocaleDateString()}
-                                                        </div>
-                                                    </div>
-                                                ) : isExpired ? (
-                                                    <span className="text-[11px] text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 inline-block">
-                                                        Expired {sub.trialEndDate ? new Date(sub.trialEndDate).toLocaleDateString() : ''}
-                                                    </span>
                                                 ) : isFrozen ? (
                                                     <span className="text-[11px] text-slate-700 font-bold bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 inline-block">
                                                         ❄️ Manually Frozen
+                                                    </span>
+                                                ) : isExpired ? (
+                                                    <span className="text-[11px] text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 inline-block">
+                                                        Expired {effectiveExpiry.toLocaleDateString()}
                                                     </span>
                                                 ) : isRejected ? (
                                                     <span className="text-[11px] text-red-700 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-200 inline-block">
                                                         Rejected
                                                     </span>
                                                 ) : (
-                                                    <span className="text-slate-400">N/A</span>
+                                                    <div className="space-y-0.5">
+                                                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border inline-block ${
+                                                            daysLeft <= 3 
+                                                                ? 'text-amber-700 bg-amber-50 border-amber-200' 
+                                                                : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                                                        }`}>
+                                                            {daysLeft === 0 ? 'Expires today' : `${daysLeft} days remaining`}
+                                                        </span>
+                                                        <div className="text-[10px] text-slate-500 font-medium">
+                                                            Until {effectiveExpiry.toLocaleDateString()}
+                                                        </div>
+                                                    </div>
                                                 )}
                                             </td>
 
@@ -337,12 +361,12 @@ const FreeTrialManagement = () => {
                                             <td className="p-4 text-center">
                                                 <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                                                     isPending ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                                                    isActive ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                                                    isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold' :
                                                     isFrozen ? 'bg-slate-900 text-white border-slate-950' :
                                                     isExpired ? 'bg-rose-100 text-rose-800 border-rose-200' :
                                                     'bg-slate-100 text-slate-700 border-slate-200'
                                                 }`}>
-                                                    {sub.status || 'Inactive'}
+                                                    {isActive ? 'ACTIVE' : (sub.status || 'INACTIVE')}
                                                 </span>
                                             </td>
 

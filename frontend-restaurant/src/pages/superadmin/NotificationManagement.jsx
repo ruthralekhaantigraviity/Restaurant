@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Bell, Plus, Trash2, CheckCheck, Send, AlertCircle, Info, Megaphone, X, ArrowRight } from 'lucide-react';
+import { Bell, Plus, Trash2, CheckCheck, Send, AlertCircle, Info, Megaphone, X, ArrowRight, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const TYPE_CONFIG = {
@@ -16,6 +16,7 @@ const NotificationManagement = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
+    const [selectedNotification, setSelectedNotification] = useState(null);
     const [sending, setSending] = useState(false);
     const [form, setForm] = useState({ title: '', desc: '', type: 'System' });
 
@@ -166,6 +167,16 @@ const NotificationManagement = () => {
                                         <p className="text-sm text-gray-500 mt-1 leading-relaxed">{n.desc}</p>
                                     </div>
                                     <div className="flex gap-1.5 shrink-0">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedNotification(n);
+                                                if (!n.read) handleMarkRead(n._id);
+                                            }}
+                                            className="px-2.5 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1.5"
+                                            title="View Full Notification"
+                                        >
+                                            <Eye size={14} /> View
+                                        </button>
                                         {!n.read && (
                                             <button
                                                 onClick={() => handleMarkRead(n._id)}
@@ -265,6 +276,60 @@ const NotificationManagement = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Notification Detail Modal */}
+            {selectedNotification && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setSelectedNotification(null)} />
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <div className="flex items-center gap-2">
+                                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                                    (TYPE_CONFIG[selectedNotification.type] || TYPE_CONFIG.Info).bg
+                                } ${(TYPE_CONFIG[selectedNotification.type] || TYPE_CONFIG.Info).text}`}>
+                                    {selectedNotification.type || 'Notification'}
+                                </span>
+                                <h3 className="font-bold text-gray-900 text-base">Notification Details</h3>
+                            </div>
+                            <button onClick={() => setSelectedNotification(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                                <h4 className="font-bold text-gray-900 text-base leading-snug">{selectedNotification.title}</h4>
+                                <p className="text-[11px] text-gray-500 mt-1">
+                                    Received: {new Date(selectedNotification.createdAt).toLocaleString()}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5">Full Message</label>
+                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-sm text-gray-700 leading-relaxed max-h-56 overflow-y-auto whitespace-pre-wrap">
+                                    {selectedNotification.desc || 'No message content.'}
+                                </div>
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                {!selectedNotification.read && (
+                                    <button
+                                        onClick={() => {
+                                            handleMarkRead(selectedNotification._id);
+                                            setSelectedNotification(prev => ({ ...prev, read: true }));
+                                        }}
+                                        className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                                    >
+                                        <CheckCheck size={14} /> Mark Read
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => setSelectedNotification(null)}
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

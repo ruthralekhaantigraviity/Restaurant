@@ -116,7 +116,7 @@ const SuperAdminLayout = () => {
                 {/* Sidebar Header */}
                 <div className="h-16 flex items-center justify-between px-5 border-b border-slate-800 shrink-0">
                     <h1 className="text-lg font-bold tracking-tight truncate text-white">
-                        FoodNest<span className="text-[#FF5A1F]">SaaS</span>
+                        Food<span className="text-[#FF5A1F]">Nest</span>
                     </h1>
                     <button 
                         onClick={() => setIsOpen(false)} 
@@ -276,9 +276,14 @@ const SuperAdminLayout = () => {
                                                     <p className="text-slate-500 text-[11px] leading-relaxed line-clamp-2">
                                                         {n.desc}
                                                     </p>
-                                                    <span className="text-[10px] text-slate-400 mt-0.5">
-                                                        {new Date(n.createdAt).toLocaleString()}
-                                                    </span>
+                                                    <div className="flex items-center justify-between mt-1 pt-1 border-t border-slate-100/70">
+                                                        <span className="text-[10px] text-slate-400">
+                                                            {new Date(n.createdAt).toLocaleString()}
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-0.5">
+                                                            View Details &rarr;
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             ))
                                         )}

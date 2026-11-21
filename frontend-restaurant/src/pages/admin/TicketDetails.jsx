@@ -27,6 +27,7 @@ const TicketDetails = () => {
 
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [logoError, setLogoError] = useState(false);
     
     const messagesEndRef = useRef(null);
 
@@ -510,15 +511,16 @@ const TicketDetails = () => {
                     <div>
                         <h4 className="text-xs font-black uppercase text-gray-400 dark:text-slate-500 tracking-wider">Restaurant Info</h4>
                         <div className="flex items-center gap-3 mt-3">
-                            <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 overflow-hidden flex items-center justify-center font-bold text-gray-700 dark:text-slate-200 shrink-0 uppercase">
-                                {ticket.restaurantId?.logo ? (
+                            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 overflow-hidden flex items-center justify-center font-bold text-blue-600 dark:text-blue-400 shrink-0 uppercase text-xs">
+                                {ticket.restaurantId?.logo && !logoError ? (
                                     <img 
                                         src={ticket.restaurantId.logo.startsWith('http') ? ticket.restaurantId.logo : `${new URL(getApiUrl()).origin}${ticket.restaurantId.logo}`}
-                                        alt="Logo"
+                                        alt={ticket.restaurantId?.name || "Logo"}
                                         className="w-full h-full object-cover"
+                                        onError={() => setLogoError(true)}
                                     />
                                 ) : (
-                                    ticket.restaurantId?.name?.slice(0, 2)
+                                    <span>{ticket.restaurantId?.name ? ticket.restaurantId.name.slice(0, 2).toUpperCase() : 'R'}</span>
                                 )}
                             </div>
                             <div className="space-y-0.5 min-w-0 pr-1.5 flex-1">

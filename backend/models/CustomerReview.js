@@ -37,8 +37,19 @@ const customerReviewSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Approved', 'Pending', 'Hidden'],
-        default: 'Approved' // auto-approved for instant visibility on landing page
+        enum: ['Approved', 'Pending', 'Hidden', 'Rejected'],
+        default: 'Pending' // Requires admin or manager approval before appearing on landing page
+    },
+    approvedAt: {
+        type: Date
+    },
+    approvedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    rejectionReason: {
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true

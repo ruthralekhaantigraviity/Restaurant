@@ -78,7 +78,8 @@ const CartDrawer = () => {
                                         </div>
                                         <button 
                                             onClick={() => removeFromCart(item.id)}
-                                            className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer"
+                                            title="Delete Item"
                                         >
                                             <Trash2 size={16} />
                                         </button>

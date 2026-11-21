@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import CustomerProtectedRoute from './components/CustomerProtectedRoute';
 import CustomerLayout from './layouts/CustomerLayout';
+import ScrollToTop from './components/ScrollToTop';
 import Explore from './pages/customer/Explore';
 import Menu from './pages/customer/Menu';
 import RestaurantDetails from './pages/customer/RestaurantDetails';
+import Restaurants from './pages/customer/Restaurants';
 import CustomerMenu from './pages/customer/CustomerMenu';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import Checkout from './pages/customer/Checkout';
@@ -13,18 +16,47 @@ import OrderHistory from './pages/customer/OrderHistory';
 import ReservationHistory from './pages/customer/ReservationHistory';
 import CustomerOrderTracking from './pages/customer/CustomerOrderTracking';
 import CustomerAuthPage from './pages/CustomerAuthPage';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 function App() {
+  // Strictly protect website inside content from being copied
+  useEffect(() => {
+    const handleCopy = (e) => {
+      const targetTag = e.target?.tagName?.toLowerCase();
+      if (targetTag === 'input' || targetTag === 'textarea') {
+        return;
+      }
+      e.preventDefault();
+      toast.error('Copying website content is disabled.', { id: 'copy-disabled' });
+    };
+
+    const handleCut = (e) => {
+      const targetTag = e.target?.tagName?.toLowerCase();
+      if (targetTag !== 'input' && targetTag !== 'textarea') {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('copy', handleCopy);
+    document.addEventListener('cut', handleCut);
+    return () => {
+      document.removeEventListener('copy', handleCopy);
+      document.removeEventListener('cut', handleCut);
+    };
+  }, []);
+
   return (
     <>
       <Toaster position="top-right" />
+      <ScrollToTop />
       <Routes>
         {/* Main Customer Layout with Navbar & Footer */}
         <Route path="/" element={<CustomerLayout />}>
           <Route index element={<Explore />} />
           <Route path="explore" element={<Explore />} />
           <Route path="menu" element={<Menu />} />
+          <Route path="restaurants" element={<Restaurants />} />
+          <Route path="outlets" element={<Restaurants />} />
           <Route path="restaurant/:id" element={<RestaurantDetails />} />
           
           {/* Protected Customer Routes */}

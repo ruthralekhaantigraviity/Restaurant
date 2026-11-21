@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Users, ShoppingBag, DollarSign, Sparkles, ArrowRight } from 'lucide-react';
+import { TrendingUp, Users, ShoppingBag, DollarSign, Sparkles, ArrowRight, Flame, UtensilsCrossed, BarChart2, ListOrdered } from 'lucide-react';
 import StatCard from '../../components/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
@@ -9,6 +9,7 @@ const DashboardHome = () => {
     const { api, restaurant, user } = useAuth();
     const isCustomActive = restaurant?.billingConfig?.isCustomBillingActive === true;
     const customModules = restaurant?.billingConfig?.modules || {};
+    const [topDishesView, setTopDishesView] = useState('list'); // 'list' | 'chart'
     const [data, setData] = useState(() => {
         try {
             const cached = sessionStorage.getItem('restosys_admin_analytics');
@@ -26,16 +27,19 @@ const DashboardHome = () => {
     const [loading, setLoading] = useState(() => !data);
 
     useEffect(() => {
+        if (!user) return;
         const capTimer = setTimeout(() => setLoading(false), 15000);
         const fetchAnalytics = async () => {
             try {
                 const res = await api.get('/analytics/dashboard', { noCache: true });
                 if (res.data) {
                     setData(res.data);
-                    try { sessionStorage.setItem('restosys_admin_analytics', JSON.stringify(res.data)); } catch {}
+                    if (res.data?.overview?.totalOrders > 0 || res.data?.overview?.totalRevenue > 0) {
+                        try { sessionStorage.setItem('restosys_admin_analytics', JSON.stringify(res.data)); } catch { }
+                    }
                 }
-            } catch {
-                // Graceful fallback
+            } catch (err) {
+                console.error('Failed to load dashboard analytics:', err);
             } finally {
                 clearTimeout(capTimer);
                 setLoading(false);
@@ -43,7 +47,7 @@ const DashboardHome = () => {
         };
         fetchAnalytics();
         return () => clearTimeout(capTimer);
-    }, [api]);
+    }, [api, user?._id, user?.restaurantId]);
 
     if (loading) {
         return (
@@ -65,7 +69,7 @@ const DashboardHome = () => {
     };
 
     // Prepare weekly trend data: if empty, show zero values
-    const chartData = data?.revenueTrend && data.revenueTrend.length > 0 
+    const chartData = data?.revenueTrend && data.revenueTrend.length > 0
         ? data.revenueTrend.map(item => ({
             name: new Date(item._id).toLocaleDateString('en-US', { weekday: 'short' }),
             revenue: item.revenue || 0,
@@ -81,13 +85,18 @@ const DashboardHome = () => {
             { name: 'Sun', revenue: 0, orders: 0 }
         ];
 
-    // Popular items for BarChart: if empty, display placeholders
+    // Popular items: if empty, display placeholders
     const popularItems = data?.popularItems && data.popularItems.length > 0
         ? data.popularItems.map(item => ({
             name: item.name || 'Unknown',
-            sales: item.totalSold || 0
+            sales: item.totalSold || 0,
+            revenue: item.revenue || 0
         }))
         : [];
+
+    const maxSales = popularItems.length > 0
+        ? Math.max(...popularItems.map(item => item.sales), 1)
+        : 1;
 
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12 text-slate-900 dark:text-slate-100">
@@ -196,7 +205,7 @@ const DashboardHome = () => {
                         <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
                         QR Dine-In Ordering Ops
                     </h3>
-                    
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 sm:gap-3.5">
                         <div className="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl flex flex-col justify-between items-center min-h-[96px] text-center">
                             <p className="text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider h-7 flex items-center justify-center">Active Tables</p>
@@ -243,7 +252,7 @@ const DashboardHome = () => {
                         <span className="flex h-2 w-2 rounded-full bg-blue-500"></span>
                         Delivery Partner Ops
                     </h3>
-                    
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-4">
                         <div className="bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center">
                             <p className="text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Online Drivers</p>
@@ -305,29 +314,153 @@ const DashboardHome = () => {
                         </div>
                     </div>
 
-                    {/* Top Dishes Bar Chart */}
-                    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-slate-100 mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>Top Dishes</h3>
-                        <div className="h-72">
-                            {popularItems.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-slate-500">
-                                    <ShoppingBag size={40} className="mb-2 text-gray-300 dark:text-slate-600" />
-                                    <p className="text-sm font-semibold">No sales data available</p>
-                                    <p className="text-xs text-gray-400 dark:text-slate-500">Popular dishes will be ranked here by sales.</p>
+                    {/* Top Dishes Modern Card */}
+                    <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/15 via-orange-500/15 to-rose-500/15 text-orange-600 dark:text-orange-400 flex items-center justify-center border border-orange-500/20 shadow-xs">
+                                        <Flame size={18} className="animate-pulse" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                                            Top Dishes
+                                        </h3>
+                                        <p className="text-[11px] text-gray-400 dark:text-slate-500">Most ordered items by sales</p>
+                                    </div>
                                 </div>
-                            ) : (
-                                <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
-                                    <BarChart data={popularItems} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                                        <XAxis type="number" hide />
-                                        <YAxis type="category" dataKey="name" width={80} stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} />
-                                        <Tooltip
-                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.2)', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'Inter, sans-serif' }}
-                                            formatter={(val) => [val, 'Sold']}
-                                        />
-                                        <Bar dataKey="sales" fill="#F97316" radius={[0, 8, 8, 0]} barSize={18} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            )}
+                                
+                                <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg border border-gray-200 dark:border-slate-700">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTopDishesView('list')}
+                                            title="Ranked List View"
+                                            className={`px-2 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                                                topDishesView === 'list'
+                                                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
+                                                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                                            }`}
+                                        >
+                                            <ListOrdered size={12} />
+                                            <span>Rank</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTopDishesView('chart')}
+                                            title="Bar Chart View"
+                                            className={`px-2 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-all ${
+                                                topDishesView === 'chart'
+                                                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
+                                                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+                                            }`}
+                                        >
+                                            <BarChart2 size={12} />
+                                            <span>Bar</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="h-72">
+                                {popularItems.length === 0 ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-gray-400 dark:text-slate-500">
+                                        <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center mb-2.5 text-orange-400">
+                                            <UtensilsCrossed size={22} />
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-700 dark:text-slate-300">No sales data available</p>
+                                        <p className="text-xs text-gray-400 dark:text-slate-500 text-center max-w-[200px] mt-0.5">Popular dishes will be ranked here once orders are placed.</p>
+                                    </div>
+                                ) : topDishesView === 'list' ? (
+                                    <div className="h-full overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+                                        {popularItems.slice(0, 6).map((item, index) => {
+                                            const percent = Math.min(100, Math.max(12, Math.round((item.sales / maxSales) * 100)));
+                                            const rankBadges = [
+                                                'bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-xs ring-2 ring-amber-300/40',
+                                                'bg-gradient-to-br from-slate-300 to-slate-500 text-white shadow-xs ring-1 ring-slate-300/40',
+                                                'bg-gradient-to-br from-amber-700 to-amber-900 text-white shadow-xs ring-1 ring-amber-700/40'
+                                            ];
+                                            const rankBadge = rankBadges[index] || 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 font-bold';
+
+                                            return (
+                                                <div
+                                                    key={item.name + index}
+                                                    className="group p-2.5 rounded-xl bg-gray-50/60 dark:bg-slate-800/40 hover:bg-orange-50/40 dark:hover:bg-slate-800/80 border border-gray-100/80 dark:border-slate-800 transition-all"
+                                                >
+                                                    <div className="flex items-center justify-between gap-2.5 mb-1.5">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black shrink-0 ${rankBadge}`}>
+                                                                {index + 1}
+                                                            </span>
+                                                            <span className="text-xs sm:text-sm font-bold text-gray-800 dark:text-slate-100 capitalize truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                                                                {item.name}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            {item.revenue > 0 && (
+                                                                <span className="text-[11px] font-semibold text-gray-500 dark:text-slate-400">
+                                                                    ₹{item.revenue.toLocaleString()}
+                                                                </span>
+                                                            )}
+                                                            <span className="text-[11px] font-black px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 border border-orange-200/60 dark:border-orange-900/50 shadow-2xs">
+                                                                {item.sales} sold
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200/70 dark:bg-slate-700/60 rounded-full h-1.5 overflow-hidden">
+                                                        <div
+                                                            className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 transition-all duration-700 ease-out shadow-xs group-hover:brightness-110"
+                                                            style={{ width: `${percent}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
+                                        <BarChart data={popularItems} layout="vertical" margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#F59E0B" />
+                                                    <stop offset="60%" stopColor="#F97316" />
+                                                    <stop offset="100%" stopColor="#FB7185" />
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis type="number" hide />
+                                            <YAxis
+                                                type="category"
+                                                dataKey="name"
+                                                width={80}
+                                                stroke="#94a3b8"
+                                                fontSize={11}
+                                                fontWeight={600}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                tickFormatter={(v) => v.length > 9 ? `${v.substring(0, 9)}...` : v}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    borderRadius: '12px',
+                                                    border: 'none',
+                                                    boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+                                                    backgroundColor: '#0f172a',
+                                                    color: '#f8fafc',
+                                                    fontFamily: 'Inter, sans-serif',
+                                                    fontSize: '12px'
+                                                }}
+                                                formatter={(val) => [`${val} orders`, 'Volume Sold']}
+                                            />
+                                            <Bar
+                                                dataKey="sales"
+                                                fill="url(#barGradient)"
+                                                radius={[0, 8, 8, 0]}
+                                                barSize={14}
+                                            />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

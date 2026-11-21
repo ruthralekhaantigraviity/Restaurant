@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { sendTrialApprovedEmail, sendTrialRejectedEmail, sendTrialStartedEmail, sendManualFreezeEmail, sendManualUnfreezeEmail, sendSubscriptionSuccessEmail, sendWelcomeEmail } from '../utils/emailService.js';
 import { broadcastToRestaurant } from '../config/websocket.js';
 import Restaurant from '../models/Restaurant.js';
@@ -1097,10 +1098,26 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
             expiryDate.setDate(expiryDate.getDate() + 30);
         }
 
-        const restaurant = await Restaurant.create({
-            name: name.trim(),
+        const restaurantId = new mongoose.Types.ObjectId();
+        const userId = new mongoose.Types.ObjectId();
+
+        const user = await User.create({
+            _id: userId,
+            name: ownerName.trim(),
             email: cleanEmail,
+            password,
             phoneNumber: phoneNumber.trim(),
+            role: 'RestaurantAdmin',
+            restaurantId: restaurantId,
+            isActive: true
+        });
+
+        const restaurant = await Restaurant.create({
+            _id: restaurantId,
+            name: name.trim(),
+            contactEmail: cleanEmail,
+            phone: phoneNumber.trim(),
+            ownerId: user._id,
             approvalStatus: 'Approved',
             verificationStatus: 'Verified',
             isActive: true,
@@ -1120,19 +1137,6 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
                 price: selectedPlan === 'Enterprise' ? 199 : (selectedPlan === 'Pro' ? 99 : 49)
             }
         });
-
-        const user = await User.create({
-            name: ownerName.trim(),
-            email: cleanEmail,
-            password,
-            phoneNumber: phoneNumber.trim(),
-            role: 'RestaurantAdmin',
-            restaurantId: restaurant._id,
-            isActive: true
-        });
-
-        restaurant.ownerId = user._id;
-        await restaurant.save();
 
         await Branch.create({
             restaurantId: restaurant._id,

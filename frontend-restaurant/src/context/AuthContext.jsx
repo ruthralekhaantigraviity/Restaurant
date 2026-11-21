@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { getApiUrl, PROD_API_URL, isLocalEnvironment } from '../utils/axiosInstance';
 import { evaluateClientSubscriptionFreeze } from '../utils/subscriptionClient';
@@ -29,7 +29,7 @@ export const useAuth = () => {
 
 const api = axios.create({
     baseURL: getApiUrl(),
-    timeout: 30000,
+    timeout: 60000,
     withCredentials: true,
 });
 
@@ -92,7 +92,18 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        if (response?.headers && response.headers['x-refreshed-token']) {
+            const fresh = response.headers['x-refreshed-token'];
+            localStorage.setItem('token', fresh);
+            try {
+                const staff = JSON.parse(localStorage.getItem('restosys_staff_user') || '{}');
+                staff.token = fresh;
+                localStorage.setItem('restosys_staff_user', JSON.stringify(staff));
+            } catch (_) {}
+        }
+        return response;
+    },
     async (error) => {
         const config = error.config;
         const status = error.response ? error.response.status : 0;
@@ -366,14 +377,23 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
     }, []);
 
+    const fetchRestaurantRef = useRef(fetchRestaurant);
+    fetchRestaurantRef.current = fetchRestaurant;
+    const userRef = useRef(user);
+    userRef.current = user;
+
+    const userRestId = typeof user?.restaurantId === 'object' ? (user?.restaurantId?._id || user?.restaurantId?.id) : user?.restaurantId;
+    const userId = user?._id;
+    const userRole = user?.role;
+
     // Auto-refresh restaurant subscription data every 30s, on window focus, on server 402/403 freeze event, and live via WS
     useEffect(() => {
         const path = typeof window !== 'undefined' ? window.location.pathname : '';
         const isStaffRoute = isStaffPortalPath(path);
 
-        if (!isStaffRoute || !user || ['Customer', 'SuperAdmin', 'SupportAgent'].includes(user.role)) return;
+        if (!isStaffRoute || !userId || ['Customer', 'SuperAdmin', 'SupportAgent'].includes(userRole)) return;
 
-        const refresh = () => fetchRestaurant(user);
+        const refresh = () => fetchRestaurantRef.current(userRef.current);
         window.addEventListener('focus', refresh);
         window.addEventListener('subscription-frozen', refresh);
         const interval = setInterval(refresh, 30000);
@@ -383,19 +403,25 @@ export const AuthProvider = ({ children }) => {
         let isUnmounted = false;
 
         const connectSubWS = () => {
-            if (isUnmounted || !user?.restaurantId) return;
+            if (isUnmounted || !userRestId) return;
             try {
                 const wsURL = getWebSocketUrl(getApiUrl());
                 if (!wsURL) return; // Vercel serverless does not support WebSockets; periodic polling handles sync
                 ws = new WebSocket(wsURL);
                 ws.onopen = () => {
-                    const cleanRestId = typeof user.restaurantId === 'object' ? (user.restaurantId._id || user.restaurantId.id) : user.restaurantId;
-                    ws.send(JSON.stringify({
-                        type: 'register',
-                        token: user.token || localStorage.getItem('token') || undefined,
-                        restaurantId: cleanRestId,
-                        role: user.role,
-                    }));
+                    if (isUnmounted || !ws) return;
+                    const currentUser = userRef.current;
+                    const cleanRestId = typeof currentUser?.restaurantId === 'object'
+                        ? (currentUser.restaurantId._id || currentUser.restaurantId.id)
+                        : currentUser?.restaurantId;
+                    try {
+                        ws.send(JSON.stringify({
+                            type: 'register',
+                            token: currentUser?.token || localStorage.getItem('token') || undefined,
+                            restaurantId: cleanRestId,
+                            role: currentUser?.role,
+                        }));
+                    } catch (_) {}
                 };
                 ws.onmessage = (event) => {
                     try {
@@ -407,7 +433,7 @@ export const AuthProvider = ({ children }) => {
                                 try { localStorage.setItem('restosys_restaurant', JSON.stringify(updated)); } catch (_) { }
                                 return updated;
                             });
-                            fetchRestaurant(user);
+                            fetchRestaurantRef.current(userRef.current);
                         }
                     } catch (_) { }
                 };
@@ -422,8 +448,12 @@ export const AuthProvider = ({ children }) => {
 
         const handlePageHide = () => {
             if (reconnectTimer) clearTimeout(reconnectTimer);
-            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-                try { ws.close(1000, 'Page hidden'); } catch (_) { }
+            if (ws) {
+                if (ws.readyState === WebSocket.CONNECTING) {
+                    ws.onopen = () => { try { ws.close(1000, 'Page hidden'); } catch (_) {} };
+                } else if (ws.readyState === WebSocket.OPEN) {
+                    try { ws.close(1000, 'Page hidden'); } catch (_) {}
+                }
             }
         };
 
@@ -438,14 +468,20 @@ export const AuthProvider = ({ children }) => {
             clearInterval(interval);
             if (reconnectTimer) clearTimeout(reconnectTimer);
             if (ws) {
-                ws.onopen = null;
                 ws.onmessage = null;
                 ws.onerror = null;
                 ws.onclose = null;
-                try { ws.close(1000, 'Unmount'); } catch (_) { }
+                if (ws.readyState === WebSocket.CONNECTING) {
+                    // Prevent "WebSocket is closed before the connection is established" by waiting for open before closing
+                    ws.onopen = () => {
+                        try { ws.close(1000, 'Unmount'); } catch (_) {}
+                    };
+                } else if (ws.readyState === WebSocket.OPEN) {
+                    try { ws.close(1000, 'Unmount'); } catch (_) {}
+                }
             }
         };
-    }, [user, fetchRestaurant]);
+    }, [userId, userRestId, userRole]);
 
     const subscriptionState = useMemo(() => evaluateClientSubscriptionFreeze(user, restaurant), [user, restaurant]);
 

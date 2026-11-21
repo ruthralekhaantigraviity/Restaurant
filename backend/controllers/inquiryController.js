@@ -1,4 +1,6 @@
 import Inquiry from '../models/Inquiry.js';
+import User from '../models/User.js';
+import Restaurant from '../models/Restaurant.js';
 
 // @desc    Create new public inquiry
 // @route   POST /api/inquiries
@@ -48,7 +50,26 @@ export const createInquiry = async (req, res) => {
 // @access  Private/SuperAdmin
 export const getInquiries = async (req, res) => {
     try {
-        const inquiries = await Inquiry.find().sort({ createdAt: -1 });
+        const inquiries = await Inquiry.find()
+            .populate('customerId', 'name email phoneNumber phone')
+            .populate('restaurantId', 'name phone address')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        for (const inq of inquiries) {
+            if (!inq.phone || inq.phone === 'N/A' || inq.phone === 'Not Provided') {
+                const foundPhone = inq.customerId?.phoneNumber || inq.customerId?.phone || inq.restaurantId?.phone;
+                if (foundPhone) {
+                    inq.phone = foundPhone;
+                } else if (inq.email) {
+                    const u = await User.findOne({ email: inq.email.toLowerCase().trim() }).select('phoneNumber phone').lean();
+                    if (u?.phoneNumber || u?.phone) {
+                        inq.phone = u.phoneNumber || u.phone;
+                    }
+                }
+            }
+        }
+
         res.json(inquiries);
     } catch (error) {
         res.status(500).json({ message: error.message || 'Server Error' });

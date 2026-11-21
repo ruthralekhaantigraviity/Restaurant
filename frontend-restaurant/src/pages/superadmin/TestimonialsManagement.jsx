@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../utils/axiosInstance';
 import {
     MessageSquareQuote, Star, CheckCircle2, XCircle, Clock, AlertCircle,
-    Trash2, Eye, Search, Filter, RefreshCw, Check, X, ShieldAlert
+    Trash2, Eye, Search, Filter, RefreshCw, Check, X, ShieldAlert, Sparkles, User
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -11,22 +11,31 @@ import ConfirmModal from '../../components/ConfirmModal';
 const TestimonialsManagement = () => {
     const { api } = useAuth();
 
+    // Section switcher: 'customer' | 'partner'
+    const [activeSection, setActiveSection] = useState('customer');
+
+    // Partner Testimonials state
     const [testimonials, setTestimonials] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Customer Reviews state
+    const [customerReviews, setCustomerReviews] = useState([]);
+    const [customerLoading, setCustomerLoading] = useState(true);
+
     const [statusFilter, setStatusFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
     // Modal state for reject reason or card preview
-    const [activeActionModal, setActiveActionModal] = useState(null); // { type: 'reject' | 'preview', item }
+    const [activeActionModal, setActiveActionModal] = useState(null); // { type: 'reject' | 'preview', item, section }
     const [rejectionReason, setRejectionReason] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
-    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null); // { id, section }
 
     const fetchTestimonials = async () => {
         try {
             setLoading(true);
             const res = await api.get('/testimonials/admin/all', {
-                params: { status: statusFilter }
+                params: { status: 'all' }
             });
             if (res.data?.success) {
                 setTestimonials(res.data.data || []);
@@ -39,26 +48,28 @@ const TestimonialsManagement = () => {
         }
     };
 
-    useEffect(() => {
-        fetchTestimonials();
-    }, [statusFilter]);
-
-    const handleUpdateRating = async (id, newRating) => {
+    const fetchCustomerReviews = async () => {
         try {
-            const item = testimonials.find(t => t._id === id);
-            const res = await api.put(`/testimonials/admin/${id}/status`, {
-                status: item?.status || 'Approved',
-                rating: newRating
+            setCustomerLoading(true);
+            const res = await api.get('/customer-reviews/admin/all', {
+                params: { status: 'all' }
             });
             if (res.data?.success) {
-                toast.success(`Rating updated to ${newRating} stars!`);
-                fetchTestimonials();
+                setCustomerReviews(res.data.data || []);
             }
-        } catch (e) {
-            toast.error('Failed to update rating');
+        } catch (error) {
+            console.error('Error fetching customer reviews:', error);
+        } finally {
+            setCustomerLoading(false);
         }
     };
 
+    useEffect(() => {
+        fetchTestimonials();
+        fetchCustomerReviews();
+    }, []);
+
+    // Partner Testimonial status update
     const handleUpdateStatus = async (id, status, reason = '') => {
         try {
             setActionLoading(true);
@@ -81,26 +92,74 @@ const TestimonialsManagement = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        setConfirmDeleteId(id);
+    // Customer Review status update
+    const handleUpdateCustomerReviewStatus = async (id, status, reason = '') => {
+        try {
+            setActionLoading(true);
+            const res = await api.put(`/customer-reviews/admin/${id}/status`, {
+                status,
+                rejectionReason: reason
+            });
+
+            if (res.data?.success) {
+                toast.success(res.data.message || `Customer review marked as ${status}.`);
+                setActiveActionModal(null);
+                setRejectionReason('');
+                fetchCustomerReviews();
+            }
+        } catch (error) {
+            console.error('Failed to update customer review status:', error);
+            toast.error(error.response?.data?.message || 'Failed to update review status.');
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const handleConfirmDelete = async () => {
-        if (!confirmDeleteId) return;
-        const id = confirmDeleteId;
+        if (!confirmDelete) return;
+        const { id, section } = confirmDelete;
         try {
-            const res = await api.delete(`/testimonials/admin/${id}`);
-            if (res.data?.success) {
-                toast.success('Testimonial deleted successfully.');
-                fetchTestimonials();
+            if (section === 'customer') {
+                const res = await api.delete(`/customer-reviews/${id}`);
+                if (res.data?.success) {
+                    toast.success('Customer review deleted successfully.');
+                    fetchCustomerReviews();
+                }
+            } else {
+                const res = await api.delete(`/testimonials/admin/${id}`);
+                if (res.data?.success) {
+                    toast.success('Testimonial deleted successfully.');
+                    fetchTestimonials();
+                }
             }
         } catch (error) {
             console.error('Delete error:', error);
             toast.error(error.response?.data?.message || 'Failed to delete.');
+        } finally {
+            setConfirmDelete(null);
         }
     };
 
+    // Counts
+    const partnerCounts = {
+        all: testimonials.length,
+        Pending: testimonials.filter(t => t.status === 'Pending').length,
+        Approved: testimonials.filter(t => t.status === 'Approved').length,
+        Rejected: testimonials.filter(t => t.status === 'Rejected').length
+    };
+
+    const customerCounts = {
+        all: customerReviews.length,
+        Pending: customerReviews.filter(r => r.status === 'Pending').length,
+        Approved: customerReviews.filter(r => r.status === 'Approved').length,
+        Rejected: customerReviews.filter(r => r.status === 'Rejected').length
+    };
+
+    const currentCounts = activeSection === 'customer' ? customerCounts : partnerCounts;
+
+    // Filtered lists
     const filteredTestimonials = testimonials.filter(t => {
+        if (statusFilter !== 'all' && t.status !== statusFilter) return false;
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (
@@ -111,12 +170,16 @@ const TestimonialsManagement = () => {
         );
     });
 
-    const counts = {
-        all: testimonials.length,
-        Pending: testimonials.filter(t => t.status === 'Pending').length,
-        Approved: testimonials.filter(t => t.status === 'Approved').length,
-        Rejected: testimonials.filter(t => t.status === 'Rejected').length
-    };
+    const filteredCustomerReviews = customerReviews.filter(r => {
+        if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            r.customerName?.toLowerCase().includes(q) ||
+            r.customerEmail?.toLowerCase().includes(q) ||
+            r.reviewText?.toLowerCase().includes(q)
+        );
+    });
 
     const formatAvatarUrl = (avatar) => {
         if (!avatar) return null;
@@ -135,25 +198,60 @@ const TestimonialsManagement = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 flex items-center justify-center border border-purple-100 dark:border-purple-900/40">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#FF5A1F] flex items-center justify-center border border-orange-100 dark:border-orange-900/40">
                         <MessageSquareQuote size={22} />
                     </div>
                     <div>
                         <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                            Partner Testimonials Moderation
+                            Reviews & Testimonials Moderation
                         </h1>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Review and publish authentic testimonials from registered restaurant owners.
+                            Unapproved reviews remain strictly hidden from landing pages until reviewed and approved here.
                         </p>
                     </div>
                 </div>
 
                 <button
-                    onClick={fetchTestimonials}
+                    onClick={() => { fetchTestimonials(); fetchCustomerReviews(); }}
                     className="self-start sm:self-auto px-4 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition-colors inline-flex items-center gap-2 cursor-pointer"
                 >
-                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                    <RefreshCw size={14} className={loading || customerLoading ? 'animate-spin' : ''} />
                     <span>Refresh</span>
+                </button>
+            </div>
+
+            {/* Section Switcher: Customer Reviews vs Partner Testimonials */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <button
+                    onClick={() => { setActiveSection('customer'); setStatusFilter('all'); }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                        activeSection === 'customer'
+                            ? 'bg-[#FF5A1F] text-white shadow-md shadow-orange-500/20'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+                    }`}
+                >
+                    <Sparkles size={14} />
+                    <span>Customer Reviews ({customerCounts.all})</span>
+                    {customerCounts.Pending > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-400 text-amber-950 font-black">
+                            {customerCounts.Pending} Pending
+                        </span>
+                    )}
+                </button>
+                <button
+                    onClick={() => { setActiveSection('partner'); setStatusFilter('all'); }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                        activeSection === 'partner'
+                            ? 'bg-[#FF5A1F] text-white shadow-md shadow-orange-500/20'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50'
+                    }`}
+                >
+                    <span>🏢 Partner Testimonials ({partnerCounts.all})</span>
+                    {partnerCounts.Pending > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-400 text-amber-950 font-black">
+                            {partnerCounts.Pending} Pending
+                        </span>
+                    )}
                 </button>
             </div>
 
@@ -161,16 +259,16 @@ const TestimonialsManagement = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                     {[
-                        { key: 'all', label: 'All Reviews' },
-                        { key: 'Pending', label: 'Pending Review', count: counts.Pending, alert: counts.Pending > 0 },
-                        { key: 'Approved', label: 'Approved (Live)', count: counts.Approved },
-                        { key: 'Rejected', label: 'Rejected', count: counts.Rejected }
+                        { key: 'all', label: 'All Reviews', count: currentCounts.all },
+                        { key: 'Pending', label: 'Pending Review', count: currentCounts.Pending, alert: currentCounts.Pending > 0 },
+                        { key: 'Approved', label: 'Approved (Live on Landing)', count: currentCounts.Approved },
+                        { key: 'Rejected', label: 'Rejected', count: currentCounts.Rejected }
                     ].map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => setStatusFilter(tab.key)}
                             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap inline-flex items-center gap-2 cursor-pointer ${statusFilter === tab.key
-                                ? 'bg-[#FF5A1F] text-white shadow-md shadow-orange-500/20'
+                                ? 'bg-slate-900 text-white shadow-sm'
                                 : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }`}
                         >
@@ -191,7 +289,7 @@ const TestimonialsManagement = () => {
                     <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search testimonials..."
+                        placeholder={activeSection === 'customer' ? "Search customer reviews..." : "Search partner testimonials..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-9 pr-3.5 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#FF5A1F]/30 focus:border-[#FF5A1F] transition-all outline-none"
@@ -199,152 +297,293 @@ const TestimonialsManagement = () => {
                 </div>
             </div>
 
-            {/* Testimonials List / Table */}
-            {loading ? (
-                <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-                    <div className="w-8 h-8 border-3 border-[#FF5A1F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-xs font-semibold text-slate-500">Loading submitted testimonials...</p>
-                </div>
-            ) : filteredTestimonials.length === 0 ? (
-                <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
-                        <MessageSquareQuote size={24} />
+            {/* Content List */}
+            {activeSection === 'customer' ? (
+                customerLoading ? (
+                    <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div className="w-8 h-8 border-3 border-[#FF5A1F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                        <p className="text-xs font-semibold text-slate-500">Loading customer reviews...</p>
                     </div>
-                    <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">
-                        No testimonials found
-                    </h3>
-                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                        {statusFilter === 'Pending'
-                            ? 'No testimonials pending approval at this time.'
-                            : 'No partner testimonials match your current filter.'}
-                    </p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {filteredTestimonials.map(item => (
-                        <div
-                            key={item._id}
-                            className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-slate-300 dark:hover:border-slate-700"
-                        >
-                            {/* Left: Author & Content */}
-                            <div className="flex items-start gap-4 flex-1 min-w-0">
-                                {formatAvatarUrl(item.avatar) ? (
-                                    <img
-                                        src={formatAvatarUrl(item.avatar)}
-                                        alt={item.ownerName}
-                                        className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                                    />
-                                ) : (
-                                    <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold text-base flex items-center justify-center border-2 border-purple-200 dark:border-purple-800 shrink-0">
-                                        {item.ownerName ? item.ownerName.trim().charAt(0).toUpperCase() : 'O'}
-                                    </div>
-                                )}
-
-                                <div className="space-y-1.5 flex-1 min-w-0">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <h3 className="font-black text-sm text-slate-900 dark:text-white">
-                                            {item.ownerName}
-                                        </h3>
-                                        <span className="text-xs text-slate-400 font-medium">
-                                            • {item.restaurantName} ({item.location})
-                                        </span>
-
-                                        {/* Status Tag */}
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.status === 'Approved'
-                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                            : item.status === 'Pending'
-                                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                                : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                            }`}>
-                                            {item.status}
-                                        </span>
-                                    </div>
-
-                                    {/* Star Rating */}
-                                    <div className="flex items-center gap-1 text-[#FF5A0A]">
-                                        {[...Array(item.rating || 5)].map((_, i) => (
-                                            <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
-                                        ))}
-                                        <span className="text-[11px] text-slate-400 font-semibold ml-1">
-                                            ({item.rating || 5}/5)
-                                        </span>
-                                    </div>
-
-                                    {/* Quote Text */}
-                                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                                        "{item.quote}"
-                                    </p>
-
-                                    {item.status === 'Rejected' && item.rejectionReason && (
-                                        <div className="text-[11px] text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 p-2 rounded-lg mt-2">
-                                            <strong>Rejection reason:</strong> {item.rejectionReason}
+                ) : filteredCustomerReviews.length === 0 ? (
+                    <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <MessageSquareQuote size={24} />
+                        </div>
+                        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                            No customer reviews found
+                        </h3>
+                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                            {statusFilter === 'Pending'
+                                ? 'No customer reviews pending approval at this time.'
+                                : 'No customer reviews match your current filter.'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredCustomerReviews.map(item => (
+                            <div
+                                key={item._id}
+                                className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+                            >
+                                {/* Author & Content */}
+                                <div className="flex items-start gap-4 flex-1 min-w-0">
+                                    {formatAvatarUrl(item.avatar) ? (
+                                        <img
+                                            src={formatAvatarUrl(item.avatar)}
+                                            alt={item.customerName}
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#FF5A1F] font-bold text-base flex items-center justify-center border-2 border-orange-200 dark:border-orange-800 shrink-0">
+                                            {item.customerName ? item.customerName.trim().charAt(0).toUpperCase() : 'C'}
                                         </div>
                                     )}
 
-                                    <div className="text-[10px] text-slate-400 pt-1">
-                                        Submitted on: {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                        {item.approvedAt && ` • Approved on: ${new Date(item.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                                    <div className="space-y-1.5 flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="font-black text-sm text-slate-900 dark:text-white">
+                                                {item.customerName}
+                                            </h3>
+                                            {item.customerEmail && (
+                                                <span className="text-xs text-slate-400 font-medium">
+                                                    • {item.customerEmail}
+                                                </span>
+                                            )}
+
+                                            {/* Status Tag */}
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.status === 'Approved'
+                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                : item.status === 'Pending'
+                                                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                }`}>
+                                                {item.status === 'Approved' ? 'Live on Landing Page' : item.status}
+                                            </span>
+                                        </div>
+
+                                        {/* Star Rating */}
+                                        <div className="flex items-center gap-1 text-[#FF5A0A]">
+                                            {[...Array(item.rating || 5)].map((_, i) => (
+                                                <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
+                                            ))}
+                                            <span className="text-[11px] text-slate-400 font-semibold ml-1">
+                                                ({item.rating || 5}/5)
+                                            </span>
+                                        </div>
+
+                                        {/* Quote Text */}
+                                        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                                            "{item.reviewText}"
+                                        </p>
+
+                                        {item.status === 'Rejected' && item.rejectionReason && (
+                                            <div className="text-[11px] text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 p-2 rounded-lg mt-2">
+                                                <strong>Rejection reason:</strong> {item.rejectionReason}
+                                            </div>
+                                        )}
+
+                                        <div className="text-[10px] text-slate-400 pt-1">
+                                            Submitted on: {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            {item.approvedAt && ` • Approved on: ${new Date(item.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Moderation Actions */}
+                                <div className="flex flex-wrap md:flex-col items-center md:items-end gap-2 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                                    {item.status !== 'Approved' && (
+                                        <button
+                                            onClick={() => handleUpdateCustomerReviewStatus(item._id, 'Approved')}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Check size={14} /> Approve &amp; Publish to Landing
+                                        </button>
+                                    )}
+
+                                    {item.status !== 'Rejected' && (
+                                        <button
+                                            onClick={() => {
+                                                setActiveActionModal({ type: 'reject', item, section: 'customer' });
+                                                setRejectionReason('');
+                                            }}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <X size={14} /> Reject
+                                        </button>
+                                    )}
+
+                                    {item.status === 'Approved' && (
+                                        <button
+                                            onClick={() => handleUpdateCustomerReviewStatus(item._id, 'Pending')}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Clock size={14} /> Revert to Pending
+                                        </button>
+                                    )}
+
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => setConfirmDelete({ id: item._id, section: 'customer' })}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer"
+                                            title="Delete Review"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
                                     </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                )
+            ) : (
+                /* Partner Testimonials Section */
+                loading ? (
+                    <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div className="w-8 h-8 border-3 border-[#FF5A1F] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                        <p className="text-xs font-semibold text-slate-500">Loading submitted testimonials...</p>
+                    </div>
+                ) : filteredTestimonials.length === 0 ? (
+                    <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <MessageSquareQuote size={24} />
+                        </div>
+                        <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">
+                            No testimonials found
+                        </h3>
+                        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                            {statusFilter === 'Pending'
+                                ? 'No testimonials pending approval at this time.'
+                                : 'No partner testimonials match your current filter.'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredTestimonials.map(item => (
+                            <div
+                                key={item._id}
+                                className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+                            >
+                                {/* Author & Content */}
+                                <div className="flex items-start gap-4 flex-1 min-w-0">
+                                    {formatAvatarUrl(item.avatar) ? (
+                                        <img
+                                            src={formatAvatarUrl(item.avatar)}
+                                            alt={item.ownerName}
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold text-base flex items-center justify-center border-2 border-purple-200 dark:border-purple-800 shrink-0">
+                                            {item.ownerName ? item.ownerName.trim().charAt(0).toUpperCase() : 'O'}
+                                        </div>
+                                    )}
 
-                            {/* Right: Moderation Actions */}
-                            <div className="flex flex-wrap md:flex-col items-center md:items-end gap-2 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                                    <div className="space-y-1.5 flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="font-black text-sm text-slate-900 dark:text-white">
+                                                {item.ownerName}
+                                            </h3>
+                                            <span className="text-xs text-slate-400 font-medium">
+                                                • {item.restaurantName} ({item.location})
+                                            </span>
 
-                                {item.status !== 'Approved' && (
-                                    <button
-                                        onClick={() => handleUpdateStatus(item._id, 'Approved')}
-                                        disabled={actionLoading}
-                                        className="px-3.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
-                                    >
-                                        <Check size={14} /> Approve &amp; Publish
-                                    </button>
-                                )}
+                                            {/* Status Tag */}
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.status === 'Approved'
+                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                : item.status === 'Pending'
+                                                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                }`}>
+                                                {item.status}
+                                            </span>
+                                        </div>
 
-                                {item.status !== 'Rejected' && (
-                                    <button
-                                        onClick={() => {
-                                            setActiveActionModal({ type: 'reject', item });
-                                            setRejectionReason('');
-                                        }}
-                                        disabled={actionLoading}
-                                        className="px-3.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
-                                    >
-                                        <X size={14} /> Reject
-                                    </button>
-                                )}
+                                        {/* Star Rating */}
+                                        <div className="flex items-center gap-1 text-[#FF5A0A]">
+                                            {[...Array(item.rating || 5)].map((_, i) => (
+                                                <Star key={i} size={13} fill="currentColor" strokeWidth={0} />
+                                            ))}
+                                            <span className="text-[11px] text-slate-400 font-semibold ml-1">
+                                                ({item.rating || 5}/5)
+                                            </span>
+                                        </div>
 
-                                {item.status === 'Approved' && (
-                                    <button
-                                        onClick={() => handleUpdateStatus(item._id, 'Pending')}
-                                        disabled={actionLoading}
-                                        className="px-3.5 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
-                                    >
-                                        <Clock size={14} /> Revert to Pending
-                                    </button>
-                                )}
+                                        {/* Quote Text */}
+                                        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                                            "{item.quote}"
+                                        </p>
 
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        onClick={() => setActiveActionModal({ type: 'preview', item })}
-                                        className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                                        title="Preview Card"
-                                    >
-                                        <Eye size={15} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(item._id)}
-                                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer"
-                                        title="Delete Permanently"
-                                    >
-                                        <Trash2 size={15} />
-                                    </button>
+                                        {item.status === 'Rejected' && item.rejectionReason && (
+                                            <div className="text-[11px] text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 p-2 rounded-lg mt-2">
+                                                <strong>Rejection reason:</strong> {item.rejectionReason}
+                                            </div>
+                                        )}
+
+                                        <div className="text-[10px] text-slate-400 pt-1">
+                                            Submitted on: {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            {item.approvedAt && ` • Approved on: ${new Date(item.approvedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                                        </div>
+                                    </div>
                                 </div>
 
+                                {/* Moderation Actions */}
+                                <div className="flex flex-wrap md:flex-col items-center md:items-end gap-2 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                                    {item.status !== 'Approved' && (
+                                        <button
+                                            onClick={() => handleUpdateStatus(item._id, 'Approved')}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Check size={14} /> Approve &amp; Publish
+                                        </button>
+                                    )}
+
+                                    {item.status !== 'Rejected' && (
+                                        <button
+                                            onClick={() => {
+                                                setActiveActionModal({ type: 'reject', item, section: 'partner' });
+                                                setRejectionReason('');
+                                            }}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <X size={14} /> Reject
+                                        </button>
+                                    )}
+
+                                    {item.status === 'Approved' && (
+                                        <button
+                                            onClick={() => handleUpdateStatus(item._id, 'Pending')}
+                                            disabled={actionLoading}
+                                            className="px-3.5 py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                        >
+                                            <Clock size={14} /> Revert to Pending
+                                        </button>
+                                    )}
+
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => setActiveActionModal({ type: 'preview', item, section: 'partner' })}
+                                            className="p-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                            title="Preview Card"
+                                        >
+                                            <Eye size={15} />
+                                        </button>
+                                        <button
+                                            onClick={() => setConfirmDelete({ id: item._id, section: 'partner' })}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors cursor-pointer"
+                                            title="Delete Permanently"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )
             )}
 
             {/* Reject Reason Modal */}
@@ -354,7 +593,7 @@ const TestimonialsManagement = () => {
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                             <h3 className="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
                                 <ShieldAlert size={18} className="text-rose-600" />
-                                Reject Testimonial
+                                Reject {activeActionModal.section === 'customer' ? 'Customer Review' : 'Testimonial'}
                             </h3>
                             <button
                                 type="button"
@@ -366,17 +605,17 @@ const TestimonialsManagement = () => {
                         </div>
 
                         <p className="text-xs text-slate-500">
-                            Provide feedback for <strong>{activeActionModal.item.ownerName}</strong> ({activeActionModal.item.restaurantName}). This will be visible on their dashboard.
+                            Provide rejection notes for <strong>{activeActionModal.item.customerName || activeActionModal.item.ownerName}</strong>.
                         </p>
 
                         <div>
                             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                                Reason for Rejection / Suggested Revision
+                                Reason for Rejection
                             </label>
                             <textarea
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
-                                placeholder="e.g. Please clarify your restaurant location or add more details about your specific results with the software..."
+                                placeholder="e.g. Inappropriate language, off-topic content, unverified claims..."
                                 rows={3}
                                 className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all outline-none resize-none"
                             />
@@ -392,7 +631,13 @@ const TestimonialsManagement = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => handleUpdateStatus(activeActionModal.item._id, 'Rejected', rejectionReason)}
+                                onClick={() => {
+                                    if (activeActionModal.section === 'customer') {
+                                        handleUpdateCustomerReviewStatus(activeActionModal.item._id, 'Rejected', rejectionReason);
+                                    } else {
+                                        handleUpdateStatus(activeActionModal.item._id, 'Rejected', rejectionReason);
+                                    }
+                                }}
                                 disabled={actionLoading}
                                 className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md transition-all cursor-pointer"
                             >
@@ -420,25 +665,24 @@ const TestimonialsManagement = () => {
                             </button>
                         </div>
 
-                        {/* Card matching landing page */}
                         <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-sm text-left flex flex-col justify-between space-y-4">
                             <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed italic">
-                                "{activeActionModal.item.quote}"
+                                "{activeActionModal.item.quote || activeActionModal.item.reviewText}"
                             </p>
 
                             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <img
-                                        src={formatAvatarUrl(activeActionModal.item.avatar)}
-                                        alt={activeActionModal.item.ownerName}
+                                        src={formatAvatarUrl(activeActionModal.item.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(activeActionModal.item.customerName || activeActionModal.item.ownerName || 'User')}&background=FF5A1F&color=fff`}
+                                        alt={activeActionModal.item.customerName || activeActionModal.item.ownerName}
                                         className="w-10 h-10 rounded-full object-cover border border-slate-200"
                                     />
                                     <div>
                                         <h4 className="text-xs font-extrabold text-slate-900 leading-tight">
-                                            {activeActionModal.item.ownerName}
+                                            {activeActionModal.item.customerName || activeActionModal.item.ownerName}
                                         </h4>
                                         <p className="text-[11px] text-slate-400 font-medium">
-                                            {activeActionModal.item.restaurantName}, {activeActionModal.item.location}
+                                            {activeActionModal.item.restaurantName || activeActionModal.item.customerEmail || 'Customer'}
                                         </p>
                                     </div>
                                 </div>
@@ -465,12 +709,12 @@ const TestimonialsManagement = () => {
             )}
 
             <ConfirmModal
-                isOpen={Boolean(confirmDeleteId)}
-                onClose={() => setConfirmDeleteId(null)}
+                isOpen={Boolean(confirmDelete)}
+                onClose={() => setConfirmDelete(null)}
                 onConfirm={handleConfirmDelete}
-                title="Delete Testimonial"
-                message="Are you sure you want to permanently delete this testimonial?"
-                confirmText="Delete Testimonial"
+                title={confirmDelete?.section === 'customer' ? 'Delete Customer Review' : 'Delete Testimonial'}
+                message="Are you sure you want to permanently delete this entry?"
+                confirmText="Delete Permanently"
                 isDestructive={true}
             />
         </div>

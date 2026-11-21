@@ -92,42 +92,42 @@ const CommissionManagement = () => {
             </div>
 
             {/* Metrics cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
-                        <PercentCircle size={28} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-blue-50 text-blue-600 shrink-0">
+                        <PercentCircle size={22} />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Average Commission Rate</p>
-                        <h3 className="text-2xl font-black text-gray-900">{averageRate}%</h3>
+                        <p className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Average Commission Rate</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-gray-900">{averageRate}%</h3>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-green-50 text-green-600 shrink-0">
-                        <Award size={28} />
+                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-green-50 text-green-600 shrink-0">
+                        <Award size={22} />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Commission Revenue</p>
-                        <h3 className="text-2xl font-black text-gray-900">₹{totalCommissionEarned.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
+                        <p className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Commission Revenue</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-gray-900">₹{totalCommissionEarned.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-purple-50 text-purple-600 shrink-0">
-                        <Percent size={28} />
+                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-50 text-purple-600 shrink-0">
+                        <Percent size={22} />
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Active Restaurants</p>
-                        <h3 className="text-2xl font-black text-gray-900">{restaurants.length}</h3>
+                        <p className="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Active Restaurants</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-gray-900">{restaurants.length}</h3>
                     </div>
                 </div>
             </div>
 
             {/* Main Content Table */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
-                    <h3 className="font-bold text-gray-900 text-lg">Restaurant Commission Rates</h3>
+                <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+                    <h3 className="font-bold text-gray-900 text-base sm:text-lg">Restaurant Commission Rates</h3>
                     <div className="relative max-w-md w-full">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -141,42 +141,42 @@ const CommissionManagement = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="p-5 font-bold">Restaurant</th>
-                                <th className="p-5 font-bold">Owner Email</th>
-                                <th className="p-5 font-bold">Subscription Plan</th>
-                                <th className="p-5 font-bold">Commission Rate</th>
-                                <th className="p-5 font-bold text-right">Actions</th>
+                                <th className="p-3.5 sm:p-4 font-bold w-[28%]">Restaurant</th>
+                                <th className="p-3.5 sm:p-4 font-bold w-[26%]">Owner Email</th>
+                                <th className="p-3.5 sm:p-4 font-bold w-[18%]">Subscription Plan</th>
+                                <th className="p-3.5 sm:p-4 font-bold w-[14%]">Commission Rate</th>
+                                <th className="p-3.5 sm:p-4 font-bold text-right w-[14%]">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {filteredRestaurants.map(restaurant => (
                                 <tr key={restaurant._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                    <td className="p-5">
+                                    <td className="p-3.5 sm:p-4 align-middle">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                            <div className="w-9 h-9 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                                 {restaurant.logo ? (
                                                     <img src={restaurant.logo} alt={restaurant.name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-base">
+                                                    <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-sm">
                                                         {restaurant.name.charAt(0)}
                                                     </div>
                                                 )}
                                             </div>
-                                            <span className="font-bold text-gray-900">{restaurant.name}</span>
+                                            <span className="font-bold text-gray-900 truncate">{restaurant.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-5 text-gray-500 font-medium">
+                                    <td className="p-3.5 sm:p-4 align-middle text-gray-500 font-medium truncate">
                                         {restaurant.ownerId?.email || 'N/A'}
                                     </td>
-                                    <td className="p-5">
+                                    <td className="p-3.5 sm:p-4 align-middle whitespace-nowrap">
                                         <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-lg border border-purple-100">
                                             {restaurant.subscription?.plan || 'N/A'}
                                         </span>
                                     </td>
-                                    <td className="p-5">
+                                    <td className="p-3.5 sm:p-4 align-middle whitespace-nowrap">
                                         {editingId === restaurant._id ? (
                                             <div className="flex items-center gap-2">
                                                 <input
@@ -195,7 +195,7 @@ const CommissionManagement = () => {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="p-5 text-right whitespace-nowrap">
+                                    <td className="p-3.5 sm:p-4 align-middle text-right whitespace-nowrap">
                                         {editingId === restaurant._id ? (
                                             <div className="flex justify-end gap-2">
                                                 <button 

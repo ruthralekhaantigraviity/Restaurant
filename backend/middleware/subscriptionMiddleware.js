@@ -2,6 +2,13 @@ import Restaurant from '../models/Restaurant.js';
 import Branch from '../models/Branch.js';
 import { evaluateSubscriptionAccess } from '../utils/subscriptionHelper.js';
 
+// Fast in-memory cache for subscription access verdicts (60s TTL)
+const verdictCache = new Map();
+
+export const invalidateSubscriptionCache = (restaurantId) => {
+    if (restaurantId) verdictCache.delete(String(restaurantId));
+};
+
 /**
  * Middleware to strictly enforce subscription status and dashboard freeze.
  * Must run AFTER `protect` so `req.user` is populated.
@@ -43,14 +50,25 @@ export const checkSubscriptionAccess = async (req, res, next) => {
             return next();
         }
 
-        const restaurant = req.restaurant || await Restaurant.findById(restaurantId);
+        const restKey = String(restaurantId);
+        const cached = verdictCache.get(restKey);
+        if (cached && (Date.now() - cached.timestamp < 60000)) {
+            if (cached.verdict.isFrozen) {
+                return res.status(403).json(cached.verdict);
+            }
+            return next();
+        }
+
+        const restaurant = req.restaurant || await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages').lean();
         if (!restaurant) {
             return next();
         }
 
         req.restaurant = restaurant;
 
-        const verdict = await evaluateSubscriptionAccess(restaurant, { notifyOnExpire: true });
+        const verdict = await evaluateSubscriptionAccess(restaurant, { notifyOnExpire: false });
+        verdictCache.set(restKey, { verdict, timestamp: Date.now() });
+
         if (verdict.isFrozen) {
             return res.status(403).json(verdict);
         }

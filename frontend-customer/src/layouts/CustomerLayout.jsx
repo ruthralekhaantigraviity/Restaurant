@@ -32,7 +32,7 @@ const CustomerLayout = () => {
     const isNative = typeof window !== 'undefined' && (Capacitor.isNativePlatform() || window.Capacitor?.isNativePlatform?.());
 
     // Current section title for top header breadcrumb
-    const currentTab = new URLSearchParams(location.search).get('tab') || 'overview';
+    const currentTab = new URLSearchParams(location.search).get('tab') || 'profile';
     const activeSectionTitle = location.pathname.startsWith('/profile') || location.pathname.startsWith('/dashboard')
         ? (CUSTOMER_DASHBOARD_TABS.find(t => t.id === currentTab)?.name || 'Dashboard')
         : location.pathname.startsWith('/menu')
@@ -365,7 +365,7 @@ const CustomerLayout = () => {
                 </Link>
             </div>
 
-            {!isLandingPage && (
+            {!isLandingPage && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/dashboard') && (
                 <footer className="bg-slate-950 text-slate-300 py-12 border-t border-slate-800">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div className="space-y-3.5">
@@ -422,12 +422,31 @@ const CustomerLayout = () => {
                         <div>
                             <h4 className="text-xs font-bold text-white mb-3.5 tracking-wider uppercase">Download Our App</h4>
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                <div className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition-colors">
+                                <a 
+                                    href="https://play.google.com/store" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer hover:bg-slate-700 transition-colors shadow-2xs"
+                                >
+                                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3.609 1.814L13.793 12 3.61 22.186c-.305-.205-.5-.544-.5-.956V2.77c0-.412.195-.751.5-.956z" fill="#00C1A6"/>
+                                        <path d="M14.847 13.054l2.585 2.586-11.75 6.67 9.165-9.256z" fill="#FF3333"/>
+                                        <path d="M14.847 10.946L5.682 1.69l11.75 6.67-2.585 2.586z" fill="#0086F0"/>
+                                        <path d="M17.432 12l2.07 1.176c.72.408.72 1.076 0 1.485L17.432 15.837 15.54 13.882 17.432 12z" fill="#FFBA00"/>
+                                    </svg>
                                     <span>Google Play</span>
-                                </div>
-                                <div className="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-slate-700 transition-colors">
+                                </a>
+                                <a 
+                                    href="https://www.apple.com/app-store/" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-bold flex items-center gap-2 cursor-pointer hover:bg-slate-700 transition-colors shadow-2xs"
+                                >
+                                    <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
+                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.58.66-.99 1.72-.88 2.74 1.01.08 2-.49 2.61-1.24z"/>
+                                    </svg>
                                     <span>App Store</span>
-                                </div>
+                                </a>
                             </div>
                         </div>
                     </div>

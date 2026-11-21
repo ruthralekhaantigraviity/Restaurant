@@ -36,7 +36,7 @@ const getUserRestaurantId = async (user, queryOrBody = {}) => {
 export const getStaff = async (req, res) => {
     try {
         const restaurantId = await getUserRestaurantId(req.user);
-        const restaurant = await Restaurant.findById(restaurantId);
+        const restaurant = await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages').lean();
         const hasEnterprise = restaurant?.subscription?.plan === 'Enterprise';
 
         const staffRoles = hasEnterprise
@@ -139,16 +139,19 @@ export const createStaff = async (req, res) => {
 
         let restaurant = null;
         if (restaurantId) {
-            restaurant = await Restaurant.findById(restaurantId);
+            restaurant = await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages').lean();
         }
 
         const planName = restaurant?.subscription?.plan || 'Basic';
         const planDoc = await Plan.findOne({ name: planName });
         let staffLimit = 5;
 
-        if (planDoc && planDoc.staffLimit !== undefined) {
+        // Enterprise plan gets unlimited staff (can add more than 10 staff)
+        if (['Enterprise'].includes(planName) || restaurant?.subscription?.plan === 'Enterprise') {
+            staffLimit = Infinity;
+        } else if (planDoc && planDoc.staffLimit !== undefined) {
             staffLimit = planDoc.staffLimit;
-        } else if (['Pro', 'Professional', 'Enterprise'].includes(planName)) {
+        } else if (['Pro', 'Professional'].includes(planName)) {
             staffLimit = Infinity;
         }
 
@@ -1098,15 +1101,17 @@ export const getPayrollById = async (req, res) => {
         const record = await Payroll.findById(req.params.id)
             .populate('employee', 'name email role employeeId phoneNumber bankDetails joiningDate salaryConfig')
             .populate('branchId', 'name address phone')
-            .populate('restaurantId', 'name address phone logo currency')
+            .populate('restaurantId', 'name address phone currency')
             .populate('approvedBy', 'name role')
-            .populate('payments.paidBy', 'name role');
+            .populate('payments.paidBy', 'name role')
+            .lean();
 
         if (!record) {
             return res.status(404).json({ message: 'Payroll record not found' });
         }
 
-        if (record.restaurantId._id.toString() !== restaurantId.toString()) {
+        const rIdStr = record.restaurantId?._id ? record.restaurantId._id.toString() : record.restaurantId?.toString();
+        if (req.user.role !== 'SuperAdmin' && rIdStr && restaurantId && rIdStr !== restaurantId.toString()) {
             return res.status(403).json({ message: 'Not authorized to view this record' });
         }
 
@@ -1120,7 +1125,8 @@ export const getPayrollById = async (req, res) => {
 // @route   POST /api/staff/payroll/:id/pay
 // @access  Private
 export const recordPayrollPayment = async (req, res) => {
-    const { amount, paymentMethod, reference, notes, paymentDate } = req.body;
+    const { amount, paymentMethod, reference, paymentReference, notes, paymentDate } = req.body;
+    const ref = (reference || paymentReference || '').trim();
 
     try {
         const restaurantId = await getUserRestaurantId(req.user);
@@ -1130,7 +1136,7 @@ export const recordPayrollPayment = async (req, res) => {
             return res.status(404).json({ message: 'Payroll record not found' });
         }
 
-        if (payroll.restaurantId.toString() !== restaurantId.toString()) {
+        if (req.user.role !== 'SuperAdmin' && payroll.restaurantId && restaurantId && payroll.restaurantId.toString() !== restaurantId.toString()) {
             return res.status(403).json({ message: 'Not authorized to modify this record' });
         }
 
@@ -1153,7 +1159,7 @@ export const recordPayrollPayment = async (req, res) => {
             amount: payAmount,
             paymentDate: payDate,
             paymentMethod: paymentMethod || 'Bank Transfer',
-            reference: reference || '',
+            reference: ref,
             notes: notes || '',
             paidBy: req.user._id
         });
@@ -1165,39 +1171,43 @@ export const recordPayrollPayment = async (req, res) => {
             performedBy: req.user._id,
             performedByName: req.user.name || 'Admin',
             timestamp: payDate,
-            notes: `Disbursed ₹${payAmount} via ${paymentMethod || 'Bank Transfer'} (Ref: ${reference || 'N/A'})`,
-            changes: { amount: payAmount, paymentMethod, reference }
+            notes: `Disbursed ₹${payAmount} via ${paymentMethod || 'Bank Transfer'} (Ref: ${ref || 'N/A'})`,
+            changes: { amount: payAmount, paymentMethod, reference: ref }
         });
 
         await payroll.save();
 
         // Connect to Expenses Management WITHOUT DOUBLE-COUNTING:
-        await Expense.create({
-            title: `Salary Payment - ${payroll.employee?.name || 'Staff'} (${payroll.periodString})`,
-            category: 'Staff salary',
-            amount: payAmount,
-            paidAmount: payAmount,
-            balanceDue: 0,
-            paymentStatus: 'Paid',
-            paymentMethod: paymentMethod || 'Bank Transfer',
-            paymentDate: payDate,
-            description: `Salary Payment for ${payroll.employee?.name || 'Staff'} (${payroll.periodString}) - Ref: ${reference || 'N/A'}`,
-            date: payDate,
-            billingPeriod: payroll.periodString,
-            staff: req.user.name || 'Admin',
-            restaurantId,
-            branchId: payroll.branchId,
-            source: 'Payroll',
-            sourceId: payroll._id,
-            createdBy: req.user._id,
-            notes: notes || `Payroll salary disbursed for ${payroll.periodString}`
-        });
+        const targetBranchId = payroll.branchId || (await Branch.findOne({ restaurantId }))?._id;
+        if (targetBranchId) {
+            await Expense.create({
+                title: `Salary Payment - ${payroll.employee?.name || 'Staff'} (${payroll.periodString})`,
+                category: 'Staff salary',
+                amount: payAmount,
+                paidAmount: payAmount,
+                balanceDue: 0,
+                paymentStatus: 'Paid',
+                paymentMethod: paymentMethod || 'Bank Transfer',
+                paymentDate: payDate,
+                description: `Salary Payment for ${payroll.employee?.name || 'Staff'} (${payroll.periodString}) - Ref: ${ref || 'N/A'}`,
+                date: payDate,
+                billingPeriod: payroll.periodString,
+                staff: req.user.name || 'Admin',
+                restaurantId,
+                branchId: targetBranchId,
+                source: 'Payroll',
+                sourceId: payroll._id,
+                createdBy: req.user._id,
+                notes: notes || `Payroll salary disbursed for ${payroll.periodString}`
+            });
+        }
 
         res.json({
             message: 'Salary payment recorded successfully',
             payroll: enrichPayrollWithAliases(payroll)
         });
     } catch (error) {
+        console.error('Error recording payroll payment:', error);
         res.status(400).json({ message: error.message });
     }
 };
@@ -1535,7 +1545,8 @@ export const getMyPayrollSlip = async (req, res) => {
         }
 
         const restaurant = await Restaurant.findById(restaurantId)
-            .select('name address phone logo gstin email');
+            .select('name address phone currency gstin email')
+            .lean();
 
         res.json({
             payroll: enrichPayrollWithAliases(payroll),
@@ -1718,7 +1729,7 @@ export const updatePayrollConfig = async (req, res) => {
         const restaurantId = await getUserRestaurantId(req.user);
         const { lopCalculationPolicy, monthlyPaidLeaveQuota, unpaidLeaveDeductionType } = req.body;
 
-        const restaurant = await Restaurant.findById(restaurantId);
+        const restaurant = await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages');
         if (!restaurant) return res.status(404).json({ message: 'Restaurant not found' });
 
         if (!restaurant.restaurantConfig) restaurant.restaurantConfig = {};

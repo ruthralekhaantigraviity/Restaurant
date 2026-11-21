@@ -49,7 +49,7 @@ import Plan from './models/Plan.js';
 dotenv.config();
 
 process.on('uncaughtException', (err) => {
-    console.error('[Backend Uncaught Exception]:', err.message);
+    console.error('[Backend Uncaught Exception]:', err.stack || err.message);
 });
 process.on('unhandledRejection', (reason, promise) => {
     console.error('[Backend Unhandled Rejection]:', reason);

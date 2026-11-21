@@ -89,7 +89,7 @@ export const getApiUrl = () => {
 
 const api = axios.create({
     baseURL: getApiUrl(),
-    timeout: 15000,
+    timeout: 60000,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -127,7 +127,18 @@ api.interceptors.request.use(
 
 // Response interceptor to handle automatic retries for cold-starts (502 / 503 / 504 / Network Error)
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        if (response?.headers && response.headers['x-refreshed-token']) {
+            const fresh = response.headers['x-refreshed-token'];
+            localStorage.setItem('token', fresh);
+            try {
+                const staff = JSON.parse(localStorage.getItem('restosys_staff_user') || '{}');
+                staff.token = fresh;
+                localStorage.setItem('restosys_staff_user', JSON.stringify(staff));
+            } catch (_) {}
+        }
+        return response;
+    },
     async (error) => {
         const config = error.config;
         const status = error.response ? error.response.status : 0;
