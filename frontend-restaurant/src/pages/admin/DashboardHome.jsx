@@ -34,7 +34,9 @@ const DashboardHome = () => {
                 const res = await api.get('/analytics/dashboard');
                 if (res.data) {
                     setData(res.data);
-                    try { sessionStorage.setItem('restosys_admin_analytics', JSON.stringify(res.data)); } catch { }
+                    if (res.data?.overview?.totalOrders > 0 || res.data?.overview?.totalRevenue > 0) {
+                        try { sessionStorage.setItem('restosys_admin_analytics', JSON.stringify(res.data)); } catch { }
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load dashboard analytics:', err);
