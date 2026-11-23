@@ -23,14 +23,13 @@ const FreeTrialManagement = () => {
     const fetchTrialRequests = async () => {
         try {
             setLoading(true);
-            const reqConfig = { timeout: 12000 };
-            const res = await api.get('/super-admin/trial-requests', reqConfig);
+            const res = await api.get('/super-admin/trial-requests');
             setRestaurants(res.data || []);
         } catch (error) {
             console.error('Failed to fetch trial requests:', error);
             try {
                 // Defensive fallback: get platform restaurants if trial-requests route timed out
-                const fallbackRes = await api.get('/super-admin/restaurants', { timeout: 8000 });
+                const fallbackRes = await api.get('/super-admin/restaurants');
                 const allRestos = Array.isArray(fallbackRes.data) ? fallbackRes.data : [];
                 setRestaurants(allRestos);
             } catch (fErr) {
@@ -661,13 +660,20 @@ const FreeTrialManagement = () => {
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Approved By</span>
                                 <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.approvedBy?.name || 'Pending'}
+                                    {selectedRestaurant.subscription?.approvedBy?.name || 
+                                     (['Active', 'Paid'].includes(selectedRestaurant.subscription?.status) || selectedRestaurant.subscription?.paymentStatus === 'Paid'
+                                        ? 'SuperAdmin' 
+                                        : 'Pending')}
                                 </p>
                             </div>
                             <div className="space-y-1">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Approved At</span>
                                 <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.approvedAt ? new Date(selectedRestaurant.subscription.approvedAt).toLocaleString() : 'Pending'}
+                                    {selectedRestaurant.subscription?.approvedAt 
+                                        ? new Date(selectedRestaurant.subscription.approvedAt).toLocaleString() 
+                                        : (['Active', 'Paid'].includes(selectedRestaurant.subscription?.status) || selectedRestaurant.subscription?.paymentStatus === 'Paid'
+                                            ? (selectedRestaurant.subscription?.startDate ? new Date(selectedRestaurant.subscription.startDate).toLocaleString() : (selectedRestaurant.createdAt ? new Date(selectedRestaurant.createdAt).toLocaleString() : 'Active Plan'))
+                                            : 'Pending')}
                                 </p>
                             </div>
                         </div>

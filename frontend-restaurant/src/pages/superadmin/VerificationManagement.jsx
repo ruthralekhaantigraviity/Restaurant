@@ -32,19 +32,18 @@ const VerificationManagement = () => {
     const loadVerifications = async () => {
         try {
             setLoading(true);
-            const reqConfig = { timeout: 12000 };
             let res;
             try {
-                res = await api.get('/restaurants/verification/all', reqConfig);
+                res = await api.get('/super-admin/verifications');
             } catch (vErr) {
                 // Try alias route
-                res = await api.get('/super-admin/verifications', reqConfig);
+                res = await api.get('/restaurants/verification/all');
             }
             let data = Array.isArray(res.data) ? res.data : [];
 
             // Fallback: If verification endpoint returns no items, query all platform restaurants directly
             if (data.length === 0) {
-                const restRes = await api.get('/super-admin/restaurants', reqConfig);
+                const restRes = await api.get('/super-admin/restaurants');
                 const rests = Array.isArray(restRes.data) ? restRes.data : [];
                 data = rests.map(r => ({
                     _id: r._id,
@@ -58,7 +57,7 @@ const VerificationManagement = () => {
         } catch (error) {
             console.error("Failed to fetch verifications", error);
             try {
-                const restRes = await api.get('/super-admin/restaurants', { timeout: 8000 });
+                const restRes = await api.get('/super-admin/restaurants');
                 const rests = Array.isArray(restRes.data) ? restRes.data : [];
                 const fallbackData = rests.map(r => ({
                     _id: r._id,
@@ -349,19 +348,60 @@ const VerificationManagement = () => {
 
                                 {Object.keys(docLabels).map(key => {
                                     const doc = selectedReview.documents?.[key];
-                                    if (!doc || !doc.filePath) {
+                                    const isApproved = doc?.status === 'Approved' || selectedReview.status === 'Verified' || selectedReview.restaurantId?.approvalStatus === 'Approved';
+                                    const hasFile = Boolean(doc && doc.filePath);
+
+                                    if (!hasFile) {
+                                        if (isApproved) {
+                                            return (
+                                                <div key={key} className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-center justify-between gap-3">
+                                                    <div className="space-y-0.5 min-w-0 flex-1">
+                                                        <span className="text-xs font-black text-emerald-950 block">{docLabels[key]}</span>
+                                                        <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                                                            <CheckCircle size={12} className="text-emerald-600 shrink-0" />
+                                                            Verified & Approved on Record
+                                                        </span>
+                                                        {key === 'addressProof' && (doc?.addressText || selectedReview.restaurantId?.address) && (
+                                                            <p className="text-[10px] text-emerald-800 font-medium mt-1 bg-white/70 px-2 py-1 rounded-md border border-emerald-100">
+                                                                🏠 Address: {doc?.addressText || selectedReview.restaurantId?.address}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full shrink-0">
+                                                        Verified
+                                                    </span>
+                                                </div>
+                                            );
+                                        }
+
                                         return (
-                                            <div key={key} className="p-3 bg-red-50 text-red-700 font-bold text-xs rounded-xl border border-red-100">
-                                                ❌ {docLabels[key]}: Document missing!
+                                            <div key={key} className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl flex items-center justify-between gap-3">
+                                                <div className="space-y-0.5 min-w-0 flex-1">
+                                                    <span className="text-xs font-black text-amber-950 block">{docLabels[key]}</span>
+                                                    <span className="text-[11px] font-semibold text-amber-700">
+                                                        Awaiting document upload from restaurant
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full shrink-0">
+                                                    Pending
+                                                </span>
                                             </div>
                                         );
                                     }
 
                                     return (
-                                        <div key={key} className="p-4 bg-gray-50/50 border border-gray-100 rounded-2xl space-y-3">
+                                        <div key={key} className="p-4 bg-gray-50/70 border border-gray-100 rounded-2xl space-y-3">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="space-y-0.5 min-w-0 pr-1.5 flex-1">
-                                                    <span className="text-xs font-black text-gray-800 block">{docLabels[key]}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-black text-gray-800 block">{docLabels[key]}</span>
+                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                                            doc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+                                                            doc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                                                        }`}>
+                                                            {doc.status || 'Uploaded'}
+                                                        </span>
+                                                    </div>
                                                     {key === 'fssai' && doc.expiryDate && (
                                                         <span className="text-[10px] text-gray-400 font-bold block">
                                                             📅 Expiry: {new Date(doc.expiryDate).toLocaleDateString()}
@@ -375,7 +415,7 @@ const VerificationManagement = () => {
                                                 </div>
                                                 <button
                                                     onClick={() => setPreviewDoc({ label: docLabels[key], path: doc.filePath })}
-                                                    className="p-1.5 bg-white hover:bg-gray-100 border border-gray-200 hover:border-gray-300 rounded-lg text-gray-600 transition-all"
+                                                    className="p-1.5 bg-white hover:bg-gray-100 border border-gray-200 hover:border-gray-300 rounded-lg text-gray-600 transition-all cursor-pointer"
                                                     title="Preview document"
                                                 >
                                                     <Eye size={12} />

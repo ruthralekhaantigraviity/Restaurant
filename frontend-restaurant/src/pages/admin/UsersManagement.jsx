@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Mail, Shield, MoreVertical, X, Trash2 } from 'lucide-react';
+import { Plus, Search, Mail, Shield, MoreVertical, X, Trash2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../context/AuthContext';
@@ -153,18 +153,21 @@ const UsersManagement = () => {
                     />
                 </div>
                 <div className="flex gap-3">
-                    <select
-                        value={roleFilter}
-                        onChange={(e) => setRoleFilter(e.target.value)}
-                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
-                    >
-                        <option value="All Roles">All Roles</option>
-                        <option value="RestaurantAdmin">Admin</option>
-                        <option value="BranchManager">Manager</option>
-                        <option value="Chef">Chef</option>
-                        <option value="Waiter">Waiter</option>
-                        <option value="Cashier">Cashier</option>
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={roleFilter}
+                            onChange={(e) => setRoleFilter(e.target.value)}
+                            className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl pl-3.5 pr-9 py-2 focus:outline-none focus:border-green-500 cursor-pointer shadow-xs"
+                        >
+                            <option value="All Roles">All Roles</option>
+                            <option value="RestaurantAdmin">Admin</option>
+                            <option value="BranchManager">Manager</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Waiter">Waiter</option>
+                            <option value="Cashier">Cashier</option>
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                    </div>
                 </div>
             </div>
 

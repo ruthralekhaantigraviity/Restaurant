@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { 
     TrendingUp, Award, Receipt, Store, 
-    Calendar, ShieldAlert, ArrowUpRight, DollarSign, Loader2, ArrowDownRight
+    Calendar, ShieldAlert, ArrowUpRight, DollarSign, Loader2, ArrowDownRight, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -15,12 +15,22 @@ const RevenueAnalytics = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [analyticsRes, paymentsRes] = await Promise.all([
+            const [analyticsResult, paymentsResult] = await Promise.allSettled([
                 api.get('/super-admin/subscription-analytics'),
                 api.get('/super-admin/billing-history')
             ]);
-            setAnalytics(analyticsRes.data);
-            setPayments(paymentsRes.data || []);
+
+            if (analyticsResult.status === 'fulfilled' && analyticsResult.value?.data) {
+                setAnalytics(analyticsResult.value.data);
+            } else {
+                console.warn("Analytics fetch notice:", analyticsResult.reason);
+            }
+
+            if (paymentsResult.status === 'fulfilled' && Array.isArray(paymentsResult.value?.data)) {
+                setPayments(paymentsResult.value.data);
+            } else {
+                setPayments([]);
+            }
         } catch (error) {
             console.error("Failed to load analytics data", error);
             toast.error("Failed to load revenue and billing details.");
@@ -33,10 +43,11 @@ const RevenueAnalytics = () => {
         fetchData();
     }, [api]);
 
-    if (loading) {
+    if (loading && !analytics) {
         return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <Loader2 className="animate-spin text-indigo-600" size={32} />
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+                <Loader2 className="animate-spin text-blue-600" size={36} />
+                <p className="text-xs font-bold text-slate-400">Loading Revenue & Billing Analytics...</p>
             </div>
         );
     }
@@ -47,9 +58,19 @@ const RevenueAnalytics = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div>
-                <h2 className="text-2xl font-black text-slate-900 font-sans tracking-tight">Revenue & Subscription Analytics</h2>
-                <p className="text-slate-500 mt-1 text-sm font-medium">Global platform revenue, monthly metrics, and active transaction audits.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-black text-slate-900 font-sans tracking-tight">Revenue & Subscription Analytics</h2>
+                    <p className="text-slate-500 mt-1 text-sm font-medium">Global platform revenue, monthly metrics, and active transaction audits.</p>
+                </div>
+                <button
+                    onClick={fetchData}
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-700 shadow-xs transition-all cursor-pointer self-start sm:self-auto"
+                >
+                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                    <span>Refresh Analytics</span>
+                </button>
             </div>
 
             {/* KPI Cards */}

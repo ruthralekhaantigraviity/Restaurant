@@ -637,8 +637,12 @@ export const deleteSuperAdminNotification = async (req, res) => {
 // @access  Private/SuperAdmin
 export const getSubscriptionPayments = async (req, res) => {
     try {
-        const payments = await SubscriptionPayment.find().populate('restaurantId', 'name contactEmail').sort({ createdAt: -1 });
-        res.json(payments);
+        const payments = await SubscriptionPayment.find()
+            .populate('restaurantId', 'name contactEmail')
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .lean();
+        res.json(payments || []);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -649,23 +653,42 @@ export const getSubscriptionPayments = async (req, res) => {
 // @access  Private/SuperAdmin
 export const getSubscriptionAnalytics = async (req, res) => {
     try {
-        const activeBasic = await Restaurant.countDocuments({ 'subscription.status': 'Active', 'subscription.plan': 'Basic' });
-        const activePro = await Restaurant.countDocuments({ 'subscription.status': 'Active', 'subscription.plan': 'Pro' });
-        const activeEnt = await Restaurant.countDocuments({ 'subscription.status': 'Active', 'subscription.plan': 'Enterprise' });
+        const allRestos = await Restaurant.find({}, 'name subscription createdAt').lean();
+        const totalRestaurants = allRestos.length;
 
-        const totalRestaurants = await Restaurant.countDocuments();
-        const activeRestaurants = await Restaurant.countDocuments({ 'subscription.status': 'Active' });
-        const expiredRestaurants = await Restaurant.countDocuments({ 'subscription.status': 'Expired' });
-        const cancelledRestaurants = await Restaurant.countDocuments({ 'subscription.status': 'Cancelled' });
-        
-        // Calculate MRR & ARR
-        const activeM = await Restaurant.find({ 'subscription.status': 'Active', 'subscription.billingCycle': 'monthly' });
-        const activeY = await Restaurant.find({ 'subscription.status': 'Active', 'subscription.billingCycle': 'yearly' });
-        
+        let activeRestaurants = 0;
+        let expiredRestaurants = 0;
+        let cancelledRestaurants = 0;
+        let activeBasic = 0;
+        let activePro = 0;
+        let activeEnt = 0;
         let mrr = 0;
-        activeM.forEach(r => { mrr += r.subscription.price || 49; });
-        activeY.forEach(r => { mrr += (r.subscription.price || 490) / 12; });
-        
+
+        for (const r of allRestos) {
+            const sub = r.subscription || {};
+            const status = sub.status || 'Pending';
+            const plan = (sub.plan || '').toLowerCase();
+            const cycle = (sub.billingCycle || '').toLowerCase();
+            const price = Number(sub.price) || 0;
+
+            if (status === 'Active') {
+                activeRestaurants++;
+                if (plan.includes('pro')) activePro++;
+                else if (plan.includes('ent')) activeEnt++;
+                else activeBasic++;
+
+                if (cycle === 'yearly') {
+                    mrr += (price || 490) / 12;
+                } else {
+                    mrr += price || 49;
+                }
+            } else if (status === 'Expired') {
+                expiredRestaurants++;
+            } else if (status === 'Cancelled') {
+                cancelledRestaurants++;
+            }
+        }
+
         mrr = Math.round(mrr);
         const arr = mrr * 12;
 
@@ -806,12 +829,26 @@ export const getTrialRequests = async (req, res) => {
         }
 
         const restaurants = await Restaurant.find(query)
+            .select('name address phone subscription approvalStatus verificationStatus ownerId createdAt')
             .populate('ownerId', 'name email phoneNumber')
             .populate('subscription.approvedBy', 'name email')
             .sort({ 'subscription.trialRequestDate': -1, createdAt: -1 })
             .lean();
 
-        res.json(restaurants || []);
+        // Ensure active / paid subscriptions have clean approval details
+        const enriched = (restaurants || []).map(r => {
+            if (!r.subscription) r.subscription = {};
+            const isLive = r.subscription.status === 'Active' || r.subscription.paymentStatus === 'Paid';
+            if (isLive && !r.subscription.approvedBy) {
+                r.subscription.approvedBy = { name: 'SuperAdmin' };
+            }
+            if (isLive && !r.subscription.approvedAt) {
+                r.subscription.approvedAt = r.subscription.startDate || r.createdAt;
+            }
+            return r;
+        });
+
+        res.json(enriched);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

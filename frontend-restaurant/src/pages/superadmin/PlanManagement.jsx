@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Plus, Edit, Trash2, X, AlertCircle, TrendingUp, IndianRupee } from 'lucide-react';
+import { Plus, Edit, Trash2, X, AlertCircle, TrendingUp, IndianRupee, CheckCircle2, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
 
@@ -159,67 +159,113 @@ const PlanManagement = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {plans.map(plan => (
-                    <div key={plan._id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col relative group transition-all hover:shadow-md hover:-translate-y-1">
-                        {!plan.isActive && (
-                            <span className="absolute top-4 right-4 bg-gray-100 text-gray-500 px-2 py-1 text-xs font-bold rounded-full">Inactive</span>
-                        )}
-                        <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                        
-                        {/* Dual Pricing Display */}
-                        <div className="mt-4 space-y-2">
-                            <div className="flex items-center gap-2 bg-blue-50 rounded-xl px-3 py-2">
-                                <IndianRupee size={14} className="text-blue-600 shrink-0" />
-                                <div>
-                                    <p className="text-xs text-blue-500 font-semibold uppercase tracking-wider">Monthly</p>
-                                    <p className="text-xl font-black text-blue-700">₹{(plan.monthlyPrice || 0).toLocaleString('en-IN')}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 bg-green-50 rounded-xl px-3 py-2">
-                                <TrendingUp size={14} className="text-green-600 shrink-0" />
-                                <div>
-                                    <p className="text-xs text-green-500 font-semibold uppercase tracking-wider">Yearly (per month)</p>
-                                    <p className="text-xl font-black text-green-700">₹{(plan.yearlyPrice || 0).toLocaleString('en-IN')}</p>
-                                </div>
-                                {plan.monthlyPrice && plan.yearlyPrice && (
-                                    <span className="ml-auto text-xs bg-green-200 text-green-800 font-bold px-2 py-0.5 rounded-full">
-                                        Save {Math.round((1 - plan.yearlyPrice / plan.monthlyPrice) * 100)}%
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+            {/* Three Distinct Plan Sections for Maximum Visibility */}
+            <div className="space-y-6">
+                {plans.map((plan, index) => {
+                    const isEnterprise = plan.name?.toLowerCase().includes('enterprise');
+                    const isPro = plan.name?.toLowerCase().includes('pro');
+                    const badgeClass = isEnterprise
+                        ? 'bg-purple-100 text-purple-700 border-purple-200'
+                        : isPro
+                            ? 'bg-blue-100 text-blue-700 border-blue-200'
+                            : 'bg-emerald-100 text-emerald-700 border-emerald-200';
 
-                        <ul className="mt-6 space-y-3 flex-1">
-                            {plan.features.map((feature, idx) => (
-                                <li key={idx} className="flex items-center gap-2 text-gray-600 text-sm">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                                    {feature}
-                                </li>
-                            ))}
-                            {plan.features.length === 0 && (
-                                <li className="text-gray-400 italic text-sm">No features listed.</li>
-                            )}
-                        </ul>
-                        <div className="mt-8 flex gap-2">
-                            <button 
-                                onClick={() => handleOpenModal(plan)}
-                                className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors font-medium active:scale-95"
-                            >
-                                <Edit size={16} /> Edit
-                            </button>
-                            <button 
-                                onClick={() => handleDelete(plan._id)}
-                                className="p-2 text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors active:scale-95"
-                                title="Delete Plan"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                    return (
+                        <div
+                            key={plan._id}
+                            className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 transition-all hover:shadow-md"
+                        >
+                            {/* Section Header */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    <span className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border ${badgeClass}`}>
+                                        Section {index + 1} • {plan.name} Tier
+                                    </span>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${plan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                        {plan.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleOpenModal(plan)}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-xs font-bold transition-all border border-gray-200 cursor-pointer"
+                                    >
+                                        <Edit size={14} /> Edit Plan
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(plan._id)}
+                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all border border-red-100 cursor-pointer"
+                                        title="Delete Plan"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Section Body: Pricing & Features */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                                {/* Pricing Cards */}
+                                <div className="lg:col-span-4 space-y-3">
+                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider">Pricing Structure</h4>
+                                    <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl flex items-center justify-between">
+                                        <div>
+                                            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Monthly Billing</span>
+                                            <div className="text-2xl font-black text-blue-900 mt-0.5">
+                                                ₹{(plan.monthlyPrice || 0).toLocaleString('en-IN')}
+                                                <span className="text-xs font-normal text-blue-600">/mo</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+                                            <IndianRupee size={20} />
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl flex items-center justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Yearly (Per Month)</span>
+                                                {plan.monthlyPrice && plan.yearlyPrice && (
+                                                    <span className="text-[10px] font-black bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
+                                                        Save {Math.max(0, Math.round((1 - plan.yearlyPrice / plan.monthlyPrice) * 100))}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="text-2xl font-black text-emerald-900 mt-0.5">
+                                                ₹{(plan.yearlyPrice || 0).toLocaleString('en-IN')}
+                                                <span className="text-xs font-normal text-emerald-600">/mo</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                                            <TrendingUp size={20} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Features List */}
+                                <div className="lg:col-span-8 flex flex-col justify-start">
+                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Included Capabilities & Modules</h4>
+                                    {plan.features?.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            {plan.features.map((feature, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50/70 border border-gray-100 text-xs font-semibold text-gray-700"
+                                                >
+                                                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                                                    <span className="truncate">{feature}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-400 italic">No features specified for this plan.</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 {plans.length === 0 && !loading && (
-                    <div className="col-span-full p-12 text-center bg-white rounded-3xl border border-gray-100 text-gray-500 font-medium flex flex-col items-center">
+                    <div className="p-12 text-center bg-white rounded-3xl border border-gray-100 text-gray-500 font-medium flex flex-col items-center">
                         <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
                         No subscription plans found. Create one to get started.
                     </div>

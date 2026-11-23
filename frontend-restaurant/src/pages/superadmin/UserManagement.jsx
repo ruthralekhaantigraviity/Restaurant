@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, Search, ShieldOff, ShieldCheck, UserCog, Trash2 } from 'lucide-react';
+import { Users, Search, ShieldOff, ShieldCheck, UserCog, Trash2, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
 
@@ -132,13 +132,16 @@ const UserManagement = () => {
                                 className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium w-full sm:w-56"
                             />
                         </div>
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                        >
-                            {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
-                        </select>
+                        <div className="relative">
+                            <select
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                                className="appearance-none pl-4 pr-10 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium cursor-pointer shadow-xs"
+                            >
+                                {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                            <ChevronDown size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
+                        </div>
                     </div>
                 </div>
 
