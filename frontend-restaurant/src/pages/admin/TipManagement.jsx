@@ -161,21 +161,18 @@ const TipManagement = () => {
                     </div>
                     <span className="text-[11px] text-slate-500 block">Separated from restaurant revenue</span>
                 </div>
-            </div >
-        </div>
-
-            {/* Waiter Wise Breakdown Card */ }
-    < div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4" >
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b dark:border-slate-800">
-                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <Users size={18} className="text-amber-500" /> Waiter-Wise Tip Summary
-                </h3>
-                <span className="text-xs text-slate-400 font-bold">Audited Staff Earnings</span>
             </div>
 
-            {
-                uniqueWaiters.length === 0 ? (
+            {/* Waiter Wise Breakdown Card */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b dark:border-slate-800">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <Users size={18} className="text-amber-500" /> Waiter-Wise Tip Summary
+                    </h3>
+                    <span className="text-xs text-slate-400 font-bold">Audited Staff Earnings</span>
+                </div>
+
+                {uniqueWaiters.length === 0 ? (
                     <div className="py-8 text-center text-xs text-slate-400 font-medium">
                         No waiter tips have been recorded yet.
                     </div>
@@ -190,300 +187,208 @@ const TipManagement = () => {
                                     <th className="py-3 px-4">Settled</th>
                                     <th className="py-3 px-4">Count</th>
                                     <th className="py-3 px-4 text-right">Action</th>
-                                    {uniqueWaiters.length === 0 ? (
-                                        <div className="py-8 text-center text-xs text-slate-400 font-medium">
-                                            No waiter tips have been recorded yet.
-                                        </div>
-                                    ) : (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-left text-xs">
-                                                <thead>
-                                                    <tr className="border-b dark:border-slate-800 text-slate-400 uppercase font-black tracking-wider text-[10px]">
-                                                        <th className="py-3 px-4">Waiter / Staff</th>
-                                                        <th className="py-3 px-4">Total Tips</th>
-                                                        <th className="py-3 px-4">Pending</th>
-                                                        <th className="py-3 px-4">Settled</th>
-                                                        <th className="py-3 px-4">Count</th>
-                                                        <th className="py-3 px-4 text-right">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                                                    {uniqueWaiters.map((w, idx) => (
-                                                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                                                            <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                                                {w.waiterName || 'Table Service Staff'}
-                                                                {w.employeeId && <span className="text-[10px] text-slate-400 font-normal ml-1.5">({w.employeeId})</span>}
-                                                            </td>
-                                                            <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">₹{w.totalAmount}</td>
-                                                            <td className="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">₹{w.pendingAmount}</td>
-                                                            <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">₹{w.settledAmount}</td>
-                                                            <td className="py-3.5 px-4 text-slate-500">{w.tipCount}</td>
-                                                            <td className="py-3.5 px-4 text-right">
-                                                                {w.pendingAmount > 0 ? (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSettleTarget({ waiterId: w.waiterId, waiterName: w.waiterName, pendingAmount: w.pendingAmount });
-                                                                            setIsSettleModalOpen(true);
-                                                                        }}
-                                                                        className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs"
-                                                                    >
-                                                                        Settle ₹{w.pendingAmount}
-                                                                    </button>
-                                                                ) : (
-                                                                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                                                                        Fully Settled
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                </thead>
-                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                                                    {uniqueWaiters.map((w, idx) => (
-                                                        <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                                                            <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                                                {w.waiterName || 'Table Service Staff'}
-                                                                {w.employeeId && <span className="text-[10px] text-slate-400 font-normal ml-1.5">({w.employeeId})</span>}
-                                                            </td>
-                                                            <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">₹{w.totalAmount}</td>
-                                                            <td className="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">₹{w.pendingAmount}</td>
-                                                            <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">₹{w.settledAmount}</td>
-                                                            <td className="py-3.5 px-4 text-slate-500">{w.tipCount}</td>
-                                                            <td className="py-3.5 px-4 text-right">
-                                                                {w.pendingAmount > 0 ? (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSettleTarget({ waiterId: w.waiterId, waiterName: w.waiterName, pendingAmount: w.pendingAmount });
-                                                                            setIsSettleModalOpen(true);
-                                                                        }}
-                                                                        className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs"
-                                                                    >
-                                                                        Settle ₹{w.pendingAmount}
-                                                                    </button>
-                                                                ) : (
-                                                                    <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
-                                                                        Fully Settled
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )
-                                    }
-                                </div >
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                                {uniqueWaiters.map((w, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                                            {w.waiterName || 'Table Service Staff'}
+                                            {w.employeeId && <span className="text-[10px] text-slate-400 font-normal ml-1.5">({w.employeeId})</span>}
+                                        </td>
+                                        <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">₹{w.totalAmount}</td>
+                                        <td className="py-3.5 px-4 font-bold text-amber-600 dark:text-amber-400">₹{w.pendingAmount}</td>
+                                        <td className="py-3.5 px-4 font-bold text-emerald-600 dark:text-emerald-400">₹{w.settledAmount}</td>
+                                        <td className="py-3.5 px-4 text-slate-500">{w.tipCount}</td>
+                                        <td className="py-3.5 px-4 text-right">
+                                            {w.pendingAmount > 0 ? (
+                                                <button
+                                                    onClick={() => {
+                                                        setSettleTarget({ waiterId: w.waiterId, waiterName: w.waiterName, pendingAmount: w.pendingAmount });
+                                                        setIsSettleModalOpen(true);
+                                                    }}
+                                                    className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold transition-all shadow-xs"
+                                                >
+                                                    Settle ₹{w.pendingAmount}
+                                                </button>
+                                            ) : (
+                                                <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
+                                                    Fully Settled
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
                 )}
-        </div>
+            </div>
 
-        {/* Individual Tip Transactions Ledger */}
-        < div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4" >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b dark:border-slate-800">
-                <div>
-                    <h3 className="text-base font-black text-slate-900 dark:text-white">
-                        Tip Transaction History
-                        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b dark:border-slate-800">
-                                <div>
-                                    <h3 className="text-base font-black text-slate-900 dark:text-white">
-                                        Tip Transaction History
-                                    </h3>
-                                    <p className="text-xs text-slate-400">Every customer tip logged with payment method and settlement stamp</p>
-                                </div>
+            {/* Individual Tip Transactions Ledger */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b dark:border-slate-800">
+                    <div>
+                        <h3 className="text-base font-black text-slate-900 dark:text-white">
+                            Tip Transaction History
+                        </h3>
+                        <p className="text-xs text-slate-400">Every customer tip logged with payment method and settlement stamp</p>
+                    </div>
 
-                                <div className="flex items-center gap-2">
-                                    {/* Status Filter */}
-                                    <select
-                                        value={selectedStatus}
-                                        onChange={(e) => setSelectedStatus(e.target.value)}
-                                        className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
-                                    >
-                                        <option value="All">All Statuses</option>
-                                        <option value="Pending">Pending Only</option>
-                                        <option value="Settled">Settled Only</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <div className="flex items-center gap-2">
+                        {/* Status Filter */}
+                        <select
+                            value={selectedStatus}
+                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+                        >
+                            <option value="All">All Statuses</option>
+                            <option value="Pending">Pending Only</option>
+                            <option value="Settled">Settled Only</option>
+                        </select>
+                    </div>
+                </div>
 
-                            {
-                                filteredTips.length === 0 ? (
-                                    <div className="py-12 text-center text-xs text-slate-400 font-medium">
-                                        No tip transactions matching the filter.
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-xs">
-                                            <thead>
-                                                <tr className="border-b dark:border-slate-800 text-slate-400 uppercase font-black tracking-wider text-[10px]">
-                                                    <th className="py-3 px-4">Date & Time</th>
-                                                    <th className="py-3 px-4">Table / Order</th>
-                                                    <th className="py-3 px-4">Assigned Waiter</th>
-                                                    <th className="py-3 px-4">Tip Amount</th>
-                                                    <th className="py-3 px-4">Tender</th>
-                                                    <th className="py-3 px-4">Status</th>
-                                                    <th className="py-3 px-4">Settlement Details</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                                                {filteredTips.map((tip) => (
-                                                    <tr key={tip._id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
-                                                        <td className="py-3.5 px-4 text-slate-500">
-                                                            {new Date(tip.date || tip.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                                        </td>
-                                                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                                            Table {tip.tableNumber || tip.orderId?.tableNumber || 'Any'}
-                                                        </td>
-                                                        <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-bold">
-                                                            {tip.waiterId?.name || tip.waiterName || 'Table Waiter'}
-                                                        </td>
-                                                        <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
-                                                            ₹{tip.amount}
-                                                        </td>
-                                                        <td className="py-3.5 px-4">
-                                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
-                                                                {tip.paymentMethod || 'Online'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-3.5 px-4">
-                                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${tip.status === 'Settled'
-                                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                                                                }`}>
-                                                                {tip.status}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-3.5 px-4 text-slate-400 text-[11px]">
-                                                            {tip.status === 'Settled' ? (
-                                                                <span>Settled on {new Date(tip.settledAt).toLocaleDateString()} {tip.settledBy ? `by ${tip.settledBy.name || 'Admin'}` : ''}</span>
-                                                            ) : (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSettleTarget({ tipId: tip._id, amount: tip.amount, waiterName: tip.waiterName });
-                                                                        setIsSettleModalOpen(true);
-                                                                    }}
-                                                                    className="text-amber-600 hover:text-amber-700 font-bold hover:underline"
-                                                                >
-                                                                    Mark Settled
-                                                                </button>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                        </div>
-
-        {/* Settle Modal */}
-        {isSettleModalOpen && (
-            <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-100 dark:border-slate-800 shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
-                    <div className="flex items-center justify-between pb-3 border-b dark:border-slate-800">
-                        <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                                    <CheckCircle2 className="text-emerald-500" size={20} />
-                                    Record Tip Settlement
-                                </h3>
-                                <button onClick={() => setIsSettleModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                                        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                                            {settleTarget?.waiterName ? (
-                                                <span>Settling pending tips of <strong>₹{settleTarget.pendingAmount || settleTarget.amount}</strong> for <strong>{settleTarget.waiterName}</strong>.</span>
+                {filteredTips.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-slate-400 font-medium">
+                        No tip transactions matching the filter.
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                            <thead>
+                                <tr className="border-b dark:border-slate-800 text-slate-400 uppercase font-black tracking-wider text-[10px]">
+                                    <th className="py-3 px-4">Date & Time</th>
+                                    <th className="py-3 px-4">Table / Order</th>
+                                    <th className="py-3 px-4">Assigned Waiter</th>
+                                    <th className="py-3 px-4">Tip Amount</th>
+                                    <th className="py-3 px-4">Tender</th>
+                                    <th className="py-3 px-4">Status</th>
+                                    <th className="py-3 px-4">Settlement Details</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+                                {filteredTips.map((tip) => (
+                                    <tr key={tip._id} className="hover:bg-slate-50 dark:hover:bg-slate-800">
+                                        <td className="py-3.5 px-4 text-slate-500">
+                                            {new Date(tip.date || tip.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                        </td>
+                                        <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                                            Table {tip.tableNumber || tip.orderId?.tableNumber || 'Any'}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-bold">
+                                            {tip.waiterId?.name || tip.waiterName || 'Table Waiter'}
+                                        </td>
+                                        <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">
+                                            ₹{tip.amount}
+                                        </td>
+                                        <td className="py-3.5 px-4">
+                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
+                                                {tip.paymentMethod || 'Online'}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4">
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${tip.status === 'Settled'
+                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                                                }`}>
+                                                {tip.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                                            {tip.status === 'Settled' ? (
+                                                <span>Settled on {new Date(tip.settledAt).toLocaleDateString()} {tip.settledBy ? `by ${tip.settledBy.name || 'Admin'}` : ''}</span>
                                             ) : (
-                                                <span>Settling all pending verified tips for your restaurant floor staff.</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setSettleTarget({ tipId: tip._id, amount: tip.amount, waiterName: tip.waiterName });
+                                                        setIsSettleModalOpen(true);
+                                                    }}
+                                                    className="text-amber-600 hover:text-amber-700 font-bold hover:underline"
+                                                >
+                                                    Mark Settled
+                                                </button>
                                             )}
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 dark:text-slate-300 block mb-1">
-                                                    Settlement Reference (Optional)
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={settleRef}
-                                                    onChange={(e) => setSettleRef(e.target.value)}
-                                                    placeholder="e.g. CASH-PAYOUT-OCT26 or UTR / Bank Slip"
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 dark:text-slate-300 block mb-1">
-                                                    Notes / Audit Memo
-                                                </label>
-                                                <textarea
-                                                    value={settleNotes}
-                                                    onChange={(e) => setSettleNotes(e.target.value)}
-                                                    placeholder="e.g. Paid in cash at end of dinner service by cashier"
-                                                    rows={2}
-                                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-end gap-3 pt-3 border-t dark:border-slate-800">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsSettleModalOpen(false)}
-                                                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleSettle}
-                                                disabled={settling}
-                                                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all"
-                                            >
-                                                <Check size={16} />
-                                                <span>{settling ? 'Recording...' : 'Confirm Settlement'}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-black text-slate-700 dark:text-slate-300 block mb-1">
-                                        Notes / Audit Memo
-                                    </label>
-                                    <textarea
-                                        value={settleNotes}
-                                        onChange={(e) => setSettleNotes(e.target.value)}
-                                        placeholder="e.g. Paid in cash at end of dinner service by cashier"
-                                        rows={2}
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 pt-3 border-t dark:border-slate-800">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsSettleModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleSettle}
-                                    disabled={settling}
-                                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all"
-                                >
-                                    <Check size={16} />
-                                    <span>{settling ? 'Recording...' : 'Confirm Settlement'}</span>
-                                </button>
-                            </div>
-                        </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
-    </div>
+            </div>
+
+            {/* Settle Modal */}
+            {isSettleModalOpen && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-100 dark:border-slate-800 shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b dark:border-slate-800">
+                            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                <CheckCircle2 className="text-emerald-500" size={20} />
+                                Record Tip Settlement
+                            </h3>
+                            <button onClick={() => setIsSettleModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                            {settleTarget?.waiterName ? (
+                                <span>Settling pending tips of <strong>₹{settleTarget.pendingAmount || settleTarget.amount}</strong> for <strong>{settleTarget.waiterName}</strong>.</span>
+                            ) : (
+                                <span>Settling all pending verified tips for your restaurant floor staff.</span>
+                            )}
+                        </div>
+
+                        <div className="space-y-3">
+                            <div>
+                                <label className="text-xs font-black text-slate-700 dark:text-slate-300 block mb-1">
+                                    Settlement Reference (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={settleRef}
+                                    onChange={(e) => setSettleRef(e.target.value)}
+                                    placeholder="e.g. CASH-PAYOUT-OCT26 or UTR / Bank Slip"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-black text-slate-700 dark:text-slate-300 block mb-1">
+                                    Notes / Audit Memo
+                                </label>
+                                <textarea
+                                    value={settleNotes}
+                                    onChange={(e) => setSettleNotes(e.target.value)}
+                                    placeholder="e.g. Paid in cash at end of dinner service by cashier"
+                                    rows={2}
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t dark:border-slate-800">
+                            <button
+                                type="button"
+                                onClick={() => setIsSettleModalOpen(false)}
+                                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSettle}
+                                disabled={settling}
+                                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all"
+                            >
+                                <Check size={16} />
+                                <span>{settling ? 'Recording...' : 'Confirm Settlement'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
