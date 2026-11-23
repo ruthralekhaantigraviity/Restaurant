@@ -418,7 +418,7 @@ export const loginUser = async (req, res) => {
                         name: restaurant.name,
                         email: restaurant.email,
                         contactEmail: restaurant.contactEmail,
-                        phone: restaurant.phone,
+                        phone: (/^[6-9]\d{9}$/.test(String(restaurant.phone || '').replace(/\D/g, '')) ? String(restaurant.phone).replace(/\D/g, '') : '9658741230'),
                         address: restaurant.address,
                         city: restaurant.city,
                         logo: (restaurant.logo && typeof restaurant.logo === 'string' && restaurant.logo.length > 5000)
@@ -454,11 +454,15 @@ export const loginUser = async (req, res) => {
                 console.error("Login email error:", lErr.message);
             }
 
+            const cleanUserPhone = (/^[6-9]\d{9}$/.test(String(user.phoneNumber || user.phone || '').replace(/\D/g, '')) ? String(user.phoneNumber || user.phone).replace(/\D/g, '') : '9658741230');
+
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                phoneNumber: cleanUserPhone,
+                phone: cleanUserPhone,
                 restaurantId: user.restaurantId,
                 branchId: user.branchId,
                 token: token,

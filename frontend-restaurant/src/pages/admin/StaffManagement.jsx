@@ -29,6 +29,7 @@ import {
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../context/AuthContext';
+import { filterIndianMobile, isValidIndianMobile } from '../../utils/phoneValidator';
 
 const formatTimeHHMM = (val) => {
     if (!val) return '';
@@ -334,7 +335,7 @@ const StaffManagement = () => {
             // Populate attendanceMap with existing database records or default to 'Present'
             const map = {};
             staffList.forEach(emp => {
-                const existing = list.find(r => (r.employee?._id || r.employee) === emp._id);
+                const existing = list.find(r => String(r.employee?._id || r.employee) === String(emp._id));
                 const shiftHrs = emp.salaryConfig?.dailyWorkHours || 8;
                 if (existing) {
                     const rawIn = existing.checkIn || existing.checkInTime;
@@ -1487,7 +1488,7 @@ const StaffManagement = () => {
                                     {staffList.map(emp => {
                                         const shiftHrs = emp.salaryConfig?.dailyWorkHours || 8;
                                         const defaultOt = calculateOvertimeHours('09:00', '18:00', shiftHrs);
-                                        const savedRecord = attendanceRecords.find(r => (r.employee?._id || r.employee) === emp._id);
+                                        const savedRecord = attendanceRecords.find(r => String(r.employee?._id || r.employee) === String(emp._id));
                                         const current = attendanceMap[emp._id] || (savedRecord ? {
                                             status: savedRecord.status,
                                             checkInTime: formatTimeHHMM(savedRecord.checkIn || savedRecord.checkInTime),
@@ -1495,7 +1496,7 @@ const StaffManagement = () => {
                                             overtimeHours: savedRecord.overtimeHours || 0,
                                             isSaved: true
                                         } : { status: 'Not Marked', checkInTime: '', checkOutTime: '', overtimeHours: 0, isSaved: false });
-                                        const existingRecord = attendanceRecords.find(r => (r.employee?._id || r.employee) === emp._id);
+                                        const existingRecord = attendanceRecords.find(r => String(r.employee?._id || r.employee) === String(emp._id));
                                         return (
                                             <tr key={emp._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
                                                 <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
@@ -2263,7 +2264,11 @@ const StaffManagement = () => {
                                         pattern="[6-9][0-9]{9}"
                                         placeholder="10-digit mobile"
                                         value={staffForm.phone}
-                                        onChange={(e) => setStaffForm({ ...staffForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                        onChange={(e) => {
+                                            const clean = filterIndianMobile(e.target.value);
+                                            if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
+                                            setStaffForm({ ...staffForm, phone: clean });
+                                        }}
                                         className="w-full px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
                                     />
                                 </div>

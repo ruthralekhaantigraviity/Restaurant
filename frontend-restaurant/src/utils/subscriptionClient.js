@@ -24,8 +24,13 @@ export const evaluateClientSubscriptionFreeze = (user, restaurant) => {
     const now = new Date();
 
     const isManualFrozen = Boolean(sub.manualFreeze || status === 'Frozen');
-    const isPendingApproval = status === 'Pending Approval';
-    const isRejected = status === 'Rejected';
+    const isApprovalPending = Boolean(
+        sub.status === 'Pending Approval' || 
+        restaurant.approvalStatus === 'Pending' || 
+        restaurant.approvalStatus !== 'Approved'
+    );
+    const isPendingApproval = isApprovalPending;
+    const isRejected = status === 'Rejected' || restaurant.approvalStatus === 'Rejected';
 
     const trialEnd = sub.trialEndDate || sub.expiryDate;
     const isTrialExpired = Boolean(sub.trialActive && trialEnd && now > new Date(trialEnd));

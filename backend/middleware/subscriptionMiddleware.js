@@ -1,6 +1,7 @@
 import Restaurant from '../models/Restaurant.js';
 import Branch from '../models/Branch.js';
 import { evaluateSubscriptionAccess } from '../utils/subscriptionHelper.js';
+import { getCachedRestaurant } from './authMiddleware.js';
 
 // Fast in-memory cache for subscription access verdicts (60s TTL)
 const verdictCache = new Map();
@@ -56,10 +57,13 @@ export const checkSubscriptionAccess = async (req, res, next) => {
             if (cached.verdict.isFrozen) {
                 return res.status(403).json(cached.verdict);
             }
+            if (cached.restaurant) {
+                req.restaurant = cached.restaurant;
+            }
             return next();
         }
 
-        const restaurant = req.restaurant || await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages').lean();
+        const restaurant = req.restaurant || await getCachedRestaurant(restaurantId);
         if (!restaurant) {
             return next();
         }
@@ -67,7 +71,7 @@ export const checkSubscriptionAccess = async (req, res, next) => {
         req.restaurant = restaurant;
 
         const verdict = await evaluateSubscriptionAccess(restaurant, { notifyOnExpire: false });
-        verdictCache.set(restKey, { verdict, timestamp: Date.now() });
+        verdictCache.set(restKey, { verdict, restaurant, timestamp: Date.now() });
 
         if (verdict.isFrozen) {
             return res.status(403).json(verdict);

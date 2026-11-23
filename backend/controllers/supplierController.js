@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
 import Supplier from '../models/Supplier.js';
 import Branch from '../models/Branch.js';
+import Restaurant from '../models/Restaurant.js';
 
 // @desc    Get all suppliers
 // @route   GET /api/suppliers
@@ -7,7 +9,7 @@ import Branch from '../models/Branch.js';
 export const getSuppliers = async (req, res) => {
     try {
         const filter = {};
-        
+
         // If staff is logged in, filter by their branch; else scope to restaurant branches
         if (req.user && req.user.branchId) {
             filter.branch = req.user.branchId;
@@ -17,9 +19,29 @@ export const getSuppliers = async (req, res) => {
             const branches = await Branch.find({ restaurantId: req.user.restaurantId }).select('_id').lean();
             filter.branch = { $in: branches.map(b => b._id) };
         }
-        
-        const suppliers = await Supplier.find(filter).populate('branch', 'name');
-        res.json(suppliers);
+
+        const suppliers = await Supplier.find(filter).populate('branch', 'name').sort({ createdAt: -1 }).lean();
+
+        // Deduplicate suppliers by name and prune excess duplicates from MongoDB
+        const seen = new Map();
+        const unique = [];
+        const duplicateIds = [];
+
+        for (const s of suppliers) {
+            const key = (s.name || '').trim().toLowerCase();
+            if (seen.has(key)) {
+                duplicateIds.push(s._id);
+            } else {
+                seen.set(key, true);
+                unique.push(s);
+            }
+        }
+
+        if (duplicateIds.length > 0) {
+            Supplier.deleteMany({ _id: { $in: duplicateIds } }).catch(() => {});
+        }
+
+        res.json(unique);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -37,13 +59,43 @@ export const createSupplier = async (req, res) => {
             return res.status(400).json({ message: 'Phone number must be exactly 10 digits starting with 6, 7, 8, or 9.' });
         }
 
-        let targetBranch = req.user.branchId || branch;
+        let targetBranch = null;
+        if (branch && mongoose.Types.ObjectId.isValid(branch)) {
+            const isRealBranch = await Branch.exists({ _id: branch });
+            if (isRealBranch) targetBranch = branch;
+        }
+        if (!targetBranch && req.user?.branchId) {
+            targetBranch = req.user.branchId;
+        }
         if (!targetBranch && req.user?.restaurantId) {
-            const defaultBranch = await Branch.findOne({ restaurantId: req.user.restaurantId }).select('_id').lean();
+            let defaultBranch = await Branch.findOne({ restaurantId: req.user.restaurantId }).select('_id').lean();
+            if (!defaultBranch) {
+                const rest = await Restaurant.findById(req.user.restaurantId).select('name address phone').lean();
+                defaultBranch = await Branch.create({
+                    restaurantId: req.user.restaurantId,
+                    name: rest?.name ? `${rest.name} Main Branch` : 'Main Outlet',
+                    location: { address: rest?.address || 'Primary Location' },
+                    contact: { phone: cleanPhone },
+                    isActive: true
+                });
+            }
             if (defaultBranch) targetBranch = defaultBranch._id;
         }
         if (!targetBranch) {
-            return res.status(400).json({ message: 'Please assign a branch to this supplier.' });
+            const firstBranch = await Branch.findOne().select('_id').lean();
+            if (firstBranch) targetBranch = firstBranch._id;
+        }
+
+        // Prevent duplicate supplier creation
+        const trimmedName = String(name || '').trim();
+        const existingSupplier = await Supplier.findOne({
+            $or: [
+                { name: { $regex: new RegExp(`^${trimmedName}$`, 'i') } },
+                { phone: cleanPhone }
+            ]
+        }).lean();
+        if (existingSupplier) {
+            return res.status(409).json({ message: `A supplier named "${existingSupplier.name}" or with phone ${cleanPhone} already exists.` });
         }
 
         const supplier = await Supplier.create({

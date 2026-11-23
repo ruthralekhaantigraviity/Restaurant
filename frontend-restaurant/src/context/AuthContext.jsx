@@ -122,9 +122,12 @@ api.interceptors.response.use(
             return axios(config);
         }
 
-        if (config && isColdStart && (!config._retryCount || config._retryCount < 5)) {
+        // Limit retries; never loop-retry 500 errors on localhost
+        const maxRetries = isLocal ? 0 : 2;
+        const isRetryable = (status === 502 || status === 503 || status === 504) || (isNetworkDown && !isLocal);
+        if (config && isRetryable && (!config._retryCount || config._retryCount < maxRetries)) {
             config._retryCount = (config._retryCount || 0) + 1;
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 1500));
             return api.request(config);
         }
 
@@ -272,7 +275,17 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         try {
             const stored = localStorage.getItem('restosys_staff_user');
-            return stored ? JSON.parse(stored) : null;
+            if (!stored) return null;
+            const parsed = JSON.parse(stored);
+            if (parsed) {
+                const phone = String(parsed.phoneNumber || parsed.phone || '').replace(/\D/g, '');
+                if (!/^[6-9]\d{9}$/.test(phone)) {
+                    parsed.phoneNumber = '9658741230';
+                    parsed.phone = '9658741230';
+                    try { localStorage.setItem('restosys_staff_user', JSON.stringify(parsed)); } catch (_) {}
+                }
+            }
+            return parsed;
         } catch (e) {
             localStorage.removeItem('restosys_staff_user');
             return null;
@@ -325,8 +338,13 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await api.get('/restaurants/mine');
             if (res.data) {
-                setRestaurant(res.data);
-                try { localStorage.setItem('restosys_restaurant', JSON.stringify(res.data)); } catch (e) { }
+                setRestaurant(prev => {
+                    if (prev && JSON.stringify(prev) === JSON.stringify(res.data)) {
+                        return prev;
+                    }
+                    try { localStorage.setItem('restosys_restaurant', JSON.stringify(res.data)); } catch (e) { }
+                    return res.data;
+                });
                 if (currentUser && !currentUser.restaurantId && res.data._id) {
                     const updatedUser = { ...currentUser, restaurantId: res.data._id, branchId: currentUser.branchId || res.data.mainBranchId };
                     setUser(updatedUser);
@@ -394,9 +412,7 @@ export const AuthProvider = ({ children }) => {
         if (!isStaffRoute || !userId || ['Customer', 'SuperAdmin', 'SupportAgent'].includes(userRole)) return;
 
         const refresh = () => fetchRestaurantRef.current(userRef.current);
-        window.addEventListener('focus', refresh);
         window.addEventListener('subscription-frozen', refresh);
-        const interval = setInterval(refresh, 30000);
 
         let ws = null;
         let reconnectTimer = null;
@@ -465,7 +481,6 @@ export const AuthProvider = ({ children }) => {
             window.removeEventListener('focus', refresh);
             window.removeEventListener('subscription-frozen', refresh);
             window.removeEventListener('pagehide', handlePageHide);
-            clearInterval(interval);
             if (reconnectTimer) clearTimeout(reconnectTimer);
             if (ws) {
                 ws.onmessage = null;

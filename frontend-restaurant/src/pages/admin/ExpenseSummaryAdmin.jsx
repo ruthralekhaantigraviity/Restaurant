@@ -79,6 +79,7 @@ const ExpenseSummaryAdmin = () => {
     const [summary, setSummary] = useState(null);
     const [branches, setBranches] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isGeneratingRecurring, setIsGeneratingRecurring] = useState(false);
 
     // Filters
     const [selectedBranch, setSelectedBranch] = useState('All');
@@ -165,7 +166,18 @@ const ExpenseSummaryAdmin = () => {
                 api.get('/branches').catch(() => ({ data: [] }))
             ]);
 
-            setExpenses(expRes.data || []);
+            let expData = expRes.data || [];
+            // If filtering by thismonth returned 0 expenses, check if recent expenses exist so screen isn't completely blank
+            if (expData.length === 0 && selectedPeriod === 'thismonth' && selectedBranch === 'All' && selectedCategory === 'All') {
+                try {
+                    const fallbackRes = await api.get('/expenses', { params: { period: 'all' } });
+                    if (fallbackRes.data && fallbackRes.data.length > 0) {
+                        expData = fallbackRes.data;
+                    }
+                } catch (_) {}
+            }
+
+            setExpenses(expData);
             setSummary(sumRes.data || null);
             setBranches(branchRes.data || []);
 
@@ -336,17 +348,25 @@ const ExpenseSummaryAdmin = () => {
 
     // Handle Generate Recurring Bills
     const handleGenerateRecurring = async () => {
-        const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        setIsGeneratingRecurring(true);
+        let targetMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        if (selectedPeriod === 'lastmonth') {
+            const lastMonthDate = new Date();
+            lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+            targetMonth = lastMonthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        }
         try {
             const res = await api.post('/expenses/generate-recurring', {
-                targetBillingPeriod: currentMonth,
+                targetBillingPeriod: targetMonth,
                 branchId: selectedBranch !== 'All' ? selectedBranch : undefined
             });
-            toast.success(res.data.message || 'Recurring bills generated without duplicates!');
-            fetchData();
+            toast.success(res.data.message || 'Recurring bills generated successfully!');
+            await fetchData();
         } catch (error) {
             console.error('Failed to generate recurring bills', error);
             toast.error(error.response?.data?.message || 'Error generating recurring bills');
+        } finally {
+            setIsGeneratingRecurring(false);
         }
     };
 
@@ -439,10 +459,12 @@ const ExpenseSummaryAdmin = () => {
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start xl:self-center">
                     <button 
                         onClick={handleGenerateRecurring}
-                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer whitespace-nowrap"
+                        disabled={isGeneratingRecurring}
+                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-60"
                         title="Check and instantiate recurring monthly rent & utility bills"
                     >
-                        <RefreshCw size={15} /> Check Recurring Bills
+                        <RefreshCw size={15} className={isGeneratingRecurring ? 'animate-spin text-emerald-600' : ''} />
+                        <span>{isGeneratingRecurring ? 'Generating Bills...' : 'Check Recurring Bills'}</span>
                     </button>
                     <button 
                         onClick={handleExportCSV}
@@ -460,49 +482,71 @@ const ExpenseSummaryAdmin = () => {
             </div>
 
             {/* Financial Overview KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-slate-400 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider">Total Incurred</span>
-                        <DollarSign size={18} className="text-slate-700 dark:text-slate-300" />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Operating Expenses</span>
+                        <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                            <DollarSign size={18} />
+                        </div>
                     </div>
-                    <div className="text-2xl font-black text-slate-900 dark:text-white">
+                    <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
                         ₹{(summary?.totalIncurred || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-slate-400 mt-1">Total recorded expenses</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center justify-between">
+                        <span>Rent, salary, power &amp; supplies</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 px-2 py-0.5 rounded-md text-[10px]">{expenses.length} records</span>
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-emerald-500 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider">Total Paid Out</span>
-                        <CheckCircle2 size={18} />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Disbursed &amp; Settled</span>
+                        <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                            <CheckCircle2 size={18} />
+                        </div>
                     </div>
-                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                    <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
                         ₹{(summary?.totalPaid || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1">Confirmed payments</div>
+                    <div className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-2 flex items-center justify-between">
+                        <span>Cleared bank &amp; cash payments</span>
+                        <span className="font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-md text-[10px]">{expenses.filter(e => e.paymentStatus === 'Paid').length} settled</span>
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col justify-between">
                     <div className="flex items-center justify-between text-amber-500 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider">Outstanding Liabilities</span>
-                        <Clock size={18} />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Pending Payables</span>
+                        <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                            <Clock size={18} />
+                        </div>
                     </div>
-                    <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
+                    <div className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">
                         ₹{((summary?.outstandingLiabilities ?? summary?.totalOutstanding) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1">Pending payments balance</div>
+                    <div className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-2 flex items-center justify-between">
+                        <span>Upcoming vendor &amp; utility dues</span>
+                        <span className="font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-md text-[10px]">{expenses.filter(e => e.paymentStatus === 'Pending' || e.paymentStatus === 'Partially Paid').length} active</span>
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                    <div className="flex items-center justify-between text-red-500 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider">Overdue Bills</span>
-                        <AlertTriangle size={18} />
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-rose-500 mb-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">Overdue Risk Exposure</span>
+                        <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
+                            <AlertTriangle size={18} />
+                        </div>
                     </div>
-                    <div className="text-2xl font-black text-red-600 dark:text-red-400">
+                    <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">
                         ₹{(summary?.overdueAmount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                     </div>
-                    <div className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">{((summary?.overdueBillsCount ?? summary?.overdueCount) || 0)} overdue bills</div>
+                    <div className="text-xs text-rose-600/80 dark:text-rose-400/80 mt-2 flex items-center justify-between">
+                        <span>{(summary?.overdueBillsCount || summary?.overdueCount || 0) > 0 ? 'Invoices past due date' : 'All obligations on schedule'}</span>
+                        <span className={`font-bold px-2 py-0.5 rounded-md text-[10px] ${(summary?.overdueBillsCount || summary?.overdueCount || 0) > 0 ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
+                            {(summary?.overdueBillsCount || summary?.overdueCount || 0)} overdue
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -615,18 +659,18 @@ const ExpenseSummaryAdmin = () => {
             {(activeTab === 'expenses' || activeTab === 'bills' || activeTab === 'pending') && (
                 <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs overflow-hidden">
                     <div className="overflow-x-auto custom-scrollbar">
-                        <table className="w-full min-w-[980px] text-left text-sm text-slate-600 dark:text-slate-300">
-                            <thead className="bg-slate-50/80 dark:bg-slate-900/50 text-xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:border-slate-700/60">
+                        <table className="w-full min-w-[1150px] text-left text-sm text-slate-600 dark:text-slate-300">
+                            <thead className="bg-slate-50/80 dark:bg-slate-900/60 text-xs uppercase font-bold text-slate-400 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700/60 tracking-wider">
                                 <tr>
-                                    <th className="py-4 px-6">Expense Title & Ref</th>
-                                    <th className="py-4 px-6">Category</th>
-                                    <th className="py-4 px-6">Expense Date</th>
-                                    <th className="py-4 px-6">Due Date / Billing Period</th>
-                                    <th className="py-4 px-6">Total Amount</th>
-                                    <th className="py-4 px-6">Paid Amount</th>
-                                    <th className="py-4 px-6">Balance Due</th>
-                                    <th className="py-4 px-6">Status</th>
-                                    <th className="py-4 px-6 text-right">Actions</th>
+                                    <th className="py-4 px-6 min-w-[280px]">Expense Title &amp; Ref</th>
+                                    <th className="py-4 px-6 min-w-[170px]">Category</th>
+                                    <th className="py-4 px-6 min-w-[130px]">Expense Date</th>
+                                    <th className="py-4 px-6 min-w-[180px]">Due Date / Billing Period</th>
+                                    <th className="py-4 px-6 min-w-[130px]">Total Amount</th>
+                                    <th className="py-4 px-6 min-w-[130px]">Paid Amount</th>
+                                    <th className="py-4 px-6 min-w-[130px]">Balance Due</th>
+                                    <th className="py-4 px-6 min-w-[110px]">Status</th>
+                                    <th className="py-4 px-6 text-right pr-8 min-w-[180px]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
@@ -639,7 +683,7 @@ const ExpenseSummaryAdmin = () => {
                                                 </div>
                                                 <h4 className="font-bold text-slate-800 dark:text-slate-200 text-base">No Expense or Bill Records Found</h4>
                                                 <p className="text-xs text-slate-400">
-                                                    Get started by recording your operational overheads or instantly generate monthly recurring bills (Rent, Electricity, Water & Internet).
+                                                    Get started by recording your operational overheads or instantly generate monthly recurring bills (Rent, Electricity, Water &amp; Internet).
                                                 </p>
                                                 <div className="flex items-center justify-center gap-3 pt-2">
                                                     <button
@@ -661,62 +705,62 @@ const ExpenseSummaryAdmin = () => {
                                 ) : (
                                     (activeTab === 'bills' ? utilityBills : activeTab === 'pending' ? pendingBills : filteredExpenses).map(e => (
                                         <tr key={e._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                                            <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
-                                                <div>{e.title || e.description || e.category}</div>
-                                                <div className="text-xs font-normal text-slate-400 flex items-center gap-2">
-                                                    <span>{e.branchId?.name || 'Main Outlet'}</span>
+                                            <td className="py-4.5 px-6 font-bold text-slate-900 dark:text-white align-middle min-w-[280px]">
+                                                <div className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">{e.title || e.description || e.category}</div>
+                                                <div className="text-xs font-normal text-slate-400 dark:text-slate-500 flex items-center gap-2 mt-1 flex-wrap">
+                                                    <span className="font-medium text-slate-500 dark:text-slate-400">{e.branchId?.name || 'Main Outlet'}</span>
                                                     {e.isRecurring && (
-                                                        <span className="px-1.5 py-0.5 rounded-sm bg-purple-100 text-purple-800 text-[10px] font-bold">
+                                                        <span className="px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-[10px] font-bold">
                                                             Recurring
                                                         </span>
                                                     )}
                                                     {e.source && e.source !== 'Manual' && e.source !== 'Recurring' && !e.isRecurring && (
-                                                        <span className="text-[10px] text-slate-400 font-semibold">
+                                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                                                             via {e.source}
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-6">
+                                            <td className="py-4.5 px-6 align-middle min-w-[170px] whitespace-nowrap">
                                                 <span 
-                                                    className="px-2.5 py-1 rounded-md text-xs font-bold"
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold inline-block whitespace-nowrap shadow-2xs"
                                                     style={{ 
-                                                        backgroundColor: `${CATEGORY_COLORS[e.category] || '#64748B'}15`,
+                                                        backgroundColor: `${CATEGORY_COLORS[e.category] || '#64748B'}18`,
                                                         color: CATEGORY_COLORS[e.category] || '#64748B'
                                                     }}
                                                 >
                                                     {e.category}
                                                 </span>
                                             </td>
-                                            <td className="py-4 px-6 text-xs text-slate-500 whitespace-nowrap">
+                                            <td className="py-4.5 px-6 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap align-middle font-medium min-w-[130px]">
                                                 {new Date(e.date).toLocaleDateString()}
                                             </td>
-                                            <td className="py-4 px-6 text-xs">
+                                            <td className="py-4.5 px-6 text-xs align-middle whitespace-nowrap min-w-[180px]">
                                                 {e.dueDate ? (
-                                                    <span className={new Date(e.dueDate) < new Date() && e.balanceDue > 0 ? 'text-red-600 font-bold' : 'text-slate-500'}>
+                                                    <span className={new Date(e.dueDate) < new Date() && e.balanceDue > 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium'}>
                                                         Due: {new Date(e.dueDate).toLocaleDateString()}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-slate-400">-</span>
+                                                    <span className="text-slate-400 dark:text-slate-500">-</span>
                                                 )}
                                                 {e.billingPeriod && (
-                                                    <div className="text-[11px] text-slate-400">{e.billingPeriod}</div>
+                                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{e.billingPeriod}</div>
                                                 )}
                                             </td>
-                                            <td className="py-4 px-6 font-bold text-slate-900 dark:text-white">
+                                            <td className="py-4.5 px-6 font-bold text-slate-900 dark:text-white whitespace-nowrap align-middle min-w-[130px]">
                                                 ₹{e.amount?.toLocaleString('en-IN')}
                                             </td>
-                                            <td className="py-4 px-6 font-semibold text-emerald-600 dark:text-emerald-400">
+                                            <td className="py-4.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle min-w-[130px]">
                                                 ₹{e.paidAmount?.toLocaleString('en-IN') || 0}
                                             </td>
-                                            <td className="py-4 px-6 font-bold text-amber-600 dark:text-amber-400">
+                                            <td className="py-4.5 px-6 font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap align-middle min-w-[130px]">
                                                 ₹{e.balanceDue?.toLocaleString('en-IN') || 0}
                                             </td>
-                                            <td className="py-4 px-6">
+                                            <td className="py-4.5 px-6 align-middle whitespace-nowrap min-w-[110px]">
                                                 {getPaymentBadge(e.paymentStatus)}
                                             </td>
-                                            <td className="py-4 px-6 text-right whitespace-nowrap">
-                                                <div className="flex items-center justify-end gap-1.5">
+                                            <td className="py-4.5 px-6 text-right pr-8 whitespace-nowrap align-middle min-w-[180px]">
+                                                <div className="flex items-center justify-end gap-2">
                                                     {e.balanceDue > 0 && (
                                                         <button 
                                                             onClick={() => {
@@ -729,7 +773,7 @@ const ExpenseSummaryAdmin = () => {
                                                                 });
                                                                 setIsPaymentModalOpen(true);
                                                             }}
-                                                            className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                                            className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer shadow-2xs"
                                                             title="Record payment toward balance"
                                                         >
                                                             <CreditCard size={13} /> Pay
@@ -740,24 +784,24 @@ const ExpenseSummaryAdmin = () => {
                                                             setSelectedExpenseForDetails(e);
                                                             setIsDetailsModalOpen(true);
                                                         }}
-                                                        className="p-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors cursor-pointer"
+                                                        className="p-2 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors cursor-pointer shadow-2xs"
                                                         title="View Details"
                                                     >
-                                                        <FileText size={14} />
+                                                        <FileText size={15} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleOpenEditModal(e)}
-                                                        className="p-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors cursor-pointer"
+                                                        className="p-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors cursor-pointer shadow-2xs"
                                                         title="Edit Expense"
                                                     >
-                                                        <Edit2 size={14} />
+                                                        <Edit2 size={15} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteExpense(e)}
-                                                        className="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg transition-colors cursor-pointer"
+                                                        className="p-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg transition-colors cursor-pointer shadow-2xs"
                                                         title="Delete Expense"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Trash2 size={15} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -773,10 +817,13 @@ const ExpenseSummaryAdmin = () => {
             {/* TAB 4: CATEGORY BREAKDOWN & ANALYTICS */}
             {activeTab === 'analytics' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                            <PieIcon size={18} className="text-emerald-500" /> Expenses Distribution by Category
-                        </h3>
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                                <PieIcon size={18} className="text-emerald-500" /> Expenses Distribution by Category
+                            </h3>
+                            <p className="text-xs text-slate-400 mb-4">Hover slices for real breakdown values &amp; percentages</p>
+                        </div>
                         <div className="h-72">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -786,8 +833,9 @@ const ExpenseSummaryAdmin = () => {
                                         nameKey="name"
                                         cx="50%"
                                         cy="50%"
-                                        outerRadius={80}
-                                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                        innerRadius={55}
+                                        outerRadius={85}
+                                        paddingAngle={2}
                                     >
                                         {categoryChartData.map((entry, index) => (
                                             <Cell 
@@ -796,31 +844,46 @@ const ExpenseSummaryAdmin = () => {
                                             />
                                         ))}
                                     </Pie>
-                                    <Tooltip formatter={(value) => `₹${value.toLocaleString('en-IN')}`} />
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                                        formatter={(value, name) => {
+                                            const total = categoryChartData.reduce((s, c) => s + c.value, 0);
+                                            const pct = total > 0 ? ((Number(value) / total) * 100).toFixed(1) : 0;
+                                            return [`₹${Number(value).toLocaleString('en-IN')}`, `${name} (${pct}%)`];
+                                        }} 
+                                    />
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
                     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
                             Expense Ledger Breakdown
                         </h3>
+                        <p className="text-xs text-slate-400 mb-4">Itemized breakdown by spending classification</p>
                         <div className="divide-y divide-slate-100 dark:divide-slate-700/60">
-                            {categoryChartData.map(cat => (
-                                <div key={cat.name} className="py-3 flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2.5">
-                                        <span 
-                                            className="w-3 h-3 rounded-full" 
-                                            style={{ backgroundColor: CATEGORY_COLORS[cat.name] || '#64748B' }} 
-                                        />
-                                        <span className="font-semibold text-slate-800 dark:text-slate-200">{cat.name}</span>
+                            {categoryChartData.map(cat => {
+                                const total = categoryChartData.reduce((s, c) => s + c.value, 0);
+                                const pct = total > 0 ? ((cat.value / total) * 100).toFixed(1) : '0.0';
+                                return (
+                                    <div key={cat.name} className="py-3 flex items-center justify-between text-sm">
+                                        <div className="flex items-center gap-2.5">
+                                            <span 
+                                                className="w-3 h-3 rounded-full shrink-0" 
+                                                style={{ backgroundColor: CATEGORY_COLORS[cat.name] || '#64748B' }} 
+                                            />
+                                            <span className="font-semibold text-slate-800 dark:text-slate-200">{cat.name}</span>
+                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                                {pct}%
+                                            </span>
+                                        </div>
+                                        <span className="font-bold text-slate-900 dark:text-white font-mono">
+                                            ₹{cat.value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                                        </span>
                                     </div>
-                                    <span className="font-bold text-slate-900 dark:text-white">
-                                        ₹{cat.value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

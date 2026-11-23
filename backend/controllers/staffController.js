@@ -446,7 +446,14 @@ export const bulkMarkAttendance = async (req, res) => {
 export const getAttendance = async (req, res) => {
     try {
         const restaurantId = await getUserRestaurantId(req.user);
-        const filter = { restaurantId };
+        const filter = {};
+        if (restaurantId) {
+            filter.$or = [
+                { restaurantId: restaurantId },
+                { restaurantId: null },
+                { restaurantId: { $exists: false } }
+            ];
+        }
 
         if (req.user.role === 'BranchManager' && req.user.branchId) {
             filter.branchId = req.user.branchId;
@@ -1084,7 +1091,8 @@ export const getPayrollRecords = async (req, res) => {
             .populate('branchId', 'name')
             .populate('approvedBy', 'name role')
             .populate('payments.paidBy', 'name')
-            .sort({ year: -1, month: -1, 'employee.name': 1 });
+            .sort({ year: -1, month: -1, createdAt: -1 })
+            .lean();
 
         res.json(records.map(enrichPayrollWithAliases));
     } catch (error) {

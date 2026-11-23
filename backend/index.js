@@ -9,6 +9,7 @@ import http from 'http';
 import https from 'https';
 
 import connectDB from './config/db.js';
+import mongoose from 'mongoose';
 import { initWebSocket } from './config/websocket.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
@@ -99,6 +100,7 @@ app.use(cookieParser());
 // Ensure MongoDB is connected on serverless (Vercel) invocations
 app.use(async (req, res, next) => {
     if (req.path === '/health' || req.path === '/api/health') return next();
+    if (mongoose.connection.readyState === 1) return next();
     try {
         await connectDB();
     } catch (err) {

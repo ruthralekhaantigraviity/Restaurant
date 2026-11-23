@@ -317,11 +317,11 @@ const Sidebar = () => {
                                             className={clsx(
                                                 "relative flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all text-sm group",
                                                 isActive
-                                                    ? "bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs font-semibold"
-                                                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                                                    ? "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 font-semibold"
+                                                    : "text-slate-600 dark:text-slate-400 hover:bg-emerald-50/70 hover:text-emerald-700 dark:hover:bg-slate-800 dark:hover:text-white"
                                             )}
                                         >
-                                            <Icon size={17} className={clsx("transition-transform group-hover:scale-110 shrink-0", isActive ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200")} />
+                                            <Icon size={17} className={clsx("transition-transform group-hover:scale-110 shrink-0", isActive ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400")} />
                                             <span className="truncate">{item.name}</span>
                                             {item.name === 'Verification' && (
                                                 <span className={clsx(
@@ -345,9 +345,9 @@ const Sidebar = () => {
                 <div className="p-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
                     <button
                         onClick={() => setShowLogoutConfirm(true)}
-                        className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-all text-sm cursor-pointer"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 w-full rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 active:scale-98 transition-all text-sm cursor-pointer shadow-sm shadow-red-600/30 border border-red-700"
                     >
-                        <LogOut size={17} />
+                        <LogOut size={16} className="text-white" />
                         <span>Logout</span>
                     </button>
                 </div>

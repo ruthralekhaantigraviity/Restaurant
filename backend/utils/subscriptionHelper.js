@@ -66,12 +66,8 @@ export const findPlanDocument = async (planName) => {
         ...(normalized === 'Pro' ? ['Pro', 'Professional'] : []),
     ]));
 
-    for (const candidate of aliases) {
-        const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const found = await Plan.findOne({ name: { $regex: `^${escaped}$`, $options: 'i' } }).lean();
-        if (found) return found;
-    }
-    return null;
+    const regexes = aliases.map(candidate => new RegExp(`^${candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'));
+    return await Plan.findOne({ name: { $in: regexes } }).lean();
 };
 
 export const resolvePlanPrice = async (planName, billingCycle = 'monthly') => {
@@ -202,6 +198,17 @@ export const evaluateSubscriptionAccess = async (restaurant, { notifyOnExpire = 
     normalizeSubscriptionState(restaurant);
     const sub = restaurant.subscription || {};
     const now = new Date();
+
+    // 0. SuperAdmin Restaurant Approval Check
+    // Without SuperAdmin approval, the admin side cannot access or use the operational dashboard
+    if (restaurant.approvalStatus !== 'Approved') {
+        return {
+            isFrozen: true,
+            isPendingApproval: true,
+            approvalStatus: restaurant.approvalStatus || 'Pending',
+            message: 'Your restaurant registration is pending SuperAdmin approval. The management dashboard will unlock as soon as your account is approved.',
+        };
+    }
 
     // 1. Manual Super Admin Freeze
     if (sub.manualFreeze || sub.status === 'Frozen') {

@@ -284,20 +284,23 @@ const Reports = () => {
                             onClick={() => setSelectedReport(rep.id)}
                             className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                                 isSelected 
-                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md border-transparent ring-2 ring-emerald-500' 
+                                    ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm' 
                                     : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600 shadow-xs'
                             }`}
                         >
                             <div className="flex items-center justify-between mb-3">
-                                <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : `${rep.bg} ${rep.color}`}`}>
+                                <div className={`p-2.5 rounded-xl ${rep.bg} ${rep.color}`}>
                                     <Icon size={20} />
                                 </div>
                                 {isSelected && (
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Active
+                                    </span>
                                 )}
                             </div>
-                            <h4 className="font-bold text-sm mb-1">{rep.title}</h4>
-                            <p className={`text-xs line-clamp-2 ${isSelected ? 'text-white/70 dark:text-slate-600' : 'text-slate-400'}`}>
+                            <h4 className="font-bold text-sm mb-1 text-slate-900 dark:text-white">{rep.title}</h4>
+                            <p className="text-xs line-clamp-2 text-slate-500 dark:text-slate-400">
                                 {rep.desc}
                             </p>
                         </div>

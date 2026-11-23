@@ -8,18 +8,24 @@ import Plan from '../models/Plan.js';
 // @access  Private
 export const getBranches = async (req, res) => {
     try {
-        let branches = await Branch.find({ restaurantId: req.user.restaurantId }).populate('manager', 'name email');
-        if (branches.length === 0 && req.user.restaurantId) {
-            const restaurant = await Restaurant.findById(req.user.restaurantId);
+        let restaurantId = req.user.restaurantId || req.user.restaurant;
+        if (!restaurantId && req.user._id) {
+            const owned = await Restaurant.findOne({ ownerId: req.user._id }).select('_id').lean();
+            if (owned) restaurantId = owned._id;
+        }
+
+        let branches = await Branch.find({ restaurantId }).populate('manager', 'name email').lean();
+        if (branches.length === 0 && restaurantId) {
+            const restaurant = await Restaurant.findById(restaurantId).select('name address phone').lean();
             if (restaurant) {
-                const mainBranch = await Branch.create({
-                    restaurantId: req.user.restaurantId,
+                await Branch.create({
+                    restaurantId,
                     name: `${restaurant.name || 'Main'} Branch`,
                     location: { address: 'Primary Location' },
                     contact: { phone: '' },
                     isActive: true
                 });
-                branches = await Branch.find({ restaurantId: req.user.restaurantId }).populate('manager', 'name email');
+                branches = await Branch.find({ restaurantId }).populate('manager', 'name email').lean();
             }
         }
         res.json(branches);

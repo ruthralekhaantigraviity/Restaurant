@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, User, Menu, ArrowLeft, Crown, Zap, Star, X, Loader2, AlertCircle, ArrowUpRight, Check, Store, QrCode } from 'lucide-react';
+import { Bell, User, Menu, ArrowLeft, Crown, Zap, Star, X, Loader2, AlertCircle, ArrowUpRight, Check, Store, QrCode, Sun, Moon, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import ConfirmModal from './ConfirmModal';
 import { buildDummyUpiQrUrl, confirmDummyQRSubscriptionPayment } from '../utils/subscriptionClient';
 /* ─── Plan styling helpers ───────────────────────────────────────── */
 const PLAN_META = {
@@ -21,7 +22,7 @@ const getPlanMeta = (name) => {
 };
 
 /* ─── Plan Upgrade Modal ────────────────────────────────────────── */
-const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, subscriptionState, onClose, onUpgraded }) => {
+const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, subscriptionState, onClose, onUpgraded }) => {
     const [subscribing, setSubscribing] = useState(null);
     const [qrPlan, setQrPlan] = useState(null);
     const modalRef = useRef(null);
@@ -55,20 +56,30 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, subscriptionSta
     const handleConfirmQRUpgrade = async () => {
         if (!qrPlan?.planItem || subscribing) return;
         setSubscribing(qrPlan.planItem.name);
-        await confirmDummyQRSubscriptionPayment({
-            api,
-            planName: qrPlan.planItem.name,
-            billingCycle: 'monthly',
-            refId: qrPlan.refId,
-            onSuccess: async () => {
-                setSubscribing(null);
-                await onUpgraded(qrPlan.planItem.name);
-                onClose();
-            },
-            onFailure: () => {
-                setSubscribing(null);
-            }
-        });
+        try {
+            await confirmDummyQRSubscriptionPayment({
+                api,
+                planName: qrPlan.planItem.name,
+                billingCycle: 'monthly',
+                refId: qrPlan.refId,
+                onSuccess: (data) => {
+                    setSubscribing(null);
+                    onClose(); // Instantly close modal — no freezing or waiting
+                    if (data?.restaurant && setRestaurant) {
+                        setRestaurant(data.restaurant);
+                        try { localStorage.setItem('restosys_restaurant', JSON.stringify(data.restaurant)); } catch (_) { }
+                    }
+                    if (onUpgraded) {
+                        onUpgraded(qrPlan.planItem.name, data?.restaurant);
+                    }
+                },
+                onFailure: () => {
+                    setSubscribing(null);
+                }
+            });
+        } catch {
+            setSubscribing(null);
+        }
     };
 
     const tierRank = (name = '') => {
@@ -134,7 +145,7 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, subscriptionSta
                                     type="button"
                                     onClick={() => setQrPlan(null)}
                                     disabled={subscribing !== null}
-                                    className="w-1/3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs cursor-pointer"
+                                    className="w-1/3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
                                 >
                                     Back
                                 </button>
@@ -142,12 +153,18 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, subscriptionSta
                                     type="button"
                                     onClick={handleConfirmQRUpgrade}
                                     disabled={subscribing !== null}
-                                    className="w-2/3 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                                    className="w-2/3 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-60"
                                 >
                                     {subscribing ? (
-                                        <><Loader2 size={15} className="animate-spin" /> Confirming…</>
+                                        <span className="inline-flex items-center gap-2">
+                                            <Loader2 size={16} className="animate-spin text-white shrink-0" />
+                                            <span>Confirming Payment...</span>
+                                        </span>
                                     ) : (
-                                        <><QrCode size={15} /> Confirm QR Payment &amp; Upgrade</>
+                                        <span className="inline-flex items-center gap-2">
+                                            <QrCode size={15} className="shrink-0" />
+                                            <span>Confirm QR Payment</span>
+                                        </span>
                                     )}
                                 </button>
                             </div>
@@ -241,7 +258,8 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, subscriptionSta
 
 /* ─── Topbar ────────────────────────────────────────────────────── */
 const Topbar = () => {
-    const { user, api, restaurant, fetchRestaurant, subscriptionState, plans: cachedPlans, fetchPlans } = useAuth();
+    const { user, api, restaurant, setRestaurant, fetchRestaurant, subscriptionState, plans: cachedPlans, fetchPlans } = useAuth();
+    const navigate = useNavigate();
     const [hasUnread, setHasUnread] = useState(false);
     const [plans, setPlans] = useState(cachedPlans || []);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -259,6 +277,22 @@ const Topbar = () => {
         window.addEventListener('toggle-theme', handleThemeToggle);
         return () => window.removeEventListener('toggle-theme', handleThemeToggle);
     }, []);
+
+    const handleToggleTheme = () => {
+        const nextTheme = isDark ? 'light' : 'dark';
+        try {
+            localStorage.setItem('theme', nextTheme);
+        } catch (_) {}
+        if (nextTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        }
+        setIsDark(nextTheme === 'dark');
+        window.dispatchEvent(new CustomEvent('toggle-theme'));
+    };
 
     // Fetch notifications
     useEffect(() => {
@@ -355,11 +389,11 @@ const Topbar = () => {
 
     return (
         <>
-            <header className="h-16 sm:h-20 bg-white/95 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-8 sticky top-0 z-10">
+            <header className="h-16 sm:h-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-8 sticky top-0 z-10 transition-colors">
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 w-full md:w-auto flex-1 min-w-0">
                     <button
                         onClick={() => window.dispatchEvent(new Event('toggle-sidebar'))}
-                        className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg shrink-0 cursor-pointer"
+                        className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg shrink-0 cursor-pointer"
                         aria-label="Toggle Sidebar Menu"
                         title="Toggle Sidebar"
                     >
@@ -368,7 +402,7 @@ const Topbar = () => {
 
                     <button
                         onClick={() => window.history.back()}
-                        className="md:hidden p-1.5 px-2 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 shrink-0 shadow-xs cursor-pointer"
+                        className="md:hidden p-1.5 px-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs cursor-pointer"
                         aria-label="Go Back"
                         title="Back"
                     >
@@ -378,8 +412,8 @@ const Topbar = () => {
 
                     {/* Branch Badge / Name display */}
                     {isAdmin && (
-                        <div className="flex items-center gap-1.5 sm:gap-2 bg-emerald-50 border border-emerald-100 text-emerald-800 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs truncate">
-                            <Store size={14} className="text-emerald-600 shrink-0" />
+                        <div className="flex items-center gap-1.5 sm:gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs truncate">
+                            <Store size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span className="truncate max-w-[100px] sm:max-w-[140px] md:max-w-[200px]">
                                 {selectedBranch?.name ? selectedBranch.name : 'Main Branch'}
                             </span>
@@ -387,10 +421,10 @@ const Topbar = () => {
                                 <select 
                                     value={selectedBranch?._id || ''}
                                     onChange={(e) => setSelectedBranch(branches.find(b => b._id === e.target.value))}
-                                    className="bg-transparent text-emerald-800 font-bold text-xs outline-none cursor-pointer border-none pl-1"
+                                    className="bg-transparent text-emerald-800 dark:text-emerald-300 font-bold text-xs outline-none cursor-pointer border-none pl-1"
                                 >
                                     {branches.map(b => (
-                                        <option key={b._id} value={b._id} className="bg-white text-slate-800 font-semibold">{b.name}</option>
+                                        <option key={b._id} value={b._id} className="bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-semibold">{b.name}</option>
                                     ))}
                                 </select>
                             ) : (
@@ -402,7 +436,17 @@ const Topbar = () => {
                     )}
                 </div>
 
-                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 ml-2 md:ml-0 shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 ml-2 md:ml-0 shrink-0">
+
+                    {/* Dark / Light Theme Toggle */}
+                    <button
+                        type="button"
+                        onClick={handleToggleTheme}
+                        title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                        className="p-1.5 sm:p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                        {isDark ? <Sun size={20} className="text-amber-400" /> : <Moon size={20} className="text-slate-600" />}
+                    </button>
 
                     {/* Notifications */}
                     <Link
@@ -421,7 +465,7 @@ const Topbar = () => {
                     </Link>
 
                     {/* Profile corner */}
-                    <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 md:pl-6 border-l border-gray-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-gray-200 dark:border-slate-800">
                         <div className="text-right hidden md:block">
                             <p className="text-sm font-semibold text-gray-800 dark:text-slate-100 capitalize">{user?.name || 'User'}</p>
                             <div className="flex items-center justify-end gap-1.5 mt-0.5">
@@ -461,13 +505,13 @@ const Topbar = () => {
                         <div className="relative">
                             <div
                                 onClick={() => isAdmin && meta && setShowUpgradeModal(true)}
-                                className={`w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold border border-green-200 ${isAdmin && meta ? 'cursor-pointer hover:ring-2 ring-offset-1 ' + (meta.ring || 'ring-green-400') : ''} transition-all`}
+                                className={`w-10 h-10 bg-green-100 dark:bg-emerald-950/60 rounded-full flex items-center justify-center text-green-600 dark:text-emerald-400 font-bold border border-green-200 dark:border-emerald-800 ${isAdmin && meta ? 'cursor-pointer hover:ring-2 ring-offset-1 ' + (meta.ring || 'ring-green-400') : ''} transition-all`}
                             >
                                 <User size={20} />
                             </div>
                             {/* Tiny plan icon on avatar */}
                             {meta && Icon && isAdmin && (
-                                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center ${meta.bg} border-2 border-white shadow-sm`}>
+                                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center ${meta.bg} border-2 border-white dark:border-slate-900 shadow-sm`}>
                                     <Icon size={9} className={meta.text} />
                                 </div>
                             )}
@@ -483,11 +527,16 @@ const Topbar = () => {
                     plans={plans}
                     api={api}
                     restaurant={restaurant}
+                    setRestaurant={setRestaurant}
                     user={user}
                     subscriptionState={subscriptionState}
                     onClose={() => setShowUpgradeModal(false)}
-                    onUpgraded={async () => {
-                        if (fetchRestaurant) await fetchRestaurant();
+                    onUpgraded={(planName, freshRest) => {
+                        if (freshRest && setRestaurant) {
+                            setRestaurant(freshRest);
+                        } else if (fetchRestaurant) {
+                            fetchRestaurant().catch(() => {});
+                        }
                     }}
                 />
             )}

@@ -639,9 +639,10 @@ export const getOrders = async (req, res) => {
         let query = Order.find(filter)
             .populate('user', 'id name email')
             .populate('deliveryPartner', 'id name phoneNumber')
-            .populate('restaurantId', 'name address phone restaurantConfig logo gstin kitchenMode')
+            .populate('restaurantId', 'name address phone restaurantConfig gstin kitchenMode')
             .populate('branchId', 'name location contact')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .lean();
 
         if (req.query.limit) {
             const limit = parseInt(req.query.limit, 10);
@@ -651,6 +652,11 @@ export const getOrders = async (req, res) => {
         }
 
         const orders = await query;
+        orders.forEach(o => {
+            if (o.restaurantId && typeof o.restaurantId === 'object') {
+                o.restaurantId.logo = `/api/restaurants/${o.restaurantId._id}/thumbnail?kind=logo`;
+            }
+        });
         res.json(orders);
     } catch (error) {
         console.error('Failed to fetch orders', error);

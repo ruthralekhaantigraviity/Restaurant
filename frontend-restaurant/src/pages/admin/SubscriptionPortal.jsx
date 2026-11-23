@@ -4,7 +4,7 @@ import { buildDummyUpiQrUrl, confirmDummyQRSubscriptionPayment } from '../../uti
 import {
     CreditCard, QrCode, CheckCircle, AlertTriangle, ShieldCheck, Loader2,
     CheckCircle2, AlertCircle, Sparkles, Receipt, HelpCircle, ArrowRight,
-    Clock, ShieldAlert, XCircle, LifeBuoy, Zap, Lock
+    Clock, ShieldAlert, XCircle, LifeBuoy, Zap, Lock, Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -383,47 +383,80 @@ const SubscriptionPortal = () => {
 
             {/* Current Plan Overview Card */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-gradient-to-r from-slate-900 via-slate-800 to-zinc-900 text-white rounded-3xl p-8 relative overflow-hidden shadow-lg border border-slate-700">
+                <div className="lg:col-span-2 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/80 text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-700/60 backdrop-blur-md">
+                    {/* Ambient Glow */}
+                    <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
                     <div className="relative z-10 flex flex-col justify-between h-full gap-6">
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between flex-wrap gap-4">
                             <div>
-                                <span className="text-[10px] font-black tracking-widest text-orange-400 uppercase">CURRENT PLAN</span>
-                                <h3 className="text-3xl font-black mt-1 font-sans">
-                                    {sub.plan || 'Free Trial'} {isTrialActive && <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full ml-2">7-Day Trial</span>}
+                                <div className="flex items-center gap-2 mb-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                                    <span className="text-[10px] font-black tracking-widest text-indigo-300 uppercase">ACTIVE SUBSCRIPTION</span>
+                                </div>
+                                <h3 className="text-3xl sm:text-4xl font-black font-sans tracking-tight flex items-center gap-2">
+                                    {sub.plan || 'Free Trial'}
+                                    {isTrialActive && (
+                                        <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                                            7-Day Trial
+                                        </span>
+                                    )}
                                 </h3>
                             </div>
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-inner ${isPaidActive || isTrialActive
-                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                : isPendingApproval
-                                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                                    : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                                }`}>
+                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs inline-flex items-center gap-2 ${
+                                isPaidActive || isTrialActive
+                                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                    : isPendingApproval
+                                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                            }`}>
+                                <span className={`w-2 h-2 rounded-full ${
+                                    isPaidActive || isTrialActive
+                                        ? 'bg-emerald-400 animate-pulse'
+                                        : isPendingApproval
+                                            ? 'bg-amber-400 animate-pulse'
+                                            : 'bg-rose-400'
+                                }`}></span>
                                 {isManualFrozen ? 'Manually Frozen' : isPendingApproval ? 'Pending Approval' : isTrialActive ? 'Trial Active' : isPaidActive ? 'Paid Active' : 'Frozen / Inactive'}
                             </span>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-white/10">
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 block uppercase">Payment Status</span>
-                                <span className="font-extrabold capitalize text-sm">{effectivePaymentStatus}</span>
+                        {/* Modern Frosted Metric Chips */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-4 border-t border-white/10">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-xs">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <ShieldCheck size={14} className="text-indigo-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Payment Status</span>
+                                </div>
+                                <span className="font-extrabold capitalize text-sm sm:text-base text-white">{effectivePaymentStatus}</span>
                             </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 block uppercase">Plan Price</span>
-                                <span className="font-extrabold text-sm">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-xs">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <CreditCard size={14} className="text-emerald-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Plan Price</span>
+                                </div>
+                                <span className="font-extrabold text-sm sm:text-base text-white">
                                     {effectivePaymentStatus === 'Trial' ? 'Free (₹0)' : `₹${(sub.price || 0).toLocaleString('en-IN')}`}
                                 </span>
                             </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 block uppercase">{isTrialActive ? 'Trial Expiry' : 'Plan Expiry'}</span>
-                                <span className="font-extrabold text-sm">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-xs">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <Calendar size={14} className="text-amber-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{isTrialActive ? 'Trial Expiry' : 'Plan Expiry'}</span>
+                                </div>
+                                <span className="font-extrabold text-sm sm:text-base text-white">
                                     {isTrialActive && sub.trialEndDate
                                         ? new Date(sub.trialEndDate).toLocaleDateString()
                                         : ((sub.subscriptionEndDate || sub.expiryDate) ? new Date(sub.subscriptionEndDate || sub.expiryDate).toLocaleDateString() : (isPendingApproval ? 'Awaiting Approval' : 'Active'))}
                                 </span>
                             </div>
-                            <div>
-                                <span className="text-[10px] font-bold text-slate-400 block uppercase">Approval Date</span>
-                                <span className="font-extrabold text-sm">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-xs">
+                                <div className="flex items-center gap-2 text-slate-400 mb-1">
+                                    <CheckCircle2 size={14} className="text-teal-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">Approval Date</span>
+                                </div>
+                                <span className="font-extrabold text-sm sm:text-base text-white">
                                     {sub.approvedAt ? new Date(sub.approvedAt).toLocaleDateString() : (isPendingApproval ? 'Pending' : (sub.subscriptionStartDate ? new Date(sub.subscriptionStartDate).toLocaleDateString() : 'Active'))}
                                 </span>
                             </div>

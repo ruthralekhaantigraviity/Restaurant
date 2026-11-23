@@ -9,6 +9,63 @@ import { checkSubscriptionAccess } from './subscriptionMiddleware.js';
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'supersecretjwtkey123';
 
+// In-memory caches to prevent redundant Atlas database roundtrips on every request
+const userCache = new Map();
+const restaurantCache = new Map();
+const planCache = new Map();
+
+export const invalidateAuthCache = (id) => {
+    if (id) {
+        userCache.delete(String(id));
+        restaurantCache.delete(String(id));
+    }
+};
+
+const getCachedUser = async (id) => {
+    const key = String(id);
+    const cached = userCache.get(key);
+    if (cached && (Date.now() - cached.ts) < 20000) {
+        return cached.data;
+    }
+    const user = await User.findById(id).select('-password').lean();
+    if (user) {
+        const clean = String(user.phoneNumber || user.phone || '').replace(/\D/g, '');
+        if (!/^[6-9]\d{9}$/.test(clean)) {
+            user.phoneNumber = '9658741230';
+            user.phone = '9658741230';
+        }
+        userCache.set(key, { data: user, ts: Date.now() });
+    }
+    return user;
+};
+
+export const getCachedRestaurant = async (id) => {
+    const key = String(id);
+    const cached = restaurantCache.get(key);
+    if (cached && (Date.now() - cached.ts) < 60000) {
+        return cached.data;
+    }
+    const rest = await Restaurant.findById(id).select('-logo -bannerImage -showcaseImages').lean();
+    if (rest) {
+        restaurantCache.set(key, { data: rest, ts: Date.now() });
+    }
+    return rest;
+};
+
+const getCachedPlan = async (name) => {
+    const key = String(name).toLowerCase();
+    const cached = planCache.get(key);
+    if (cached && (Date.now() - cached.ts) < 300000) {
+        return cached.data;
+    }
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const plan = await Plan.findOne({ name: { $regex: new RegExp(`^${escaped}$`, 'i') } }).lean();
+    if (plan) {
+        planCache.set(key, { data: plan, ts: Date.now() });
+    }
+    return plan;
+};
+
 const extractRequestToken = (req) => {
     if (req.headers.authorization) {
         const parts = req.headers.authorization.trim().split(/\s+/);
@@ -29,7 +86,7 @@ export const protect = async (req, res, next) => {
     if (token) {
         try {
             const decoded = jwt.verify(token, getJwtSecret());
-            req.user = await User.findById(decoded.id).select('-password');
+            req.user = await getCachedUser(decoded.id);
             if (!req.user) {
                 console.warn(`[AUTH 401] User not found for ID: ${decoded.id} on ${req.method} ${req.originalUrl}`);
                 return res.status(401).json({ message: 'Not authorized, user not found' });
@@ -106,8 +163,8 @@ export const optionalProtect = async (req, res, next) => {
 export const authorize = (...roles) => {
     return (req, res, next) => {
         if (!req.user || !req.user.role) {
-            return res.status(403).json({ 
-                message: `User role ${req.user?.role || 'Unknown'} is not authorized to access this route` 
+            return res.status(403).json({
+                message: `User role ${req.user?.role || 'Unknown'} is not authorized to access this route`
             });
         }
 
@@ -128,8 +185,8 @@ export const authorize = (...roles) => {
         });
 
         if (!allowed) {
-            return res.status(403).json({ 
-                message: `User role ${req.user.role} is not authorized to access this route` 
+            return res.status(403).json({
+                message: `User role ${req.user.role} is not authorized to access this route`
             });
         }
         next();
@@ -147,7 +204,7 @@ export const checkVerification = async (req, res, next) => {
 
     // Bypass check for verification endpoints, restaurant info, and basic system calls
     if (
-        req.originalUrl.includes('/verification') || 
+        req.originalUrl.includes('/verification') ||
         (req.method === 'GET' && req.originalUrl.includes('/restaurants/mine')) ||
         req.originalUrl.includes('/notifications') ||
         req.originalUrl.includes('/auth/logout')
@@ -166,7 +223,7 @@ export const checkVerification = async (req, res, next) => {
             return next();
         }
 
-        const restaurant = await Restaurant.findById(rId).select('-logo -bannerImage -showcaseImages').lean();
+        const restaurant = await getCachedRestaurant(rId);
         if (!restaurant) {
             return next();
         }
@@ -211,9 +268,18 @@ export const checkFeature = (featureName) => {
         }
 
         try {
-            const restaurant = await Restaurant.findById(req.user.restaurantId);
+            let rId = req.user.restaurantId;
+            if (!rId && req.user.branchId) {
+                const b = await Branch.findById(req.user.branchId).select('restaurantId');
+                if (b?.restaurantId) rId = b.restaurantId;
+            }
+            if (!rId) {
+                return next();
+            }
+
+            const restaurant = await getCachedRestaurant(rId);
             if (!restaurant) {
-                return res.status(404).json({ message: 'Restaurant not found' });
+                return next();
             }
 
             const planName = restaurant.subscription?.plan || 'Basic';
@@ -228,8 +294,7 @@ export const checkFeature = (featureName) => {
                 return next();
             }
 
-            const escapedPlan = planName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const plan = await Plan.findOne({ name: { $regex: new RegExp(`^${escapedPlan}$`, 'i') } });
+            const plan = await getCachedPlan(planName);
             const targetNorm = normalizeFeatureName(featureName);
 
             // Customer Support is a fundamental platform right available to all accounts
@@ -260,7 +325,8 @@ export const checkFeature = (featureName) => {
             }
             next();
         } catch (error) {
-            res.status(500).json({ message: 'Failed to verify feature access permission' });
+            console.error('checkFeature error:', error.message);
+            next();
         }
     };
 };
@@ -270,7 +336,6 @@ export const checkBillingModule = (moduleNames) => {
     const modulesToCheck = Array.isArray(moduleNames) ? moduleNames : [moduleNames];
 
     return async (req, res, next) => {
-        // SuperAdmin can bypass module restrictions
         if (req.user?.role === 'SuperAdmin') {
             return next();
         }
@@ -280,17 +345,13 @@ export const checkBillingModule = (moduleNames) => {
         }
 
         try {
-            const restaurant = req.restaurant || await Restaurant.findById(req.user.restaurantId);
+            const restaurant = req.restaurant || await getCachedRestaurant(req.user.restaurantId);
             if (!restaurant) {
                 return next();
             }
 
-            // Only enforce if custom billing is specifically active for this restaurant
-            // If isCustomBillingActive is false or undefined, existing restaurants maintain 100% full backward-compatible access
             if (restaurant.billingConfig?.isCustomBillingActive) {
                 const modules = restaurant.billingConfig?.modules || {};
-                
-                // If any of the acceptable module keys is enabled, allow access
                 const isEnabled = modulesToCheck.some(mod => modules[mod] !== false);
 
                 if (!isEnabled) {

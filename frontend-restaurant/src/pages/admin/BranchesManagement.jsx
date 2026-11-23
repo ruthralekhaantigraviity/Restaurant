@@ -3,6 +3,7 @@ import { Plus, Search, MapPin, Phone, Edit2, Trash2, X, AlertTriangle, Sparkles,
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { filterIndianMobile } from '../../utils/phoneValidator';
 
 const BranchesManagement = () => {
     const { api, restaurant } = useAuth();
@@ -282,7 +283,11 @@ const BranchesManagement = () => {
                                     maxLength={10}
                                     pattern="[6-9][0-9]{9}"
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                                    onChange={(e) => {
+                                        const clean = filterIndianMobile(e.target.value);
+                                        if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
+                                        setFormData({...formData, phone: clean});
+                                    }}
                                     className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
                                     placeholder="9876543210"
                                 />

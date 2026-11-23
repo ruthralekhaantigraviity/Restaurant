@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Calendar as CalendarIcon, CalendarCheck, Users, Plus, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { filterIndianMobile } from '../../utils/phoneValidator';
 
 const getStatusStyle = (status) => {
     switch (status) {
@@ -15,10 +16,20 @@ const getStatusStyle = (status) => {
 
 const ReservationManagement = () => {
     const { api } = useAuth();
-    const [reservations, setReservations] = useState([]);
-    const [branches, setBranches] = useState([]);
+    const [reservations, setReservations] = useState(() => {
+        try {
+            const cached = sessionStorage.getItem('restosys_reservations');
+            return cached ? JSON.parse(cached) : [];
+        } catch { return []; }
+    });
+    const [branches, setBranches] = useState(() => {
+        try {
+            const cached = sessionStorage.getItem('restosys_branches');
+            return cached ? JSON.parse(cached) : [];
+        } catch { return []; }
+    });
     const [tables, setTables] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => !sessionStorage.getItem('restosys_reservations'));
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -34,22 +45,33 @@ const ReservationManagement = () => {
     });
 
     const fetchData = async () => {
+        let capTimer = setTimeout(() => setLoading(false), 1200);
         try {
             const [resRes, branchesRes, tablesRes] = await Promise.all([
-                api.get('/reservations'),
-                api.get('/branches'),
-                api.get('/tables')
+                api.get('/reservations', { timeout: 3500 }).catch(() => ({ data: [] })),
+                api.get('/branches', { timeout: 3500 }).catch(() => ({ data: [] })),
+                api.get('/tables', { timeout: 3500 }).catch(() => ({ data: [] }))
             ]);
-            setReservations(resRes.data);
-            setBranches(branchesRes.data);
-            setTables(tablesRes.data);
+            const rList = Array.isArray(resRes.data) ? resRes.data : [];
+            const bList = Array.isArray(branchesRes.data) ? branchesRes.data : [];
+            const tList = Array.isArray(tablesRes.data) ? tablesRes.data : [];
+
+            setReservations(rList);
+            setBranches(bList);
+            setTables(tList);
+
+            try {
+                sessionStorage.setItem('restosys_reservations', JSON.stringify(rList));
+                sessionStorage.setItem('restosys_branches', JSON.stringify(bList));
+            } catch (_) {}
             
-            if (branchesRes.data.length > 0 && !formData.branch) {
-                setFormData(prev => ({ ...prev, branch: branchesRes.data[0]._id }));
+            if (bList.length > 0 && !formData.branch) {
+                setFormData(prev => ({ ...prev, branch: bList[0]._id }));
             }
         } catch (error) {
             console.error('Failed to fetch data', error);
         } finally {
+            clearTimeout(capTimer);
             setLoading(false);
         }
     };
@@ -226,16 +248,16 @@ const ReservationManagement = () => {
                     {/* Sidebar Stats */}
                     <div className="space-y-6">
                         {/* Capacity Overview */}
-                        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-md">
-                            <h3 className="font-bold text-green-50 mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>Capacity Overview</h3>
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4 text-base" style={{ fontFamily: 'Poppins, sans-serif' }}>Capacity Overview</h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-green-100 text-sm font-medium">Expected Guests</p>
-                                    <p className="text-3xl font-extrabold mt-1">{totalGuests}</p>
+                                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40">
+                                    <p className="text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">Expected Guests</p>
+                                    <p className="text-3xl font-extrabold text-emerald-950 dark:text-emerald-100 mt-1">{totalGuests}</p>
                                 </div>
-                                <div>
-                                    <p className="text-green-100 text-sm font-medium">Active Bookings</p>
-                                    <p className="text-3xl font-extrabold mt-1">{activeBookings}</p>
+                                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40">
+                                    <p className="text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">Active Bookings</p>
+                                    <p className="text-3xl font-extrabold text-blue-950 dark:text-blue-100 mt-1">{activeBookings}</p>
                                 </div>
                             </div>
                         </div>
@@ -274,10 +296,9 @@ const ReservationManagement = () => {
                                     placeholder="10-digit mobile number"
                                     value={formData.guestPhone}
                                     onChange={(e) => {
-                                        const val = e.target.value.replace(/\D/g, '');
-                                        if (val.length === 0 || (/^[6-9]/.test(val) && val.length <= 10)) {
-                                            setFormData({...formData, guestPhone: val});
-                                        }
+                                        const clean = filterIndianMobile(e.target.value);
+                                        if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
+                                        setFormData({...formData, guestPhone: clean});
                                     }}
                                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-mono"
                                 />

@@ -7,15 +7,19 @@ import Restaurant from '../models/Restaurant.js';
 // Helper to resolve user's restaurantId safely
 const getUserRestaurantId = async (user, queryOrBody = {}) => {
     let rId = user?.restaurantId || user?.restaurant;
+    if (!rId && user?._id) {
+        const owned = await Restaurant.findOne({ ownerId: user._id }).select('_id').lean();
+        if (owned) rId = owned._id;
+    }
     if (!rId && user?.branchId) {
-        const branchDoc = await Branch.findById(user.branchId);
+        const branchDoc = await Branch.findById(user.branchId).lean();
         if (branchDoc) rId = branchDoc.restaurantId;
     }
     if (!rId && queryOrBody?.restaurantId) {
         rId = queryOrBody.restaurantId;
     }
     if (!rId && user?.role === 'SuperAdmin') {
-        const firstRest = await Restaurant.findOne().select('_id');
+        const firstRest = await Restaurant.findOne().select('_id').lean();
         if (firstRest) rId = firstRest._id;
     }
     return rId;
@@ -73,7 +77,7 @@ export const getExpenses = async (req, res) => {
     try {
         const restaurantId = await getUserRestaurantId(req.user, req.query);
         const filter = { restaurantId };
-        
+
         // Scope by branch for BranchManager or specific query
         if (req.user && req.user.role === 'BranchManager' && req.user.branchId) {
             filter.branchId = req.user.branchId;
@@ -109,24 +113,87 @@ export const getExpenses = async (req, res) => {
             ];
         }
 
-        const expenses = await Expense.find(filter)
+        let expenses = await Expense.find(filter)
             .populate('branchId', 'name')
             .populate('createdBy', 'name role')
             .populate('payments.recordedBy', 'name role')
-            .sort({ date: -1, createdAt: -1 });
+            .sort({ date: -1, createdAt: -1 })
+            .lean();
+
+        // If filtering for lastmonth or thismonth and no expenses exist for that restaurant, auto-instantiate standard bills including Staff Salary
+        if (expenses.length === 0 && (req.query.period === 'lastmonth' || req.query.period === 'thismonth') && restaurantId && (!req.query.category || req.query.category === 'All')) {
+            const now = new Date();
+            const isLastMonth = req.query.period === 'lastmonth';
+            const targetDate = isLastMonth ? new Date(now.getFullYear(), now.getMonth() - 1, 1) : new Date(now.getFullYear(), now.getMonth(), 1);
+            const periodLabel = targetDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), 10, 23, 59, 59);
+
+            const defaultBills = [
+                { category: 'Rent', title: 'Monthly Premises Rent', amount: 25000, description: `Premises Rent - ${periodLabel}`, paymentStatus: isLastMonth ? 'Paid' : 'Pending', paidAmount: isLastMonth ? 25000 : 0 },
+                { category: 'Staff salary', title: 'Monthly Staff Salary & Payroll', amount: 48000, description: `Staff Salaries & Payroll - ${periodLabel}`, paymentStatus: isLastMonth ? 'Paid' : 'Pending', paidAmount: isLastMonth ? 48000 : 0 },
+                { category: 'Electricity', title: 'Electricity & Power Utility', amount: 6500, description: `Electricity Bill - ${periodLabel}`, paymentStatus: isLastMonth ? 'Paid' : 'Pending', paidAmount: isLastMonth ? 6500 : 0 },
+                { category: 'Internet', title: 'High-Speed Broadband Internet', amount: 1500, description: `Broadband Internet Bill - ${periodLabel}`, paymentStatus: isLastMonth ? 'Paid' : 'Pending', paidAmount: isLastMonth ? 1500 : 0 },
+                { category: 'Water', title: 'Commercial Water Utility', amount: 1200, description: `Commercial Water Bill - ${periodLabel}`, paymentStatus: isLastMonth ? 'Paid' : 'Pending', paidAmount: isLastMonth ? 1200 : 0 }
+            ];
+
+            for (const b of defaultBills) {
+                const bal = Math.max(0, b.amount - (b.paidAmount || 0));
+                try {
+                    await Expense.create({
+                        ...b,
+                        balanceDue: bal,
+                        date: targetDate,
+                        dueDate: dueDate,
+                        billingPeriod: periodLabel,
+                        paymentMethod: 'Bank Transfer',
+                        isRecurring: true,
+                        restaurantId,
+                        source: 'Recurring',
+                        createdBy: req.user?._id
+                    });
+                } catch (_) { }
+            }
+
+            expenses = await Expense.find(filter)
+                .populate('branchId', 'name')
+                .populate('createdBy', 'name role')
+                .populate('payments.recordedBy', 'name role')
+                .sort({ date: -1, createdAt: -1 })
+                .lean();
+        }
 
         // Dynamically compute Overdue status for pending bills past due date
         const now = new Date();
         const enrichedExpenses = expenses.map(exp => {
-            const doc = exp.toObject();
+            const doc = typeof exp.toObject === 'function' ? exp.toObject() : { ...exp };
             if (doc.paymentStatus === 'Pending' && doc.dueDate && new Date(doc.dueDate) < now) {
                 doc.isOverdue = true;
             }
             return doc;
         });
 
-        res.json(enrichedExpenses);
+        // Deduplicate repeated salary payments or duplicate expenses
+        const seenExp = new Map();
+        const deduplicated = [];
+        const duplicateExpIds = [];
+
+        for (const exp of enrichedExpenses) {
+            const key = `${(exp.title || exp.description || '').trim().toLowerCase()}_${exp.billingPeriod || ''}_${new Date(exp.date).toDateString()}_${exp.amount}`;
+            if (seenExp.has(key)) {
+                duplicateExpIds.push(exp._id);
+            } else {
+                seenExp.set(key, true);
+                deduplicated.push(exp);
+            }
+        }
+
+        if (duplicateExpIds.length > 0) {
+            Expense.deleteMany({ _id: { $in: duplicateExpIds } }).catch(() => {});
+        }
+
+        res.json(deduplicated);
     } catch (error) {
+        console.error('getExpenses error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -137,7 +204,12 @@ export const getExpenses = async (req, res) => {
 export const getExpenseSummary = async (req, res) => {
     try {
         const restaurantId = await getUserRestaurantId(req.user, req.query);
-        const matchFilter = { restaurantId: new mongoose.Types.ObjectId(restaurantId) };
+        const matchFilter = {};
+        if (restaurantId && mongoose.Types.ObjectId.isValid(restaurantId)) {
+            matchFilter.restaurantId = new mongoose.Types.ObjectId(restaurantId);
+        } else if (restaurantId) {
+            matchFilter.restaurantId = restaurantId;
+        }
 
         if (req.user && req.user.role === 'BranchManager' && req.user.branchId) {
             matchFilter.branchId = new mongoose.Types.ObjectId(req.user.branchId);
@@ -218,11 +290,11 @@ export const getExpenseSummary = async (req, res) => {
 // @route   POST /api/expenses
 // @access  Private
 export const createExpense = async (req, res) => {
-    const { 
+    const {
         title, category, amount, description, date, dueDate, billingPeriod,
         paymentStatus, paidAmount, paymentMethod, paymentDate,
         isRecurring, recurringFrequency, recurringKey,
-        receiptUrl, notes, staff, branchId 
+        receiptUrl, notes, staff, branchId
     } = req.body;
 
     try {
@@ -430,12 +502,13 @@ export const generateRecurringBills = async (req, res) => {
             filter.branchId = branchId;
         }
 
-        let recurringTemplates = await Expense.find(filter);
+        let recurringTemplates = await Expense.find(filter).lean();
 
         // If no recurring bills configured yet, instantiate standard default recurring utility bills!
         if (!recurringTemplates.length) {
             const defaultTemplates = [
                 { category: 'Rent', title: 'Monthly Premises Rent', amount: 25000, description: `Premises Rent - ${periodLabel}` },
+                { category: 'Staff salary', title: 'Monthly Staff Salary & Payroll', amount: 48000, description: `Staff Salaries & Payroll - ${periodLabel}` },
                 { category: 'Electricity', title: 'Electricity & Power Utility', amount: 6500, description: `Electricity Bill - ${periodLabel}` },
                 { category: 'Internet', title: 'High-Speed Broadband Internet', amount: 1500, description: `Broadband Internet Bill - ${periodLabel}` },
                 { category: 'Water', title: 'Commercial Water Utility', amount: 1200, description: `Commercial Water Bill - ${periodLabel}` }
@@ -531,7 +604,7 @@ export const generateRecurringBills = async (req, res) => {
         }
 
         res.json({
-            message: generated.length > 0 
+            message: generated.length > 0
                 ? `Generated ${generated.length} recurring bills for ${periodLabel}`
                 : `All recurring bills for ${periodLabel} are already up to date.`,
             createdCount: generated.length,

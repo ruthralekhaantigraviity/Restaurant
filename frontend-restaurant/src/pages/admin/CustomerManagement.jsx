@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Plus, Filter, Download, Star, Mail, Phone, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { filterIndianMobile } from '../../utils/phoneValidator';
 
 const getTierStyle = (tier) => {
     switch(tier) {
@@ -223,7 +224,11 @@ const CustomerManagement = () => {
                                     maxLength={10}
                                     pattern="[6-9][0-9]{9}"
                                     value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                                    onChange={(e) => {
+                                        const clean = filterIndianMobile(e.target.value);
+                                        if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
+                                        setFormData({...formData, phone: clean});
+                                    }}
                                     className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
                                     placeholder="9876543210"
                                 />

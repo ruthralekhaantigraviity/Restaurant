@@ -1,39 +1,64 @@
 import mongoose from 'mongoose';
+import dns from 'node:dns';
+
+// Ensure rock-solid public DNS servers to prevent Windows querySrv EREFUSED / ECONNREFUSED
+try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (_) {}
+
+// Ensure IPv4 is prioritized for Atlas cluster SRV records
+try {
+    if (dns.setDefaultResultOrder) {
+        dns.setDefaultResultOrder('ipv4first');
+    }
+} catch (_) {}
 
 let cachedPromise = null;
 
+const fallbackUri = 'mongodb+srv://ruthralekhaantigraviity_db_user:bPtyhG4yQzSPcGgR@cluster0.3vd0qmf.mongodb.net/test?retryWrites=true&w=majority';
+const uri = process.env.MONGO_URI || fallbackUri;
+
 const connectDB = async () => {
+    // 1: Connected
     if (mongoose.connection.readyState === 1) {
         return mongoose.connection;
     }
-    if (cachedPromise) {
-        return cachedPromise;
+
+    // 2: Connecting - return the in-flight promise
+    if (mongoose.connection.readyState === 2 && cachedPromise) {
+        try {
+            return await cachedPromise;
+        } catch (_) {
+            cachedPromise = null;
+        }
     }
 
-    const fallbackUri = 'mongodb+srv://ruthralekhaantigraviity_db_user:bPtyhG4yQzSPcGgR@cluster0.3vd0qmf.mongodb.net/test?appName=Cluster0';
-    const uri = process.env.MONGO_URI || fallbackUri;
+    if (cachedPromise) {
+        try {
+            const conn = await cachedPromise;
+            if (mongoose.connection.readyState === 1) {
+                return conn;
+            }
+        } catch (_) {
+            cachedPromise = null;
+        }
+    }
 
     cachedPromise = (async () => {
-        let retries = process.env.VERCEL ? 2 : 5;
-        while (retries > 0) {
-            try {
-                const conn = await mongoose.connect(uri, {
-                    serverSelectionTimeoutMS: 5000,
-                    connectTimeoutMS: 10000,
-                });
-                console.log(`MongoDB Connected: ${conn.connection.host}`);
-                return conn.connection;
-            } catch (error) {
-                console.error(`MongoDB Connection Error: ${error.message}. Retrying in 1s... (${retries} left)`);
-                retries -= 1;
-                if (retries > 0) {
-                    await new Promise(res => setTimeout(res, 1000));
-                }
-            }
+        try {
+            const conn = await mongoose.connect(uri, {
+                serverSelectionTimeoutMS: 15000,
+                connectTimeoutMS: 20000,
+                socketTimeoutMS: 45000,
+                maxPoolSize: 20,
+            });
+            console.log(`MongoDB Connected: ${conn.connection.host}`);
+            return conn.connection;
+        } catch (error) {
+            cachedPromise = null;
+            console.error(`MongoDB Connection Error: ${error.message}`);
+            throw error;
         }
-        cachedPromise = null;
-        console.error('Failed to connect to MongoDB after multiple retries.');
-        return null;
     })();
 
     return cachedPromise;

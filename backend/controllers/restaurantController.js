@@ -262,41 +262,48 @@ const getRestaurantFallbackSvg = (name = 'FoodNest', isLogo = false) => {
         .filter(Boolean)
         .slice(0, 2)
         .join('')
-        .toUpperCase() || 'FN';
+        .toUpperCase() || (cleanName.charAt(0).toUpperCase() || 'V');
 
     if (isLogo) {
         return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <defs>
     <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF5A1F"/>
-      <stop offset="100%" stop-color="#EA580C"/>
+      <stop offset="0%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#10B981"/>
     </linearGradient>
   </defs>
-  <rect width="100%" height="100%" rx="36" fill="url(#logoBg)"/>
-  <circle cx="100" cy="100" r="72" fill="white" fill-opacity="0.12"/>
-  <text x="100" y="112" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="64" font-weight="900" letter-spacing="1">${escapeXmlForSvg(initials)}</text>
+  <rect width="100%" height="100%" rx="44" fill="url(#logoBg)"/>
+  <circle cx="100" cy="100" r="76" fill="white" fill-opacity="0.15"/>
+  <g transform="translate(46, 42) scale(4.4)" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 13.8V4a2 2 0 1 1 4 0v9.8" />
+    <path d="M6 8h4" />
+    <path d="M14 4v10" />
+    <path d="M17 4v10" />
+    <path d="M14 8h3" />
+    <path d="M3 15h18v2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2z" />
+  </g>
 </svg>`;
     }
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
   <defs>
     <linearGradient id="bannerBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E293B"/>
-      <stop offset="50%" stop-color="#0F172A"/>
-      <stop offset="100%" stop-color="#020617"/>
+      <stop offset="0%" stop-color="#064E3B"/>
+      <stop offset="50%" stop-color="#065F46"/>
+      <stop offset="100%" stop-color="#022C22"/>
     </linearGradient>
     <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF5A1F"/>
-      <stop offset="100%" stop-color="#F59E0B"/>
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#34D399"/>
     </linearGradient>
   </defs>
   <rect width="100%" height="100%" fill="url(#bannerBg)"/>
   <circle cx="400" cy="180" r="110" fill="url(#accentGrad)" fill-opacity="0.15"/>
-  <g transform="translate(376, 130) scale(2)" stroke="#FF5A1F" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <g transform="translate(376, 130) scale(2)" stroke="#10B981" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <path d="M18 2v20M2 12h20M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24"/>
   </g>
   <text x="400" y="275" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" letter-spacing="0.5">${escapeXmlForSvg(cleanName)}</text>
-  <text x="400" y="315" dominant-baseline="middle" text-anchor="middle" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="2">AUTHENTIC DINING &amp; KITCHEN</text>
+  <text x="400" y="315" dominant-baseline="middle" text-anchor="middle" fill="#A7F3D0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" letter-spacing="2">AUTHENTIC DINING &amp; KITCHEN</text>
 </svg>`;
 };
 
@@ -362,6 +369,21 @@ export const getRestaurantThumbnail = async (req, res) => {
             } else if (raw.startsWith('http://') || raw.startsWith('https://')) {
                 res.set('Cache-Control', 'public, max-age=86400');
                 return res.redirect(raw);
+            } else {
+                // Local file on disk (uploads/verification/..., uploads/..., etc.)
+                const cleanRel = raw.replace(/^[/\\]+/, '');
+                const candidates = [
+                    path.resolve(cleanRel),
+                    path.resolve('backend', cleanRel),
+                    path.resolve(process.cwd(), cleanRel),
+                    path.resolve(process.cwd(), 'backend', cleanRel)
+                ];
+                for (const fileCandidate of candidates) {
+                    if (fs.existsSync(fileCandidate) && fs.statSync(fileCandidate).isFile()) {
+                        res.set('Cache-Control', 'public, max-age=86400');
+                        return res.sendFile(fileCandidate);
+                    }
+                }
             }
         }
 
@@ -563,7 +585,7 @@ export const getMyRestaurant = async (req, res) => {
             return res.json(null);
         }
 
-        const restaurant = await Restaurant.findById(restaurantId).select('-bannerImage -showcaseImages');
+        const restaurant = await Restaurant.findById(restaurantId).select('-logo -bannerImage -showcaseImages');
         if (!restaurant) {
             return res.json(null);
         }

@@ -18,13 +18,23 @@ const ProfitAndLoss = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [branchId, setBranchId] = useState('All');
-    const [branches, setBranches] = useState([]);
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [branches, setBranches] = useState(() => {
+        try {
+            const cached = sessionStorage.getItem('restosys_branches');
+            return cached ? JSON.parse(cached) : [];
+        } catch { return []; }
+    });
+    const [data, setData] = useState(() => {
+        try {
+            const cached = sessionStorage.getItem('restosys_profit_loss');
+            return cached ? JSON.parse(cached) : null;
+        } catch { return null; }
+    });
+    const [loading, setLoading] = useState(() => !sessionStorage.getItem('restosys_profit_loss'));
     const [showBreakdown, setShowBreakdown] = useState(true);
 
     const fetchData = async () => {
-        setLoading(true);
+        let capTimer = setTimeout(() => setLoading(false), 1200);
         try {
             const params = { period };
             if (period === 'custom') {
@@ -34,16 +44,19 @@ const ProfitAndLoss = () => {
             if (branchId !== 'All') params.branchId = branchId;
 
             const [pnlRes, branchRes] = await Promise.all([
-                api.get('/analytics/profit-loss', { params }),
-                api.get('/branches').catch(() => ({ data: [] }))
+                api.get('/analytics/profit-loss', { params, timeout: 3500 }).catch(() => ({ data: null })),
+                api.get('/branches', { timeout: 3500 }).catch(() => ({ data: [] }))
             ]);
 
-            setData(pnlRes.data);
+            if (pnlRes.data) {
+                setData(pnlRes.data);
+                try { sessionStorage.setItem('restosys_profit_loss', JSON.stringify(pnlRes.data)); } catch (_) {}
+            }
             setBranches(branchRes.data || []);
         } catch (error) {
             console.error('Failed to load P&L analytics', error);
-            toast.error('Failed to load Profit & Loss statement');
         } finally {
+            clearTimeout(capTimer);
             setLoading(false);
         }
     };

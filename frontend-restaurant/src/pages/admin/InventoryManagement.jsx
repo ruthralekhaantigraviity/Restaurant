@@ -1032,33 +1032,54 @@ const InventoryManagement = () => {
             {activeTab === 'valuation' && (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-6">
-                            <h3 className="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Total Inventory Asset Value</h3>
-                            <div className="text-3xl font-black text-slate-900 dark:text-white mt-2">
-                                ₹{totalValuation.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Inventory Asset Value</h3>
+                                    <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                        <DollarSign size={18} />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-slate-900 dark:text-white mt-3 font-mono">
+                                    ₹{totalValuation.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                                Calculated using the <strong>Weighted Average Costing</strong> method based on supplier purchase prices and current verified physical stock quantities.
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
+                                Weighted average inventory valuation based on purchase records and verified stock.
                             </p>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 rounded-2xl p-6 shadow-xs">
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Critical Stock Items</h3>
-                            <div className="text-3xl font-black text-red-600 dark:text-red-400 mt-2">
-                                {criticalItems.length}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Critical Stock Items</h3>
+                                    <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                                        <ShieldAlert size={18} />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-slate-900 dark:text-white mt-3 font-mono">
+                                    {criticalItems.length}
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-400 mt-2">
-                                Items with zero stock or below 50% of the minimum threshold level.
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
+                                Items with zero stock or below 50% of the minimum safety threshold level.
                             </p>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 rounded-2xl p-6 shadow-xs">
-                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Reorder Alerts</h3>
-                            <div className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-2">
-                                {lowStockItems.length}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Reorder Alerts</h3>
+                                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                        <AlertTriangle size={18} />
+                                    </div>
+                                </div>
+                                <div className="text-3xl font-black text-slate-900 dark:text-white mt-3 font-mono">
+                                    {lowStockItems.length}
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-400 mt-2">
-                                Items requiring purchase orders to prevent operational disruption.
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
+                                Stock items requiring purchase orders to maintain continuous kitchen supply.
                             </p>
                         </div>
                     </div>

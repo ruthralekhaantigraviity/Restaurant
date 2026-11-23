@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { filterIndianMobile } from '../../utils/phoneValidator';
 import LiveOrderMap from '../../components/LiveOrderMap';
 import RadiusPickerMap from '../../components/RadiusPickerMap';
 
@@ -886,7 +887,11 @@ const DeliveryManagement = () => {
                                         pattern="[6-9][0-9]{9}"
                                         required
                                         value={newPartner.phoneNumber}
-                                        onChange={(e) => setNewPartner({...newPartner, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 10)})}
+                                        onChange={(e) => {
+                                            const clean = filterIndianMobile(e.target.value);
+                                            if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
+                                            setNewPartner({...newPartner, phoneNumber: clean});
+                                        }}
                                         className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                         placeholder="e.g. 9876543210"
                                     />

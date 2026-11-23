@@ -298,7 +298,8 @@ export const getDashboardAnalytics = async (req, res) => {
 
         const calculateChange = (current, previous) => {
             if (previous === 0) return current > 0 ? 100 : 0;
-            return ((current - previous) / previous) * 100;
+            const pct = ((current - previous) / previous) * 100;
+            return Math.round(pct * 10) / 10;
         };
 
         const revenueChange = calculateChange(curRevenue, prevRevenue);

@@ -5,7 +5,7 @@ import { protect, authorize, checkSubscription } from '../middleware/authMiddlew
 const router = express.Router();
 
 router.use(protect);
-router.use(authorize('RestaurantAdmin', 'BranchManager', 'Waiter'));
+router.use(authorize('RestaurantAdmin', 'Admin', 'Owner', 'BranchManager', 'Waiter', 'SuperAdmin'));
 router.use(checkSubscription);
 
 router.route('/')

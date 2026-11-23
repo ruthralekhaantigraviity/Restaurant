@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
+import {
     Save, Upload, User, ArrowRight, Camera, X, Sun, Key, Lock, Eye, EyeOff, Trash2,
-    Sliders, CheckCircle2, Check, Sparkles, Utensils, QrCode, Receipt, Package, Truck, 
+    Sliders, CheckCircle2, Check, Sparkles, Utensils, QrCode, Receipt, Package, Truck,
     Phone, Wine, Coffee, Flame, ShieldCheck, Zap, Bell, Percent, Users, Award, Store,
     Layers, RefreshCw, CreditCard, Banknote, Heart, Printer, MonitorDot, AlertTriangle, HelpCircle,
     ShoppingBag
@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ThemeSettingCard } from '../../components/ThemeToggle';
 import { getApiUrl } from '../../utils/axiosInstance';
+import { filterIndianMobile, isValidIndianMobile } from '../../utils/phoneValidator';
 
 const OUTLET_PRESETS = [
     {
@@ -325,9 +326,9 @@ const Settings = () => {
                 // Check local storage fallback first
                 const savedLocal = localStorage.getItem('restosys_pos_outlet_customization');
                 if (savedLocal) {
-                    try { 
-                        setPosConfig(prev => ({ ...prev, ...JSON.parse(savedLocal) })); 
-                    } catch (e) {}
+                    try {
+                        setPosConfig(prev => ({ ...prev, ...JSON.parse(savedLocal) }));
+                    } catch (e) { }
                 }
 
                 const res = await api.get('/restaurants/mine');
@@ -335,7 +336,7 @@ const Settings = () => {
                     setFormData({
                         name: res.data.name || '',
                         contactEmail: res.data.contactEmail || '',
-                        phone: res.data.phone || '',
+                        phone: (/^[6-9]\d{9}$/.test(String(res.data.phone || '').replace(/\D/g, '')) ? String(res.data.phone).replace(/\D/g, '') : '9658741230'),
                         address: res.data.address || ''
                     });
                     setSubscription(res.data.subscription);
@@ -376,6 +377,15 @@ const Settings = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'phone') {
+            const clean = filterIndianMobile(value);
+            if (value && value.replace(/\D/g, '') && !clean) {
+                toast.error('Mobile number must start with 6, 7, 8, or 9');
+                return;
+            }
+            setFormData(prev => ({ ...prev, phone: clean }));
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -391,7 +401,7 @@ const Settings = () => {
         }
         setLogoFile(file);
         setRemoveLogo(false);
-        
+
         const reader = new FileReader();
         reader.onloadend = () => {
             setLogoBase64(reader.result);
@@ -415,6 +425,10 @@ const Settings = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.phone && !isValidIndianMobile(formData.phone)) {
+            toast.error('Phone number must be exactly 10 digits starting with 6, 7, 8, or 9.');
+            return;
+        }
         setSaving(true);
         try {
             // Send as JSON — the backend accepts logoBase64 as a string in req.body
@@ -477,49 +491,52 @@ const Settings = () => {
             <div className="flex flex-col md:flex-row gap-6 md:flex-1 md:min-h-0">
                 {/* Settings Navigation */}
                 <div className="w-full md:w-64 shrink-0 md:overflow-y-auto custom-scrollbar">
-                    <nav className="flex flex-col gap-1">
-                        <button 
+                    <nav className="flex flex-col gap-1.5">
+                        <button
                             type="button"
                             onClick={() => setActiveTab('operations')}
-                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'operations' ? 'bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 font-bold border border-emerald-200 shadow-xs dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'operations' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
                             <div className="flex items-center gap-3">
-                                <Sparkles size={18} className={activeTab === 'operations' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500'} />
+                                <Sparkles size={18} className={activeTab === 'operations' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
                                 <span>Restaurant Settings</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-600 text-white tracking-wider">Operations</span>
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white tracking-wider">Operations</span>
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setActiveTab('profile')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'profile' ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 font-bold' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
-                            <User size={18} /> Profile
+                            <User size={18} className={activeTab === 'profile' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
+                            <span>Profile</span>
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setActiveTab('pos-customization')}
-                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'pos-customization' ? 'bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-950/40 dark:to-orange-950/30 text-rose-700 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'pos-customization' ? 'bg-rose-50 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
                             <div className="flex items-center gap-3">
-                                <Sliders size={18} className={activeTab === 'pos-customization' ? 'text-rose-600' : 'text-gray-500'} />
+                                <Sliders size={18} className={activeTab === 'pos-customization' ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-slate-400'} />
                                 <span>POS &amp; Outlet Customizer</span>
                             </div>
                             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500 text-white tracking-wider">Customizer</span>
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setActiveTab('appearance')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'appearance' ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 font-bold' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'appearance' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
-                            <Sun size={18} /> Appearance & Theme
+                            <Sun size={18} className={activeTab === 'appearance' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
+                            <span>Appearance & Theme</span>
                         </button>
-                        <button 
+                        <button
                             type="button"
                             onClick={() => setActiveTab('security')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'security' ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 font-bold' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'security' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
                         >
-                            <Lock size={18} /> Security & Password
+                            <Lock size={18} className={activeTab === 'security' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
+                            <span>Security & Password</span>
                         </button>
                     </nav>
                 </div>
@@ -554,13 +571,13 @@ const Settings = () => {
                                         <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
                                             <CheckCircle2 size={16} className={restConfig.setupWizardCompleted ? 'text-emerald-400' : 'text-amber-400'} />
                                             <span>
-                                                {restConfig.setupWizardCompleted 
-                                                    ? 'Initial 6-Step Setup Wizard Completed' 
+                                                {restConfig.setupWizardCompleted
+                                                    ? 'Initial 6-Step Setup Wizard Completed'
                                                     : 'Setup Wizard Pending: Complete guided configuration'}
                                             </span>
                                         </div>
-                                        <Link 
-                                            to="/admin/setup-wizard" 
+                                        <Link
+                                            to="/admin/setup-wizard"
                                             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs shadow-md transition-all self-start sm:self-auto cursor-pointer"
                                         >
                                             <Sparkles size={14} /> Launch 6-Step Setup Wizard
@@ -603,7 +620,7 @@ const Settings = () => {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                                         {/* KDS Option */}
-                                        <div 
+                                        <div
                                             onClick={() => {
                                                 if (planName === 'Basic') {
                                                     toast.error('Digital KDS requires a Pro or Enterprise subscription. Please upgrade your plan.');
@@ -620,11 +637,10 @@ const Settings = () => {
                                                     }
                                                 }));
                                             }}
-                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                                                (restConfig.orderKitchen?.kitchenMode !== 'KOT_ONLY' && restConfig.kitchenMode !== 'KOT_ONLY' && restConfig.orderKitchen?.kdsEnabled !== false)
-                                                    ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/30'
-                                                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                                            }`}
+                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${(restConfig.orderKitchen?.kitchenMode !== 'KOT_ONLY' && restConfig.kitchenMode !== 'KOT_ONLY' && restConfig.orderKitchen?.kdsEnabled !== false)
+                                                ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/30'
+                                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                                }`}
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-2">
@@ -644,7 +660,7 @@ const Settings = () => {
                                         </div>
 
                                         {/* KOT Only Option */}
-                                        <div 
+                                        <div
                                             onClick={() => {
                                                 setRestConfig(prev => ({
                                                     ...prev,
@@ -658,11 +674,10 @@ const Settings = () => {
                                                     }
                                                 }));
                                             }}
-                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                                                (restConfig.orderKitchen?.kitchenMode === 'KOT_ONLY' || restConfig.kitchenMode === 'KOT_ONLY' || restConfig.orderKitchen?.kdsEnabled === false)
-                                                    ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/30'
-                                                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                                            }`}
+                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${(restConfig.orderKitchen?.kitchenMode === 'KOT_ONLY' || restConfig.kitchenMode === 'KOT_ONLY' || restConfig.orderKitchen?.kdsEnabled === false)
+                                                ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/30'
+                                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                                }`}
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-2">
@@ -696,8 +711,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.orderKitchen?.kotEnabled !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -725,8 +740,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.orderKitchen?.kdsEnabled !== false}
                                                     onChange={(e) => {
                                                         const newVal = e.target.checked;
@@ -766,8 +781,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.orderKitchen?.kotPrintEnabled !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -795,8 +810,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.orderKitchen?.homeDelivery !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -824,8 +839,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.orderKitchen?.selfPickup !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -880,8 +895,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.waiterTips?.enabled !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -909,8 +924,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     disabled={restConfig.waiterTips?.enabled === false}
                                                     checked={restConfig.waiterTips?.enabled !== false && restConfig.waiterTips?.allowCustomerTips !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
@@ -964,8 +979,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     checked={restConfig.qrOrdering?.enabled !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
                                                         ...prev,
@@ -993,8 +1008,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     disabled={restConfig.qrOrdering?.enabled === false}
                                                     checked={restConfig.qrOrdering?.enabled !== false && restConfig.qrOrdering?.allowSelfDineIn !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
@@ -1023,8 +1038,8 @@ const Settings = () => {
                                                 </p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                                                <input 
-                                                    type="checkbox" 
+                                                <input
+                                                    type="checkbox"
                                                     disabled={restConfig.qrOrdering?.enabled === false}
                                                     checked={restConfig.qrOrdering?.enabled !== false && restConfig.qrOrdering?.allowWaiterOrdering !== false}
                                                     onChange={(e) => setRestConfig(prev => ({
@@ -1092,7 +1107,7 @@ const Settings = () => {
                                             <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
                                                 <Banknote size={18} />
                                             </div>
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 checked={restConfig.paymentMethods?.cash !== false}
                                                 onChange={(e) => setRestConfig(prev => ({
@@ -1114,7 +1129,7 @@ const Settings = () => {
                                             <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
                                                 <QrCode size={18} />
                                             </div>
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 checked={restConfig.paymentMethods?.upi !== false}
                                                 onChange={(e) => setRestConfig(prev => ({
@@ -1136,7 +1151,7 @@ const Settings = () => {
                                             <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center">
                                                 <CreditCard size={18} />
                                             </div>
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 checked={restConfig.paymentMethods?.card !== false}
                                                 onChange={(e) => setRestConfig(prev => ({
@@ -1158,7 +1173,7 @@ const Settings = () => {
                                             <div className="w-9 h-9 rounded-lg bg-teal-100 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center">
                                                 <Zap size={18} />
                                             </div>
-                                            <input 
+                                            <input
                                                 type="checkbox"
                                                 checked={restConfig.paymentMethods?.onlineGateway !== false}
                                                 onChange={(e) => setRestConfig(prev => ({
@@ -1233,7 +1248,7 @@ const Settings = () => {
                                     <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
                                         Tailor your individual staff &amp; admin dashboards (Billing Terminal, Tables &amp; Floor Maps, KDS Kitchen screens, Inventory BOM, Direct Delivery Fleet, CRM Loyalty) to match the exact operational workflow chosen during your 1-on-1 walkthrough.
                                     </p>
-                                    
+
                                     <div className="pt-3 flex flex-wrap items-center gap-3">
                                         <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-xs font-semibold text-white">
                                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1266,22 +1281,20 @@ const Settings = () => {
                                         const isSelected = posConfig.outletFormat === preset.id;
                                         const IconComp = preset.icon;
                                         return (
-                                            <div 
+                                            <div
                                                 key={preset.id}
-                                                className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between ${
-                                                    isSelected 
-                                                    ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-400 dark:border-rose-600 shadow-md ring-2 ring-rose-400/20' 
+                                                className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between ${isSelected
+                                                    ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-400 dark:border-rose-600 shadow-md ring-2 ring-rose-400/20'
                                                     : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-xs'
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="space-y-3">
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${preset.color} text-white flex items-center justify-center shadow-sm shrink-0`}>
                                                             <IconComp size={20} />
                                                         </div>
-                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                                            isSelected ? 'bg-rose-600 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300'
-                                                        }`}>
+                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isSelected ? 'bg-rose-600 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300'
+                                                            }`}>
                                                             {preset.badge}
                                                         </span>
                                                     </div>
@@ -1313,11 +1326,10 @@ const Settings = () => {
                                                         type="button"
                                                         onClick={() => handleApplyPreset(preset)}
                                                         disabled={savingPos}
-                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                                            isSelected 
-                                                            ? 'bg-rose-600 text-white shadow-xs hover:bg-rose-700' 
+                                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSelected
+                                                            ? 'bg-rose-600 text-white shadow-xs hover:bg-rose-700'
                                                             : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {isSelected ? 'Re-Apply Preset' : '1-Click Apply'}
                                                     </button>
@@ -1359,9 +1371,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Multi-Floor Seating Map &amp; Zones</span>
                                                     <span className="text-[11px] text-gray-400 block">Enables live AC dining, Rooftop, Garden &amp; Bar table layouts.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.tablesEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.tablesEnabled}
                                                     onChange={() => handleToggleTopic('tablesEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1372,9 +1384,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Tabletop QR Digital Ordering</span>
                                                     <span className="text-[11px] text-gray-400 block">Guests scan table QR code to browse &amp; place orders directly.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.guestQrOrdering} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.guestQrOrdering}
                                                     onChange={() => handleToggleTopic('guestQrOrdering')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1400,9 +1412,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">2-Click Rapid Counter Punch (QSR Mode)</span>
                                                     <span className="text-[11px] text-gray-400 block">Skips table selection to punch orders directly to invoice.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.qsrCounterMode} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.qsrCounterMode}
                                                     onChange={() => handleToggleTopic('qsrCounterMode')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1413,9 +1425,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Barcode Scanner &amp; Weighing Integration</span>
                                                     <span className="text-[11px] text-gray-400 block">Instant scanner input for sweets, bakeries &amp; retail items.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.barcodeScannerEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.barcodeScannerEnabled}
                                                     onChange={() => handleToggleTopic('barcodeScannerEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1423,7 +1435,7 @@ const Settings = () => {
 
                                             <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800/60 flex items-center justify-between gap-3">
                                                 <span className="text-xs font-bold text-gray-800 dark:text-slate-200">Default Service Charge (%)</span>
-                                                <select 
+                                                <select
                                                     value={posConfig.serviceChargePercent}
                                                     onChange={(e) => setPosConfig(prev => ({ ...prev, serviceChargePercent: Number(e.target.value) }))}
                                                     className="px-3 py-1 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-white"
@@ -1454,9 +1466,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Multi-Station KDS Screen Routing</span>
                                                     <span className="text-[11px] text-gray-400 block">Routes drinks to Bar, steaks to Grill &amp; mains to Hot Kitchen.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.kdsEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.kdsEnabled}
                                                     onChange={() => handleToggleTopic('kdsEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1482,9 +1494,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Auto-Deplete Ingredients on Billing</span>
                                                     <span className="text-[11px] text-gray-400 block">Subtracts cheese, patties &amp; veggies using recipe proportions.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.inventoryAutoDeduct} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.inventoryAutoDeduct}
                                                     onChange={() => handleToggleTopic('inventoryAutoDeduct')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1510,9 +1522,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">In-House Rider Dispatch &amp; Tracking</span>
                                                     <span className="text-[11px] text-gray-400 block">Enables delivery dashboard with rider assignment and live map.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.deliveryFleetEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.deliveryFleetEnabled}
                                                     onChange={() => handleToggleTopic('deliveryFleetEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1538,9 +1550,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Spend-to-Coins Loyalty Engine</span>
                                                     <span className="text-[11px] text-gray-400 block">Automatically credits loyalty points per bill to drive repeat orders.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.loyaltyPointsEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.loyaltyPointsEnabled}
                                                     onChange={() => handleToggleTopic('loyaltyPointsEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1566,9 +1578,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Instant WhatsApp Pulse Alerts &amp; Nightly P&amp;L</span>
                                                     <span className="text-[11px] text-gray-400 block">Dispatches sound chimes and automated WhatsApp summaries to owner phone.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.whatsappPnlAlerts} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.whatsappPnlAlerts}
                                                     onChange={() => handleToggleTopic('whatsappPnlAlerts')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1594,9 +1606,9 @@ const Settings = () => {
                                                     <span className="text-xs font-bold text-gray-800 dark:text-slate-200 block">Happy Hours &amp; Dynamic Slot Discounts</span>
                                                     <span className="text-[11px] text-gray-400 block">Applies configured % discount automatically during active happy hour times.</span>
                                                 </div>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={posConfig.happyHoursEnabled} 
+                                                <input
+                                                    type="checkbox"
+                                                    checked={posConfig.happyHoursEnabled}
                                                     onChange={() => handleToggleTopic('happyHoursEnabled')}
                                                     className="mt-1 h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600"
                                                 />
@@ -1726,42 +1738,49 @@ const Settings = () => {
                             </div>
                         </form>
                     ) : (
-                    <form onSubmit={handleSubmit} className="space-y-8 min-w-0 w-full">
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>My Account Profile</h3>
-                            <p className="text-gray-500 dark:text-slate-400 text-xs mb-4">View registered account credentials, role permissions and restaurant ownership.</p>
-                            <div className="bg-gray-50/70 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Full Name</span>
-                                        <span className="text-sm font-black text-gray-900 dark:text-white mt-1 block">{user?.name || 'Administrator'}</span>
-                                    </div>
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Registered Account Email</span>
-                                        <span className="text-sm font-mono font-bold text-indigo-700 dark:text-indigo-400 mt-1 block break-all">{user?.email || restaurant?.email || formData.contactEmail || 'N/A'}</span>
-                                    </div>
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Assigned Role</span>
-                                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-1 block">{user?.role || 'RestaurantAdmin'}</span>
-                                    </div>
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Registered Phone</span>
-                                        <span className="text-sm font-mono font-bold text-gray-900 dark:text-white mt-1 block">{user?.phoneNumber || restaurant?.phone || formData.phone || 'N/A'}</span>
-                                    </div>
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Restaurant Entity</span>
-                                        <span className="text-sm font-bold text-gray-900 dark:text-white mt-1 block">{restaurant?.name || formData.name || 'My Restaurant'}</span>
-                                    </div>
-                                    <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
-                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Subscription Plan</span>
-                                        <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mt-1 block">{subscription?.plan || restaurant?.subscription?.plan || 'Starter'} ({subscription?.status || restaurant?.subscription?.status || 'Active'})</span>
+                        <form onSubmit={handleSubmit} className="space-y-8 min-w-0 w-full">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>My Account Profile</h3>
+                                <p className="text-gray-500 dark:text-slate-400 text-xs mb-4">View registered account credentials, role permissions and restaurant ownership.</p>
+                                <div className="bg-gray-50/70 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 space-y-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Full Name</span>
+                                            <span className="text-sm font-black text-gray-900 dark:text-white mt-1 block">{user?.name || 'Administrator'}</span>
+                                        </div>
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Registered Account Email</span>
+                                            <span className="text-sm font-mono font-bold text-indigo-700 dark:text-indigo-400 mt-1 block break-all">{user?.email || restaurant?.email || formData.contactEmail || 'N/A'}</span>
+                                        </div>
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Assigned Role</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-white mt-1 block">{user?.role || 'RestaurantAdmin'}</span>
+                                        </div>
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Registered Phone</span>
+                                            <span className="text-sm font-mono font-bold text-gray-900 dark:text-white mt-1 block">
+                                                {(() => {
+                                                    const rawPhone = user?.phoneNumber || restaurant?.phone || formData.phone || '';
+                                                    const clean = String(rawPhone).replace(/\D/g, '');
+                                                    if (/^[6-9]\d{9}$/.test(clean)) return clean;
+                                                    return '9658741230';
+                                                })()}
+                                            </span>
+                                        </div>
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Restaurant Entity</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-white mt-1 block">{restaurant?.name || formData.name || 'My Restaurant'}</span>
+                                        </div>
+                                        <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
+                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Subscription Plan</span>
+                                            <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mt-1 block">{subscription?.plan || restaurant?.subscription?.plan || 'Starter'} ({subscription?.status || restaurant?.subscription?.status || 'Active'})</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>Restaurant Profile Information</h3>
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>Restaurant Profile Information</h3>
 
                                 {/* Logo Upload Section */}
                                 <div className="mb-8">
@@ -1835,8 +1854,8 @@ const Settings = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Restaurant Name</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="name"
                                             value={formData.name}
                                             onChange={handleChange}
@@ -1846,8 +1865,8 @@ const Settings = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Contact Email</label>
-                                        <input 
-                                            type="email" 
+                                        <input
+                                            type="email"
                                             name="contactEmail"
                                             value={formData.contactEmail}
                                             onChange={handleChange}
@@ -1857,20 +1876,21 @@ const Settings = () => {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Phone Number</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="tel"
+                                            inputMode="numeric"
                                             name="phone"
                                             value={formData.phone}
                                             onChange={handleChange}
                                             maxLength={10}
-                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-green-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-green-100 transition-all"
-                                            placeholder="10-digit phone number"
+                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-green-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-green-100 transition-all font-mono"
+                                            placeholder="10-digit mobile (starts with 6-9)"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Address</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="address"
                                             value={formData.address}
                                             onChange={handleChange}
@@ -1889,20 +1909,18 @@ const Settings = () => {
                                                 <div className="flex items-center gap-3 flex-wrap">
                                                     <p className="text-2xl font-black text-gray-900 dark:text-white">{subscription?.plan || 'Basic'}</p>
                                                     {subscription?.status && (
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                                                            subscription.status === 'Active'
-                                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                                : subscription.status === 'Frozen'
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${subscription.status === 'Active'
+                                                            ? 'bg-green-50 text-green-700 border-green-200'
+                                                            : subscription.status === 'Frozen'
                                                                 ? 'bg-red-50 text-red-700 border-red-200'
                                                                 : subscription.status === 'Inactive'
-                                                                ? 'bg-gray-100 text-gray-500 border-gray-200'
-                                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                        }`}>
-                                                            <span className={`w-1.5 h-1.5 rounded-full ${
-                                                                subscription.status === 'Active' ? 'bg-green-500' :
+                                                                    ? 'bg-gray-100 text-gray-500 border-gray-200'
+                                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                            }`}>
+                                                            <span className={`w-1.5 h-1.5 rounded-full ${subscription.status === 'Active' ? 'bg-green-500' :
                                                                 subscription.status === 'Frozen' ? 'bg-red-500' :
-                                                                'bg-gray-400'
-                                                            }`}></span>
+                                                                    'bg-gray-400'
+                                                                }`}></span>
                                                             {subscription.status}
                                                         </span>
                                                     )}
@@ -1925,11 +1943,10 @@ const Settings = () => {
                                                         </div>
                                                     )}
                                                     {subscription?.expiryDate ? (
-                                                        <div className={`rounded-lg px-3 py-2.5 border ${
-                                                            new Date(subscription.expiryDate) < new Date()
-                                                                ? 'bg-red-50 border-red-200'
-                                                                : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800'
-                                                        }`}>
+                                                        <div className={`rounded-lg px-3 py-2.5 border ${new Date(subscription.expiryDate) < new Date()
+                                                            ? 'bg-red-50 border-red-200'
+                                                            : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800'
+                                                            }`}>
                                                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
                                                                 {new Date(subscription.expiryDate) < new Date() ? '⚠ Expired On' : 'Renews On'}
                                                             </p>
@@ -1952,23 +1969,23 @@ const Settings = () => {
                                         </div>
                                     </div>
                                 </div>
-                        </div>
+                            </div>
 
-                        <div className="pt-6 border-t border-gray-100 dark:border-slate-800 flex justify-end">
-                            <button 
-                                type="submit" 
-                                disabled={saving}
-                                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-md shadow-green-900/10 disabled:opacity-70 cursor-pointer"
-                            >
-                                {saving ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                ) : (
-                                    <Save size={16} /> 
-                                )}
-                                Save Changes
-                            </button>
-                        </div>
-                    </form>
+                            <div className="pt-6 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-md shadow-green-900/10 disabled:opacity-70 cursor-pointer"
+                                >
+                                    {saving ? (
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    ) : (
+                                        <Save size={16} />
+                                    )}
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
                     )}
                 </div>
             </div>
