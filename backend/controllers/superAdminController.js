@@ -94,16 +94,23 @@ export const getStats = async (req, res) => {
 // @access  Private/SuperAdmin
 export const getRestaurants = async (req, res) => {
     try {
-        const [restaurants, revenues] = await Promise.all([
+        const [restaurants, revenues, users, payments] = await Promise.all([
             Restaurant.find({ isDeleted: { $ne: true } })
-                .select('_id name status approvalStatus subscription ownerId address phone posConfig billingConfig')
+                .select('_id name status approvalStatus subscription ownerId address phone contactEmail posConfig billingConfig')
                 .populate('ownerId', 'name email phoneNumber')
                 .sort({ createdAt: -1 })
                 .lean(),
             Order.aggregate([
                 { $match: { isPaid: true } },
                 { $group: { _id: "$restaurantId", totalRevenue: { $sum: "$totalPrice" } } }
-            ])
+            ]),
+            User.find({ role: { $in: ['RestaurantAdmin', 'Admin'] } })
+                .select('_id name email phoneNumber restaurantId')
+                .lean(),
+            SubscriptionPayment.find({ status: 'Completed' })
+                .select('restaurantId planName amount createdAt status')
+                .sort({ createdAt: -1 })
+                .lean()
         ]);
 
         const revMap = {};
@@ -111,12 +118,63 @@ export const getRestaurants = async (req, res) => {
             if (r._id) revMap[r._id.toString()] = r.totalRevenue;
         });
 
-        const result = (restaurants || []).map(r => ({
-            ...r,
-            name: r.name || (r.ownerId?.name ? `${r.ownerId.name}'s Restaurant` : 'Partner Restaurant'),
-            ownerId: r.ownerId || { name: `${r.name || 'Restaurant'} Admin`, email: 'admin@restauranthub.com' },
-            totalRevenue: revMap[r._id.toString()] || 0
-        }));
+        const paymentMap = {};
+        payments.forEach(p => {
+            if (p.restaurantId && !paymentMap[p.restaurantId.toString()]) {
+                paymentMap[p.restaurantId.toString()] = p;
+            }
+        });
+
+        const result = (restaurants || []).map(r => {
+            let owner = r.ownerId;
+            if (!owner || !owner.name || typeof owner === 'string') {
+                const matchedUser = users.find(u => 
+                    (u.restaurantId && u.restaurantId.toString() === r._id.toString()) || 
+                    (r.contactEmail && u.email && u.email.toLowerCase() === r.contactEmail.toLowerCase())
+                );
+                if (matchedUser) {
+                    owner = {
+                        _id: matchedUser._id,
+                        name: matchedUser.name,
+                        email: matchedUser.email,
+                        phoneNumber: matchedUser.phoneNumber || r.phone
+                    };
+                } else {
+                    owner = {
+                        name: r.name ? `${r.name} Admin` : 'Authorized Admin',
+                        email: r.contactEmail || 'N/A',
+                        phoneNumber: r.phone || 'N/A'
+                    };
+                }
+            }
+
+            const sub = r.subscription || {};
+            let verifiedPaymentStatus = sub.paymentStatus || 'Pending';
+            const hasPaidTransaction = !!paymentMap[r._id.toString()];
+
+            if (hasPaidTransaction) {
+                verifiedPaymentStatus = 'Paid';
+            } else if (sub.paymentStatus === 'Paid' && !sub.trialActive) {
+                verifiedPaymentStatus = 'Paid';
+            } else if (sub.trialActive || sub.paymentStatus === 'Trial') {
+                verifiedPaymentStatus = 'Trial';
+            } else {
+                verifiedPaymentStatus = sub.paymentStatus || 'Pending';
+            }
+
+            return {
+                ...r,
+                name: r.name || (owner?.name ? `${owner.name}'s Restaurant` : 'Partner Restaurant'),
+                ownerId: owner,
+                contactEmail: r.contactEmail || owner?.email || '',
+                subscription: {
+                    ...sub,
+                    paymentStatus: verifiedPaymentStatus
+                },
+                hasVerifiedPayment: hasPaidTransaction,
+                totalRevenue: revMap[r._id.toString()] || 0
+            };
+        });
 
         res.json(result);
     } catch (error) {
@@ -1116,7 +1174,7 @@ export const manualUnfreezeRestaurant = async (req, res) => {
 // @access  Private/SuperAdmin
 export const createRestaurantBySuperAdmin = async (req, res) => {
     try {
-        const { name, ownerName, email, password, phoneNumber, plan, billingCycle } = req.body;
+        const { name, ownerName, email, password, phoneNumber, plan, billingCycle, paymentStatus } = req.body;
         
         if (!name || !ownerName || !email || !password || !phoneNumber) {
             return res.status(400).json({ message: 'Restaurant name, owner name, email, password, and phone number are required.' });
@@ -1129,6 +1187,7 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
         }
 
         const selectedPlan = plan || 'Starter';
+        const chosenPaymentStatus = ['Paid', 'Trial', 'Pending'].includes(paymentStatus) ? paymentStatus : 'Pending';
         const expiryDate = new Date();
         if (billingCycle === 'yearly') {
             expiryDate.setFullYear(expiryDate.getFullYear() + 1);
@@ -1150,6 +1209,8 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
             isActive: true
         });
 
+        const planPrice = selectedPlan === 'Enterprise' ? 199 : (selectedPlan === 'Pro' ? 99 : 49);
+
         const restaurant = await Restaurant.create({
             _id: restaurantId,
             name: name.trim(),
@@ -1165,16 +1226,31 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
                 plan: selectedPlan,
                 status: 'Active',
                 billingCycle: billingCycle || 'monthly',
-                trialActive: false,
-                paymentStatus: 'Paid',
+                trialActive: chosenPaymentStatus === 'Trial',
+                paymentStatus: chosenPaymentStatus,
                 manualFreeze: false,
                 subscriptionStartDate: new Date(),
                 subscriptionEndDate: expiryDate,
                 startDate: new Date(),
                 expiryDate,
-                price: selectedPlan === 'Enterprise' ? 199 : (selectedPlan === 'Pro' ? 99 : 49)
+                price: planPrice
             }
         });
+
+        // Record a verified transaction if payment status is explicitly Paid
+        if (chosenPaymentStatus === 'Paid') {
+            await SubscriptionPayment.create({
+                restaurantId: restaurant._id,
+                planName: selectedPlan,
+                amount: planPrice,
+                billingCycle: billingCycle || 'monthly',
+                paymentMethod: 'SuperAdmin Verified Transaction',
+                transactionId: `SUB-TXN-${Date.now()}`,
+                status: 'Completed',
+                effectiveDate: new Date(),
+                expiryDate
+            });
+        }
 
         await Branch.create({
             restaurantId: restaurant._id,
@@ -1201,9 +1277,17 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
             expiryDate: restaurant.subscription?.subscriptionEndDate || restaurant.subscription?.expiryDate
         }).catch((err) => console.error('SuperAdmin createRestaurant subscription email error:', err.message));
 
+        const restaurantObj = restaurant.toObject ? restaurant.toObject() : { ...restaurant };
+        restaurantObj.ownerId = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber
+        };
+
         res.status(201).json({
             message: `Restaurant "${restaurant.name}" created successfully with ${selectedPlan} plan.`,
-            restaurant,
+            restaurant: restaurantObj,
             user: { _id: user._id, name: user.name, email: user.email, role: user.role }
         });
     } catch (error) {

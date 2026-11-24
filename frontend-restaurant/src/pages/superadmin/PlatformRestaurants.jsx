@@ -31,7 +31,8 @@ const PlatformRestaurants = () => {
         password: '',
         phoneNumber: '',
         plan: 'Pro',
-        billingCycle: 'monthly'
+        billingCycle: 'monthly',
+        paymentStatus: 'Pending'
     });
 
     const handleCreateRestaurant = async (e) => {
@@ -55,7 +56,8 @@ const PlatformRestaurants = () => {
                 password: '',
                 phoneNumber: '',
                 plan: 'Pro',
-                billingCycle: 'monthly'
+                billingCycle: 'monthly',
+                paymentStatus: 'Pending'
             });
         } catch (error) {
             console.error('Failed to create restaurant', error);
@@ -456,10 +458,16 @@ const PlatformRestaurants = () => {
                                             </div>
                                         </td>
                                         <td className="p-4 align-middle">
-                                            <div className="text-xs font-bold text-gray-900 leading-tight">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
-                                            <div className="text-[11px] text-gray-500 mt-0.5">{restaurant.ownerId?.email || 'N/A'}</div>
-                                            {restaurant.phone && (
-                                                <div className="text-[10px] text-gray-400 font-medium mt-0.5">📞 {restaurant.phone}</div>
+                                            <div className="text-xs font-bold text-gray-900 leading-tight">
+                                                {restaurant.ownerId?.name || (restaurant.name ? `${restaurant.name} Admin` : 'Authorized Admin')}
+                                            </div>
+                                            <div className="text-[11px] text-gray-500 mt-0.5">
+                                                {restaurant.ownerId?.email || restaurant.contactEmail || 'N/A'}
+                                            </div>
+                                            {(restaurant.ownerId?.phoneNumber || restaurant.phone) && (
+                                                <div className="text-[10px] text-gray-400 font-medium mt-0.5">
+                                                    📞 {restaurant.ownerId?.phoneNumber || restaurant.phone}
+                                                </div>
                                             )}
                                         </td>
                                         {/* Marketplace Visibility Column */}
@@ -499,6 +507,15 @@ const PlatformRestaurants = () => {
                                                 </span>
                                                 <span className="text-[11px] font-bold text-gray-700">
                                                     {planPrice}<span className="text-[10px] text-gray-400 font-normal">/{cycle === 'yearly' ? 'yr' : 'mo'}</span>
+                                                </span>
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${
+                                                    (restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : (restaurant.subscription?.paymentStatus === 'Trial'
+                                                            ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-200')
+                                                }`}>
+                                                    {(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid' ? '● Verified Paid' : (restaurant.subscription?.paymentStatus === 'Trial' ? '● Trial Access' : '○ Payment Pending')}
                                                 </span>
                                             </div>
                                         </td>
@@ -954,7 +971,7 @@ const PlatformRestaurants = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label className="text-xs font-bold text-gray-700 block mb-1">Subscription Plan *</label>
                                     <select
@@ -976,6 +993,18 @@ const PlatformRestaurants = () => {
                                     >
                                         <option value="monthly">Monthly</option>
                                         <option value="yearly">Yearly (Annual)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Payment Status *</label>
+                                    <select
+                                        value={addFormData.paymentStatus || 'Pending'}
+                                        onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })}
+                                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm font-bold bg-white focus:outline-none focus:border-indigo-600"
+                                    >
+                                        <option value="Pending">Payment Pending</option>
+                                        <option value="Paid">Paid & Verified</option>
+                                        <option value="Trial">Free Trial</option>
                                     </select>
                                 </div>
                             </div>

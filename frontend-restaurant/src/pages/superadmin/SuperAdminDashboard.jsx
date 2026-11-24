@@ -411,23 +411,23 @@ const SuperAdminDashboard = () => {
             )}
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
                 {[
-                    { label: 'Total SaaS Revenue (MRR)', value: `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
-                    { label: 'Order Commission Earned', value: `₹${(stats.totalCommission || 0).toLocaleString('en-IN')}`, icon: CreditCard, color: 'text-amber-600', bg: 'bg-amber-50' },
-                    { label: 'Active Restaurants', value: stats.activeRestaurants || 0, icon: Store, color: 'text-blue-600', bg: 'bg-blue-50' },
-                    { label: 'Frozen Accounts', value: stats.frozenRestaurants || 0, icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50' },
-                    { label: 'Total Platform Users', value: stats.totalUsers || 0, icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+                    { label: 'Total SaaS Revenue (MRR)', value: `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800/60' },
+                    { label: 'Order Commission Earned', value: `₹${(stats.totalCommission || 0).toLocaleString('en-IN')}`, icon: CreditCard, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60' },
+                    { label: 'Active Restaurants', value: stats.activeRestaurants || 0, icon: Store, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60' },
+                    { label: 'Frozen Accounts', value: stats.frozenRestaurants || 0, icon: AlertCircle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60' },
+                    { label: 'Total Platform Users', value: stats.totalUsers || 0, icon: Users, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/60' },
                 ].map((stat, idx) => {
                     const Icon = stat.icon;
                     return (
-                        <div key={idx} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100 flex items-start gap-3.5 sm:gap-5 transition-all hover:-translate-y-1 hover:shadow-md">
-                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center ${stat.bg} ${stat.color} shrink-0 mt-0.5`}>
-                                <Icon size={24} className="sm:w-7 sm:h-7" />
+                        <div key={idx} className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-xs border border-gray-100 dark:border-slate-800 flex items-center gap-3.5 transition-all hover:shadow-md">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${stat.bg}`}>
+                                <Icon size={22} className={stat.color} />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider h-8 sm:h-9 flex items-start leading-tight break-words">{stat.label}</p>
-                                <h3 className="text-lg sm:text-xl font-black text-gray-900 truncate mt-1">{stat.value}</h3>
+                                <p className="text-[10px] sm:text-[11px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-wider leading-tight truncate">{stat.label}</p>
+                                <h3 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white truncate mt-1">{stat.value}</h3>
                             </div>
                         </div>
                     );
@@ -435,20 +435,20 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Subscribed Platform Restaurants Management */}
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-xs border border-gray-100 dark:border-slate-800 overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-900/60 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                         <div>
                             <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                                <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Active Subscribed Restaurants</h2>
-                                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-black bg-blue-100 text-blue-700 border border-blue-200">
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white font-sans tracking-tight">Active Subscribed Restaurants</h2>
+                                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs font-black bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                                     {restaurants.length} Subscribed Outlets
                                 </span>
                             </div>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">All verified platform restaurants with active subscriptions, plan tiers, and billing status.</p>
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">All verified platform restaurants with active subscriptions, plan tiers, and billing status.</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Link to="/super-admin/restaurants" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl">
+                            <Link to="/super-admin/restaurants" className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3 sm:px-4 py-2 rounded-xl border border-blue-100 dark:border-blue-900/60">
                                 Full Registry <ArrowRight size={16} />
                             </Link>
                         </div>
@@ -464,10 +464,10 @@ const SuperAdminDashboard = () => {
                                 placeholder="Search by restaurant name, owner, city or phone..."
                                 value={restSearchQuery}
                                 onChange={(e) => setRestSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-gray-400 dark:placeholder:text-slate-500"
                             />
                             {restSearchQuery && (
-                                <button onClick={() => setRestSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <button onClick={() => setRestSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200">
                                     <X size={14} />
                                 </button>
                             )}
@@ -487,13 +487,13 @@ const SuperAdminDashboard = () => {
                                     <button
                                         key={tab.key}
                                         onClick={() => setPlanFilter(tab.key)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isActive
-                                            ? 'bg-gray-900 text-white shadow-sm'
-                                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${isActive
+                                            ? 'bg-blue-600 text-white shadow-xs'
+                                            : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
                                             }`}
                                     >
                                         <span>{tab.label}</span>
-                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                                             }`}>
                                             {tab.count}
                                         </span>
@@ -507,7 +507,7 @@ const SuperAdminDashboard = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+                            <tr className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 text-xs text-gray-400 dark:text-slate-400 uppercase tracking-wider">
                                 <th className="p-4 font-bold">Restaurant & Location</th>
                                 <th className="p-4 font-bold">Owner & Contact</th>
                                 <th className="p-4 font-bold">Plan & MRR</th>
@@ -517,7 +517,7 @@ const SuperAdminDashboard = () => {
                                 <th className="p-4 font-bold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                             {restaurants
                                 .filter(r => {
                                     const plan = (r.subscription?.plan || 'Basic').toLowerCase();
@@ -555,56 +555,71 @@ const SuperAdminDashboard = () => {
                                     const outletFormat = restaurant.billingConfig?.outletFormat || restaurant.posConfig?.outletFormat || 'Restaurant';
 
                                     return (
-                                        <tr key={restaurant._id} className="hover:bg-gray-50/80 transition-colors">
+                                        <tr key={restaurant._id} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="p-4 align-middle">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                                    <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 dark:bg-slate-800 shrink-0 border border-gray-200 dark:border-slate-700">
                                                         {restaurant.logo ? (
                                                             <img src={restaurant.logo} alt={restaurant.name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold text-base">
+                                                            <div className="w-full h-full flex items-center justify-center bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 font-bold text-base">
                                                                 {restaurant.name.charAt(0)}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <span className="font-bold text-gray-900 block text-sm leading-tight">{restaurant.name}</span>
-                                                        <span className="text-[11px] font-semibold text-gray-500 block mt-0.5">{outletFormat}</span>
+                                                        <span className="font-bold text-gray-900 dark:text-white block text-sm leading-tight">{restaurant.name}</span>
+                                                        <span className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 block mt-0.5">{outletFormat}</span>
                                                         {restaurant.address && (
-                                                            <span className="text-[10px] text-gray-400 block truncate max-w-[180px] mt-0.5">{restaurant.address}</span>
+                                                            <span className="text-[10px] text-gray-400 dark:text-slate-500 block truncate max-w-[180px] mt-0.5">{restaurant.address}</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="p-4 align-middle">
-                                                <div className="text-xs font-bold text-gray-900 leading-tight">{restaurant.ownerId?.name || 'Authorized Admin'}</div>
-                                                <div className="text-[11px] text-gray-500 mt-0.5">{restaurant.ownerId?.email || 'N/A'}</div>
-                                                {restaurant.phone && (
-                                                    <div className="text-[10px] text-gray-400 font-medium mt-0.5">📞 {restaurant.phone}</div>
+                                                <div className="text-xs font-bold text-gray-900 dark:text-white leading-tight">
+                                                    {restaurant.ownerId?.name || (restaurant.name ? `${restaurant.name} Admin` : 'Authorized Admin')}
+                                                </div>
+                                                <div className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
+                                                    {restaurant.ownerId?.email || restaurant.contactEmail || 'N/A'}
+                                                </div>
+                                                {(restaurant.ownerId?.phoneNumber || restaurant.phone) && (
+                                                    <div className="text-[10px] text-gray-400 dark:text-slate-500 font-medium mt-0.5">
+                                                        📞 {restaurant.ownerId?.phoneNumber || restaurant.phone}
+                                                    </div>
                                                 )}
                                             </td>
                                             <td className="p-4 align-middle whitespace-nowrap">
                                                 <div className="flex flex-col gap-1 items-start">
                                                     <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${isEnterprise
-                                                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                        ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
                                                         : isPro
-                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+                                                            : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                                                         }`}>
                                                         {restaurant.subscription?.plan || 'Basic'}
                                                     </span>
-                                                    <span className="text-[11px] font-bold text-gray-700">
-                                                        {planPrice}<span className="text-[10px] text-gray-400 font-normal">/{cycle === 'yearly' ? 'yr' : 'mo'}</span>
+                                                    <span className="text-[11px] font-bold text-gray-700 dark:text-slate-300">
+                                                        {planPrice}<span className="text-[10px] text-gray-400 dark:text-slate-500 font-normal">/{cycle === 'yearly' ? 'yr' : 'mo'}</span>
+                                                    </span>
+                                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black uppercase border ${
+                                                        (restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                                                            : (restaurant.subscription?.paymentStatus === 'Trial'
+                                                                ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
+                                                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800')
+                                                    }`}>
+                                                        {(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid' ? '● Paid' : (restaurant.subscription?.paymentStatus === 'Trial' ? '● Trial' : '○ Pending')}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="p-4 align-middle whitespace-nowrap">
                                                 {hasCustomPOS ? (
-                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
-                                                        <Sparkles size={12} className="text-emerald-600" /> Custom POS
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 rounded-lg text-xs font-bold">
+                                                        <Sparkles size={12} className="text-emerald-600 dark:text-emerald-400" /> Custom POS
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-50 text-gray-600 border border-gray-200 rounded-lg text-xs font-medium">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-50 text-gray-600 border border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 rounded-lg text-xs font-medium">
                                                         Standard POS
                                                     </span>
                                                 )}
@@ -613,25 +628,25 @@ const SuperAdminDashboard = () => {
                                                 {diffDays !== null ? (
                                                     <div>
                                                         <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap inline-flex items-center gap-1 border ${diffDays < 0
-                                                            ? 'bg-red-50 text-red-700 border-red-200'
+                                                            ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
                                                             : diffDays <= 7
-                                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
+                                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
                                                             }`}>
                                                             {diffDays < 0 ? `Expired ${Math.abs(diffDays)}d ago` : diffDays === 0 ? 'Expires today' : `${diffDays} days left`}
                                                         </span>
-                                                        <span className="text-[10px] text-gray-400 block mt-0.5">
+                                                        <span className="text-[10px] text-gray-400 dark:text-slate-500 block mt-0.5">
                                                             {new Date(expiry).toLocaleDateString()}
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400 font-medium">Ongoing</span>
+                                                    <span className="text-xs text-gray-400 dark:text-slate-500 font-medium">Ongoing</span>
                                                 )}
                                             </td>
                                             <td className="p-4 align-middle whitespace-nowrap">
                                                 <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${restaurant.subscription?.status === 'Active'
-                                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                                    : 'bg-red-50 text-red-700 border-red-200'
+                                                    ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800'
+                                                    : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
                                                     }`}>
                                                     {restaurant.subscription?.status || 'Active'}
                                                 </span>
@@ -640,7 +655,7 @@ const SuperAdminDashboard = () => {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => setViewingRestaurant(restaurant)}
-                                                        className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+                                                        className="p-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition-colors cursor-pointer"
                                                         title="View Full Profile & Subscription"
                                                     >
                                                         <Eye size={16} />
