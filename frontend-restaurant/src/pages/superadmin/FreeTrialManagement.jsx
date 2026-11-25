@@ -617,49 +617,53 @@ const FreeTrialManagement = () => {
                         {/* 5. DETAILS MODAL */}
                         {modalType === 'details' && selectedRestaurant && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                                <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                                         <div>
-                                            <h3 className="text-lg font-black text-slate-900">{selectedRestaurant.name}</h3>
-                                            <p className="text-xs text-slate-500">Subscription & Trial Audit Log</p>
+                                            <h3 className="text-lg font-black text-slate-900 dark:text-white">{selectedRestaurant.name}</h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Subscription & Trial Audit Log</p>
                                         </div>
-                                        <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full font-black text-xs uppercase">
-                                            {selectedRestaurant.subscription?.status || 'Inactive'}
+                                        <span className={`px-3 py-1 rounded-full font-black text-xs uppercase border ${
+                                            ['active', 'trial', 'paid'].includes(String(selectedRestaurant.subscription?.status || selectedRestaurant.status || 'Active').toLowerCase())
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/80'
+                                                : 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                                        }`}>
+                                            {selectedRestaurant.subscription?.status || selectedRestaurant.status || 'Active'}
                                         </span>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4 text-xs">
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Name</span>
-                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.name || 'N/A'}</p>
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Owner Name</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">{selectedRestaurant.ownerId?.name || 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Email</span>
-                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.email || 'N/A'}</p>
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Owner Email</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">{selectedRestaurant.ownerId?.email || 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Phone</span>
-                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.phoneNumber || 'N/A'}</p>
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Phone</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">{selectedRestaurant.ownerId?.phoneNumber || 'N/A'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Payment Status</span>
-                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.subscription?.paymentStatus || 'Trial'}</p>
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Payment Status</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">{selectedRestaurant.subscription?.paymentStatus || 'Trial'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Trial Start Date</span>
-                                            <p className="font-extrabold text-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Trial Start Date</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">
                                                 {selectedRestaurant.subscription?.trialStartDate ? new Date(selectedRestaurant.subscription.trialStartDate).toLocaleString() : 'Not Started'}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Trial End Date</span>
-                                            <p className="font-extrabold text-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Trial End Date</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">
                                                 {selectedRestaurant.subscription?.trialEndDate ? new Date(selectedRestaurant.subscription.trialEndDate).toLocaleString() : 'Not Set'}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Approved By</span>
-                                            <p className="font-extrabold text-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Approved By</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">
                                                 {(() => {
                                                     const subStatus = String(selectedRestaurant.subscription?.status || '').toLowerCase();
                                                     const payStatus = String(selectedRestaurant.subscription?.paymentStatus || '').toLowerCase();
@@ -674,8 +678,8 @@ const FreeTrialManagement = () => {
                                             </p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Approved At</span>
-                                            <p className="font-extrabold text-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Approved At</span>
+                                            <p className="font-extrabold text-slate-800 dark:text-slate-200">
                                                 {(() => {
                                                     const subStatus = String(selectedRestaurant.subscription?.status || '').toLowerCase();
                                                     const payStatus = String(selectedRestaurant.subscription?.paymentStatus || '').toLowerCase();
@@ -696,22 +700,22 @@ const FreeTrialManagement = () => {
                                     </div>
 
                                     {selectedRestaurant.subscription?.freezeReason && (
-                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
+                                        <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs space-y-1">
                                             <span className="text-[10px] font-bold text-slate-400 uppercase">Freeze Reason:</span>
-                                            <p className="text-slate-800 font-semibold">{selectedRestaurant.subscription.freezeReason}</p>
+                                            <p className="text-slate-800 dark:text-slate-200 font-semibold">{selectedRestaurant.subscription.freezeReason}</p>
                                         </div>
                                     )}
 
                                     {selectedRestaurant.subscription?.rejectionReason && (
-                                        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs space-y-1">
+                                        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl p-3 text-xs space-y-1">
                                             <span className="text-[10px] font-bold text-red-500 uppercase">Rejection Reason:</span>
-                                            <p className="text-red-800 font-semibold">{selectedRestaurant.subscription.rejectionReason}</p>
+                                            <p className="text-red-800 dark:text-red-300 font-semibold">{selectedRestaurant.subscription.rejectionReason}</p>
                                         </div>
                                     )}
 
                                     <button
                                         onClick={closeModal}
-                                        className="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl"
+                                        className="w-full py-3 bg-slate-900 dark:bg-slate-800 hover:bg-black dark:hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors"
                                     >
                                         Close Details
                                     </button>

@@ -616,7 +616,7 @@ const FranchiseManagement = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Franchise Store Name *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Franchise Store Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         value={storeForm.name}
@@ -630,7 +630,7 @@ const FranchiseManagement = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Region Mapping *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Region Mapping <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select
                                         value={storeForm.region}
                                         onChange={(e) => setStoreForm({ ...storeForm, region: e.target.value })}
@@ -642,7 +642,7 @@ const FranchiseManagement = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">City / Location *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">City / Location <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         value={storeForm.location}
@@ -667,7 +667,7 @@ const FranchiseManagement = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Owner Name *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Owner Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         value={storeForm.ownerName}
@@ -678,7 +678,7 @@ const FranchiseManagement = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Owner Email *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Owner Email <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="email"
                                         value={storeForm.ownerEmail}

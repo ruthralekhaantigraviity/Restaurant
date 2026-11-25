@@ -557,7 +557,7 @@ const CentralKitchen = () => {
 
                         <form onSubmit={handleCreateOrder} className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                             <div>
-                                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Destination Branch / Outlet *</label>
+                                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Destination Branch / Outlet <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <select
                                     value={orderForm.outlet}
                                     onChange={(e) => setOrderForm({ ...orderForm, outlet: e.target.value })}
@@ -572,7 +572,7 @@ const CentralKitchen = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="md:col-span-2">
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Prepared Batch Item Name *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Prepared Batch Item Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         value={orderForm.item}
@@ -583,7 +583,7 @@ const CentralKitchen = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Batch Size & Unit *</label>
+                                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Batch Size & Unit <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <div className="flex gap-2">
                                         <input
                                             type="number"
@@ -674,7 +674,7 @@ const CentralKitchen = () => {
 
                         <form onSubmit={handleSaveDispatchStatus} className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                             <div>
-                                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Production Status Stage *</label>
+                                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-1">Production Status Stage <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <select
                                     value={dispatchForm.status}
                                     onChange={(e) => setDispatchForm({ ...dispatchForm, status: e.target.value })}

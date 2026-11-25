@@ -1218,7 +1218,7 @@ export const createRestaurantBySuperAdmin = async (req, res) => {
             phone: phoneNumber.trim(),
             ownerId: user._id,
             approvalStatus: 'Approved',
-            verificationStatus: 'Verified',
+            verificationStatus: 'Pending',
             isActive: true,
             isProfileApproved: true,
             status: 'Active',

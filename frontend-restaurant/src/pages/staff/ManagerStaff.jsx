@@ -1667,8 +1667,7 @@ const ManagerStaff = () => {
 
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase mb-1">
-                                    Reason for Correction (Mandatory) *
-                                </label>
+                                    Reason for Correction (Mandatory) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea
                                     value={correctionForm.reason}
                                     onChange={(e) => setCorrectionForm({ ...correctionForm, reason: e.target.value })}

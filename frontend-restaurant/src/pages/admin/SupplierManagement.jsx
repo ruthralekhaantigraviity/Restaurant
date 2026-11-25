@@ -282,7 +282,7 @@ const SupplierManagement = () => {
                             <form id="supplier-form" onSubmit={handleSubmit} className="space-y-5">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Supplier Name *</label>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Supplier Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <input 
                                             type="text" 
                                             required
@@ -320,7 +320,7 @@ const SupplierManagement = () => {
                                         />
                                     </div>
                                     <div className="col-span-2 sm:col-span-1">
-                                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Phone Number *</label>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Phone Number <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <input 
                                             type="tel" 
                                             inputMode="numeric"
@@ -360,7 +360,7 @@ const SupplierManagement = () => {
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Assign to Branch *</label>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-slate-200 mb-1.5">Assign to Branch <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select 
                                         value={formData.branch}
                                         onChange={(e) => setFormData({...formData, branch: e.target.value})}

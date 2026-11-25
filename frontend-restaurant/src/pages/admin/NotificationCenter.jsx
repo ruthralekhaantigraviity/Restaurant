@@ -525,7 +525,7 @@ const NotificationCenter = () => {
 
                         <form onSubmit={handleConfirmRestockAction} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Ingredient / Item Name *</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Ingredient / Item Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -537,7 +537,7 @@ const NotificationCenter = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Order Quantity *</label>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Order Quantity <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="number"
                                         step="0.1"
@@ -626,7 +626,7 @@ const NotificationCenter = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Message to Kitchen *</label>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300 mb-1.5">Message to Kitchen <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea
                                     required
                                     rows="2"
@@ -673,7 +673,7 @@ const NotificationCenter = () => {
                         <div className="p-6">
                             <form onSubmit={handleBroadcastSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Broadcast Title *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Broadcast Title <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="text" 
                                         required
@@ -685,7 +685,7 @@ const NotificationCenter = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Message Content *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Message Content <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <textarea 
                                         required
                                         rows="4"

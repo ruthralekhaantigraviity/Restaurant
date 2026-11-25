@@ -2223,7 +2223,7 @@ const StaffManagement = () => {
                         <form onSubmit={handleSaveStaff} className="space-y-4">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Employee ID *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Employee ID <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="text"
                                         required
@@ -2233,7 +2233,7 @@ const StaffManagement = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Full Name *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Full Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="text"
                                         required
@@ -2246,7 +2246,7 @@ const StaffManagement = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Email *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Email <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="email"
                                         required
@@ -2276,7 +2276,7 @@ const StaffManagement = () => {
 
                             {!editingStaffId && (
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Password *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Password <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <div className="relative">
                                         <input 
                                             type={showStaffPassword ? "text" : "password"}
@@ -2496,7 +2496,7 @@ const StaffManagement = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reason for Correction (Required for Audit) *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reason for Correction (Required for Audit) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea 
                                     required
                                     rows="2"
@@ -2556,7 +2556,7 @@ const StaffManagement = () => {
                         </div>
                         <form onSubmit={handleRecordPayrollPayment} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="number"
                                     step="any"
@@ -3190,8 +3190,7 @@ const StaffManagement = () => {
 
                             <div>
                                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">
-                                    Adjustment Justification / Reason (Required for Audit) *
-                                </label>
+                                    Adjustment Justification / Reason (Required for Audit) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea
                                     required
                                     rows="2"
@@ -3317,7 +3316,7 @@ const StaffManagement = () => {
 
                         <form onSubmit={handleSubmitLeaveAction} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Decision *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Decision <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         type="button"
@@ -3462,8 +3461,7 @@ const StaffManagement = () => {
                                 {/* Status Selection */}
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                                        Attendance Status *
-                                    </label>
+                                        Attendance Status <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                                         {['Present', 'Absent', 'Leave', 'Half-day', 'Holiday'].map(st => {
                                             const isSelected = attendanceDetailsForm.status === st;

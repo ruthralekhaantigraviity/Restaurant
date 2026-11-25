@@ -348,10 +348,9 @@ const VerificationManagement = () => {
 
                                 {Object.keys(docLabels).map(key => {
                                     const doc = selectedReview.documents?.[key];
-                                    const isApproved = doc?.status === 'Approved' || 
+                                    const isApproved = (doc?.status === 'Approved' || 
                                         String(selectedReview.status || '').toLowerCase() === 'verified' || 
-                                        String(selectedReview.restaurantId?.approvalStatus || '').toLowerCase() === 'approved' ||
-                                        String(selectedReview.restaurantId?.verificationStatus || '').toLowerCase() === 'verified';
+                                        String(selectedReview.restaurantId?.verificationStatus || '').toLowerCase() === 'verified') && (Boolean(doc?.filePath) || doc?.status === 'Approved');
                                     const hasFile = Boolean(doc && doc.filePath);
 
                                     if (!hasFile) {

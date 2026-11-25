@@ -422,18 +422,18 @@ export const getAllVerifications = async (req, res) => {
             const now = new Date();
             const docsToInsert = missing.map(r => ({
                 restaurantId: r._id,
-                status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
+                status: r.verificationStatus === 'Verified' ? 'Verified' : 'Pending',
                 documents: {
-                    addressProof: { addressText: r.address || 'Registered Address', status: 'Approved' },
-                    fssai: { status: 'Approved', expiryDate: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000) },
-                    businessRegistration: { status: 'Approved' },
-                    panCard: { status: 'Approved' },
-                    aadhaarCard: { status: 'Approved' },
-                    bankProof: { status: 'Approved' }
+                    addressProof: { addressText: r.address || 'Registered Address', status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending' },
+                    fssai: { status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending', expiryDate: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000) },
+                    businessRegistration: { status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending' },
+                    panCard: { status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending' },
+                    aadhaarCard: { status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending' },
+                    bankProof: { status: r.verificationStatus === 'Verified' ? 'Approved' : 'Pending' }
                 },
                 history: [{
-                    status: r.approvalStatus === 'Approved' ? 'Verified' : 'Under Review',
-                    comments: 'Auto-synchronized registered restaurant verification record.',
+                    status: r.verificationStatus === 'Verified' ? 'Verified' : 'Pending',
+                    comments: 'Registered restaurant verification record created.',
                     actionDate: r.createdAt || now
                 }]
             }));

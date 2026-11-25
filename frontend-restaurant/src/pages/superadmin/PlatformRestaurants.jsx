@@ -475,15 +475,15 @@ const PlatformRestaurants = () => {
                                                     <Trash2 size={12} className="text-gray-400" /> Soft-Deleted
                                                 </span>
                                             ) : restStatus === 'Active' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/80 rounded-lg text-xs font-bold">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active / Visible
                                                 </span>
                                             ) : restStatus === 'Inactive' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/80 rounded-lg text-xs font-bold">
                                                     <EyeOff size={12} className="text-amber-500" /> Inactive / Hidden
                                                 </span>
                                             ) : restStatus === 'Suspended' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/80 rounded-lg text-xs font-bold">
                                                     <Ban size={12} className="text-rose-500" /> Suspended
                                                 </span>
                                             ) : (
@@ -717,10 +717,10 @@ const PlatformRestaurants = () => {
                                         </span>
                                     ) : (
                                         <span className={`px-3 py-1 text-xs font-black rounded-lg border ${(viewingRestaurant.status || 'Active') === 'Active'
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/80'
                                             : viewingRestaurant.status === 'Suspended'
-                                                ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/80'
+                                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/80'
                                             }`}>
                                             {viewingRestaurant.status || 'Active'}
                                         </span>
@@ -728,20 +728,20 @@ const PlatformRestaurants = () => {
                                 </div>
 
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Subscription Tier:</span>
-                                    <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-black rounded-lg border border-purple-200">
+                                    <span className="text-gray-500 dark:text-slate-400 font-medium">Subscription Tier:</span>
+                                    <span className="px-3 py-1 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-xs font-black rounded-lg border border-purple-200 dark:border-purple-800/80">
                                         {viewingRestaurant.subscription?.plan || 'Basic'} Tier
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Billing Cycle:</span>
-                                    <span className="text-gray-900 font-bold capitalize">
+                                    <span className="text-gray-500 dark:text-slate-400 font-medium">Billing Cycle:</span>
+                                    <span className="text-gray-900 dark:text-white font-bold capitalize">
                                         {viewingRestaurant.subscription?.billingCycle || 'monthly'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Recurring Price:</span>
-                                    <span className="text-gray-900 font-black">
+                                    <span className="text-gray-500 dark:text-slate-400 font-medium">Recurring Price:</span>
+                                    <span className="text-gray-900 dark:text-white font-black">
                                         ₹{(viewingRestaurant.subscription?.price || (
                                             (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'enterprise' ? 12999 :
                                                 (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
@@ -749,17 +749,17 @@ const PlatformRestaurants = () => {
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Subscription Status:</span>
+                                    <span className="text-gray-500 dark:text-slate-400 font-medium">Subscription Status:</span>
                                     <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.subscription?.status === 'Active'
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                        : 'bg-red-50 text-red-700 border-red-200'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/80'
+                                        : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800/80'
                                         }`}>
                                         {viewingRestaurant.subscription?.status || 'Active'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Platform Approval:</span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.approvalStatus === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                                    <span className="text-gray-500 dark:text-slate-400 font-medium">Platform Approval:</span>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.approvalStatus === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/80' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/80'
                                         }`}>
                                         {viewingRestaurant.approvalStatus || 'Approved'}
                                     </span>
@@ -896,7 +896,7 @@ const PlatformRestaurants = () => {
 
                         <form onSubmit={handleCreateRestaurant} className="space-y-4 pt-4">
                             <div>
-                                <label className="text-xs font-bold text-gray-700 block mb-1">Restaurant / Brand Name *</label>
+                                <label className="text-xs font-bold text-gray-700 block mb-1">Restaurant / Brand Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -909,7 +909,7 @@ const PlatformRestaurants = () => {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Owner Full Name *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Owner Full Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         required
@@ -920,7 +920,7 @@ const PlatformRestaurants = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">10-Digit Mobile Number *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">10-Digit Mobile Number <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="tel"
                                         required
@@ -940,7 +940,7 @@ const PlatformRestaurants = () => {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Login Email *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Login Email <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="email"
                                         required
@@ -951,7 +951,7 @@ const PlatformRestaurants = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Admin Password *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Admin Password <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="password"
                                         required
@@ -965,7 +965,7 @@ const PlatformRestaurants = () => {
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Subscription Plan *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Subscription Plan <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select
                                         value={addFormData.plan}
                                         onChange={(e) => setAddFormData({ ...addFormData, plan: e.target.value })}
@@ -977,7 +977,7 @@ const PlatformRestaurants = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Billing Cycle *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Billing Cycle <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select
                                         value={addFormData.billingCycle}
                                         onChange={(e) => setAddFormData({ ...addFormData, billingCycle: e.target.value })}
@@ -988,7 +988,7 @@ const PlatformRestaurants = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-gray-700 block mb-1">Payment Status *</label>
+                                    <label className="text-xs font-bold text-gray-700 block mb-1">Payment Status <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select
                                         value={addFormData.paymentStatus || 'Pending'}
                                         onChange={(e) => setAddFormData({ ...addFormData, paymentStatus: e.target.value })}

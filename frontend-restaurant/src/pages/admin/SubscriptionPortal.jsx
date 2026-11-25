@@ -541,29 +541,29 @@ const SubscriptionPortal = () => {
                         const isEnterprise = plan.name === 'Enterprise';
 
                         return (
-                            <div key={plan._id} className={`bg-white dark:bg-slate-800 rounded-3xl border-2 p-6 flex flex-col h-full relative transition-all duration-300 ${isCurrent && isPaidActive
-                                ? 'border-orange-500 shadow-md shadow-orange-500/10'
-                                : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
+                            <div key={plan._id} className={`bg-white dark:bg-slate-900 rounded-3xl border-2 p-6 sm:p-7 flex flex-col justify-between h-full relative transition-all duration-300 ${isCurrent && isPaidActive
+                                ? 'border-orange-500 shadow-lg shadow-orange-500/10'
+                                : 'border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700'
                                 }`}>
                                 {isEnterprise && (
-                                    <div className="absolute top-4 right-4 bg-orange-50 border border-orange-200 text-orange-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                    <div className="absolute top-4 right-4 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                                         Popular
                                     </div>
                                 )}
 
                                 <div className="space-y-4 flex-1">
                                     <div>
-                                        <h4 className="font-black text-slate-900 dark:text-slate-100 text-lg">{plan.name}</h4>
+                                        <h4 className="font-black text-slate-900 dark:text-white text-xl">{plan.name}</h4>
                                         <div className="flex items-baseline gap-1 mt-2">
-                                            <span className="text-3xl font-black text-slate-900 dark:text-slate-100">₹{price.toLocaleString('en-IN')}</span>
-                                            <span className="text-xs text-slate-400 font-extrabold">/{billingCycle === 'yearly' ? 'yr' : 'mo'}</span>
+                                            <span className="text-3xl font-black text-slate-900 dark:text-white">₹{price.toLocaleString('en-IN')}</span>
+                                            <span className="text-xs text-slate-400 dark:text-slate-400 font-extrabold">/{billingCycle === 'yearly' ? 'yr' : 'mo'}</span>
                                         </div>
                                     </div>
 
-                                    <ul className="space-y-2.5 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+                                    <ul className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 my-6">
                                         {plan.features.slice(0, 6).map((feat, idx) => (
-                                            <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                                                <CheckCircle size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                                            <li key={idx} className="flex items-start gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">
+                                                <CheckCircle size={15} className="text-emerald-500 shrink-0 mt-0.5" />
                                                 <span>{feat}</span>
                                             </li>
                                         ))}
@@ -574,7 +574,7 @@ const SubscriptionPortal = () => {
                                     onClick={() => handleSelectPlan(plan)}
                                     disabled={isSubmitting}
                                     className={`w-full h-12 px-6 py-3 rounded-2xl font-black text-sm tracking-wide transition-all mt-auto inline-flex items-center justify-center text-center cursor-pointer active:scale-98 shadow-sm ${isCurrent && isPaidActive
-                                        ? 'bg-orange-50 text-orange-600 border border-orange-200 cursor-default'
+                                        ? 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800/80 cursor-default'
                                         : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
                                         }`}
                                 >

@@ -943,7 +943,7 @@ const ExpenseSummaryAdmin = () => {
                         </div>
                         <form onSubmit={handleSaveExpense} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="text"
                                     required
@@ -956,7 +956,7 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select 
                                         value={expenseForm.category}
                                         onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
@@ -966,7 +966,7 @@ const ExpenseSummaryAdmin = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Amount (₹) *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="number"
                                         step="any"
@@ -981,7 +981,7 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Date *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Date <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="date"
                                         required
@@ -1160,7 +1160,7 @@ const ExpenseSummaryAdmin = () => {
 
                         <form onSubmit={handleRecordPayment} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="number"
                                     step="any"
@@ -1172,7 +1172,7 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <select 
                                     value={paymentForm.paymentMethod}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
@@ -1232,7 +1232,7 @@ const ExpenseSummaryAdmin = () => {
                         </div>
                         <form onSubmit={handleUpdateExpense} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="text"
                                     required
@@ -1244,7 +1244,7 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <select 
                                         value={editForm.category}
                                         onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
@@ -1254,7 +1254,7 @@ const ExpenseSummaryAdmin = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Total Amount (₹) *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Total Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="number"
                                         step="any"

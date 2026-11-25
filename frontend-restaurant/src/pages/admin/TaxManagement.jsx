@@ -135,11 +135,11 @@ const TaxManagement = () => {
             </div>
 
             {/* Alert */}
-            <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 flex items-start gap-3 shadow-sm mb-8">
-                <ShieldAlert size={20} className="text-blue-600 shrink-0 mt-0.5" />
+            <div className="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 rounded-2xl p-5 flex items-start gap-3 shadow-sm mb-8">
+                <ShieldAlert size={20} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <div>
-                    <h4 className="font-bold text-blue-900 text-sm">Tax Compliance Warning</h4>
-                    <p className="text-blue-700 text-xs mt-1 leading-relaxed">
+                    <h4 className="font-bold text-blue-900 dark:text-blue-200 text-sm">Tax Compliance Warning</h4>
+                    <p className="text-blue-700 dark:text-blue-300 text-xs mt-1 leading-relaxed">
                         Ensure your tax rates comply with local regulations. Changes made here will immediately apply to all new orders across all active branches.
                     </p>
                 </div>
@@ -159,7 +159,7 @@ const TaxManagement = () => {
                                 <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="text-center py-10">
@@ -173,7 +173,7 @@ const TaxManagement = () => {
                                     <td colSpan="6" className="text-center py-10 text-gray-500 dark:text-slate-400">No tax rules found.</td>
                                 </tr>
                             ) : taxes.map(tax => (
-                                <tr key={tax._id} className="hover:bg-gray-50/50 transition-colors group">
+                                <tr key={tax._id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/40 transition-colors group">
                                     <td className="px-6 py-5">
                                         <span className="font-bold text-gray-900 text-sm dark:text-white">{tax.name}</span>
                                     </td>
@@ -186,15 +186,16 @@ const TaxManagement = () => {
                                         <span className="text-sm font-medium text-gray-500 dark:text-slate-400">{tax.type}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-md text-xs font-bold tracking-wide dark:text-slate-300">
+                                        <span className="bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 px-3 py-1 rounded-md text-xs font-bold tracking-wide">
                                             {tax.appliesTo}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5 text-center">
                                         <button 
                                             onClick={() => handleToggleActive(tax)}
-                                            className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-                                            style={{ backgroundColor: tax.isActive ? '#10B981' : '#E5E7EB' }}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${
+                                                tax.isActive ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-slate-700'
+                                            }`}
                                         >
                                             <span 
                                                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${tax.isActive ? 'translate-x-6' : 'translate-x-1'}`} 
@@ -241,7 +242,7 @@ const TaxManagement = () => {
                         <div className="p-6 overflow-y-auto">
                             <form id="tax-form" onSubmit={handleSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Tax/Charge Name *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Tax/Charge Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input 
                                         type="text" 
                                         required
@@ -265,7 +266,7 @@ const TaxManagement = () => {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Rate *</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Rate <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <div className="relative">
                                             {formData.type === 'Fixed Amount' && <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />}
                                             <input 

@@ -104,7 +104,7 @@ const ChefInventory = () => {
                     </div>
                     <div className="p-6 space-y-4 flex-1 flex flex-col">
                         <div>
-                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Ingredient Name *</label>
+                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Ingredient Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input 
                                 required
                                 value={wastageForm.ingredientName}
@@ -116,7 +116,7 @@ const ChefInventory = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Quantity *</label>
+                                <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Quantity <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <div className="flex items-center bg-slate-50 dark:bg-[#151923] border border-slate-200 dark:border-[#2a3040] rounded-xl overflow-hidden focus-within:border-red-500 transition-colors">
                                     <button 
                                         type="button"
@@ -153,7 +153,7 @@ const ChefInventory = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Unit *</label>
+                                <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Unit <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <select 
                                     value={wastageForm.unit}
                                     onChange={(e) => setWastageForm({...wastageForm, unit: e.target.value})}
@@ -167,7 +167,7 @@ const ChefInventory = () => {
                             </div>
                         </div>
                         <div className="flex-1">
-                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Reason *</label>
+                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Reason <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input 
                                 required
                                 value={wastageForm.reason}
@@ -194,7 +194,7 @@ const ChefInventory = () => {
                     </div>
                     <div className="p-6 space-y-4 flex-1 flex flex-col">
                         <div>
-                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Ingredient Needed *</label>
+                            <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Ingredient Needed <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input 
                                 required
                                 value={restockForm.ingredientNeeded}

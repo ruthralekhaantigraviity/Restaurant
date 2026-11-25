@@ -297,8 +297,7 @@ const MyTestimonial = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <User size={13} className="text-slate-400" /> Owner Name *
-                            </label>
+                                <User size={13} className="text-slate-400" /> Owner Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input
                                 type="text"
                                 value={ownerName}
@@ -311,8 +310,7 @@ const MyTestimonial = () => {
 
                         <div>
                             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <Building2 size={13} className="text-slate-400" /> Restaurant Name *
-                            </label>
+                                <Building2 size={13} className="text-slate-400" /> Restaurant Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input
                                 type="text"
                                 value={restaurantName}
@@ -328,8 +326,7 @@ const MyTestimonial = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                                <MapPin size={13} className="text-slate-400" /> Location (City, State) *
-                            </label>
+                                <MapPin size={13} className="text-slate-400" /> Location (City, State) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <input
                                 type="text"
                                 value={location}
@@ -342,8 +339,7 @@ const MyTestimonial = () => {
 
                         <div>
                             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                                Rating *
-                            </label>
+                                Rating <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <div className="flex items-center gap-1.5 py-2">
                                 {[1, 2, 3, 4, 5].map((starVal) => (
                                     <button
@@ -419,8 +415,7 @@ const MyTestimonial = () => {
                     <div>
                         <div className="flex justify-between items-center mb-1.5">
                             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                Testimonial / Experience Review *
-                            </label>
+                                Testimonial / Experience Review <span className="text-red-500 font-bold ml-0.5">*</span></label>
                             <span className="text-[10px] text-slate-400 font-medium">
                                 {quote.length} chars
                             </span>

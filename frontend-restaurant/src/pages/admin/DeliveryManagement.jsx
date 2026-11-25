@@ -810,29 +810,38 @@ const DeliveryManagement = () => {
                             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
                                 <div>
                                     <h3 className="text-lg font-black text-gray-900 dark:text-white">Top Deliverers</h3>
-                                    <p className="text-xs text-gray-400">Partners ranked by rating and speed.</p>
+                                    <p className="text-xs text-gray-400 dark:text-slate-500">Partners ranked by rating and speed.</p>
                                 </div>
 
                                 <div className="space-y-3 min-w-0 pr-1.5 flex-1">
-                                    {[
-                                        { name: 'Ravi Kumar', rating: '4.9', count: '14 deliveries' },
-                                        { name: 'Sandeep Sharma', rating: '4.8', count: '11 deliveries' }
-                                    ].map((pat, i) => (
-                                        <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border border-gray-200 dark:bg-slate-950 dark:border-slate-800">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xs">
-                                                    {i + 1}
+                                    {partners && partners.length > 0 ? (
+                                        partners
+                                            .slice()
+                                            .sort((a, b) => ((b.rating || 5) * 100 + (b.totalDeliveries || 0)) - ((a.rating || 5) * 100 + (a.totalDeliveries || 0)))
+                                            .slice(0, 5)
+                                            .map((pat, i) => (
+                                                <div key={pat._id || i} className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border border-gray-200 dark:bg-slate-950 dark:border-slate-800">
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                                            {i + 1}
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{pat.name}</p>
+                                                            <p className="text-[10px] text-gray-400 dark:text-slate-400">{pat.totalDeliveries || pat.completedOrders || 0} deliveries</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-amber-500 font-extrabold shrink-0">
+                                                        <Star size={12} className="fill-amber-500" /> {pat.rating || '5.0'}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">{pat.name}</p>
-                                                    <p className="text-[9px] text-gray-400">{pat.count}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-1 text-xs text-amber-500 font-extrabold">
-                                                <Star size={12} className="fill-amber-500" /> {pat.rating}
-                                            </div>
+                                            ))
+                                    ) : (
+                                        <div className="p-8 text-center text-slate-400 dark:text-slate-500 space-y-2">
+                                            <Truck size={32} className="mx-auto opacity-40 text-slate-400" />
+                                            <p className="text-xs font-bold text-gray-700 dark:text-slate-300">No deliverers registered yet</p>
+                                            <p className="text-[11px] text-gray-400 dark:text-slate-500">Registered delivery staff will show performance rankings here.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </div>

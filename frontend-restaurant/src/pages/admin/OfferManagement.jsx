@@ -294,7 +294,7 @@ const OfferManagement = () => {
                         <div className="p-6 overflow-y-auto">
                             <form id="offer-form" onSubmit={handleSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Promo Code *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Promo Code <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="text"
                                         required
@@ -320,7 +320,7 @@ const OfferManagement = () => {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Discount Value *</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Discount Value <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <div className="relative">
                                             {formData.type === 'Fixed Amount' && <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />}
                                             <input

@@ -1154,7 +1154,7 @@ const InventoryManagement = () => {
                         </div>
                         <form onSubmit={handleSaveItem} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Material Name *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Material Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="text"
                                     required
@@ -1276,7 +1276,7 @@ const InventoryManagement = () => {
                                 <div className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Supplier Information</div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Supplier / Vendor Name *</label>
+                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Supplier / Vendor Name <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <input 
                                             type="text"
                                             required
@@ -1305,7 +1305,7 @@ const InventoryManagement = () => {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Invoice Number *</label>
+                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Invoice Number <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <input 
                                             type="text"
                                             required
@@ -1315,7 +1315,7 @@ const InventoryManagement = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Purchase Date *</label>
+                                        <label className="block text-[11px] font-bold text-slate-400 mb-1">Purchase Date <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                         <input 
                                             type="date"
                                             required
@@ -1490,7 +1490,7 @@ const InventoryManagement = () => {
                         </div>
                         <form onSubmit={handleRecordPayment} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Amount (₹) *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input 
                                     type="number"
                                     step="any"
@@ -1607,7 +1607,7 @@ const InventoryManagement = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reason / Description *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Reason / Description <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea 
                                     rows="2"
                                     required
@@ -1653,7 +1653,7 @@ const InventoryManagement = () => {
                         </div>
                         <form onSubmit={handleSubmitKitchenRestockOrder} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Ingredient / Item *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Ingredient / Item <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -1664,7 +1664,7 @@ const InventoryManagement = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Order Quantity *</label>
+                                    <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Order Quantity <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                     <input
                                         type="number"
                                         step="0.1"
@@ -1745,7 +1745,7 @@ const InventoryManagement = () => {
                                 </label>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Message to Kitchen *</label>
+                                <label className="block text-xs font-bold uppercase text-slate-600 dark:text-slate-300 mb-1">Message to Kitchen <span className="text-red-500 font-bold ml-0.5">*</span></label>
                                 <textarea
                                     required
                                     rows="2"
