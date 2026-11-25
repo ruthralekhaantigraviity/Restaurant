@@ -9,7 +9,7 @@ const getBrevoConfig = () => {
     ].join('-');
 
     const apiKey = process.env.BREVO_API_KEY || defaultApiKey;
-    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_FROM || 'forgeindiaconnectfic@gmail.com';
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_FROM || 'ruthralekhafic@gmail.com';
     const senderName = process.env.BREVO_SENDER_NAME || 'FoodNest';
 
     return { apiKey, senderEmail, senderName };
@@ -27,7 +27,7 @@ const getSmtpConfig = () => {
     const port = Number(process.env.SMTP_PORT || process.env.SMTP_Port || 587);
     const user = process.env.SMTP_USER || process.env.SMPT_USER || 'b5786a001@smtp-brevo.com';
     const pass = process.env.SMTP_PASS || process.env.smtp_pass_key || defaultSmtpPass;
-    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_FROM || 'forgeindiaconnectfic@gmail.com';
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_FROM || 'ruthralekhafic@gmail.com';
     const senderName = process.env.BREVO_SENDER_NAME || 'FoodNest';
     return { host, port, user, pass, senderEmail, senderName };
 };

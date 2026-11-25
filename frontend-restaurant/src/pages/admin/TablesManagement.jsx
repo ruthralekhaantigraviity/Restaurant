@@ -144,7 +144,7 @@ const TablesManagement = () => {
         setIsQrModalOpen(true);
     };
 
-    const PROD_CUSTOMER_APP_URL = 'https://f-hms-customer-two.vercel.app';
+    const PROD_CUSTOMER_APP_URL = import.meta.env.VITE_CUSTOMER_URL || 'https://restaurant-customer-cyan.vercel.app';
 
     const getQrUrl = (table) => {
         if (!table) return '';

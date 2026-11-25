@@ -586,7 +586,7 @@ export const testSendEmail = async (req, res) => {
             'ZUUMRh04YAW16Ugq'
         ].join('-');
 
-        const senderEmail = process.env.BREVO_SENDER_EMAIL || 'forgeindiaconnectfic@gmail.com';
+        const senderEmail = process.env.BREVO_SENDER_EMAIL || 'ruthralekhafic@gmail.com';
         const senderName = process.env.BREVO_SENDER_NAME || 'Restaurant Hub';
 
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {

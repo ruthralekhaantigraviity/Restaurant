@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { 
-    Truck, Plus, Search, Check, X, ShieldAlert, Ban, User, MapPin, 
-    DollarSign, Clock, CheckCircle2, AlertTriangle, Star, Navigation, 
+import {
+    Truck, Plus, Search, Check, X, ShieldAlert, Ban, User, MapPin,
+    DollarSign, Clock, CheckCircle2, AlertTriangle, Star, Navigation,
     Award, Shield, FileText, ToggleLeft, ToggleRight, Store, Bike
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -90,15 +90,15 @@ const DeliveryManagement = () => {
             const res = await api.get('/orders');
             setTotalOrdersCount(res.data.length);
             // Filter only delivery orders that are actively in progress (not delivered/completed/cancelled)
-            const active = res.data.filter(o => 
-                o.orderType === 'Delivery' && 
+            const active = res.data.filter(o =>
+                o.orderType === 'Delivery' &&
                 o.status !== 'Cancelled' &&
                 o.status !== 'Delivered' &&
                 o.status !== 'Completed' &&
                 o.deliveryStatus !== 'Delivered'
             );
             setActiveOrders(active);
-            
+
             // Set default or update tracking order state
             setSelectedTrackingOrder(prev => {
                 if (!prev && active.length > 0) return active[0];
@@ -115,7 +115,7 @@ const DeliveryManagement = () => {
 
     const getTrackingPartnerDetails = () => {
         if (!selectedTrackingOrder || !selectedTrackingOrder.deliveryPartner) return null;
-        const partnerId = typeof selectedTrackingOrder.deliveryPartner === 'object' 
+        const partnerId = typeof selectedTrackingOrder.deliveryPartner === 'object'
             ? (selectedTrackingOrder.deliveryPartner._id || selectedTrackingOrder.deliveryPartner.id)
             : selectedTrackingOrder.deliveryPartner;
         return partners.find(p => {
@@ -146,7 +146,7 @@ const DeliveryManagement = () => {
 
     useEffect(() => {
         initData(true);
-        
+
         // Silent background polling every 30 seconds for live order status without UI restarts
         const pollInterval = setInterval(() => {
             fetchPartners();
@@ -160,11 +160,11 @@ const DeliveryManagement = () => {
 
     useEffect(() => {
         if (!selectedTrackingOrder) return;
-        
+
         const isDelivered = selectedTrackingOrder.status === 'Delivered' || selectedTrackingOrder.deliveryStatus === 'Delivered';
-        const isMoving = ['Picked Up', 'On the Way', 'Out for Delivery'].includes(selectedTrackingOrder.status) || 
-                         ['Picked Up', 'On the Way'].includes(selectedTrackingOrder.deliveryStatus);
-        
+        const isMoving = ['Picked Up', 'On the Way', 'Out for Delivery'].includes(selectedTrackingOrder.status) ||
+            ['Picked Up', 'On the Way'].includes(selectedTrackingOrder.deliveryStatus);
+
         if (isDelivered) {
             setRiderProgress(100);
         } else if (isMoving) {
@@ -254,7 +254,7 @@ const DeliveryManagement = () => {
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-slate-950">
+            <div className="flex h-screen items-center justify-center bg-gray-50">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
             </div>
         );
@@ -264,21 +264,20 @@ const DeliveryManagement = () => {
         <div className="space-y-6 pb-20">
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Delivery Partner Management</h2>
-                <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Configure settings, register delivery staff, monitor live order tracking, and view analytics reports.</p>
+                <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Delivery Partner Management</h2>
+                <p className="text-gray-500 text-sm mt-1">Configure settings, register delivery staff, monitor live order tracking, and view analytics reports.</p>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex gap-1 sm:gap-2 border-b border-gray-200 pb-px overflow-x-auto no-scrollbar max-w-full min-w-0 flex-nowrap dark:border-slate-800">
+            <div className="flex gap-1 sm:gap-2 border-b border-gray-200 pb-px overflow-x-auto no-scrollbar max-w-full min-w-0 flex-nowrap">
                 {['settings', 'partners', 'tracking', 'analytics'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-3.5 sm:px-6 py-2.5 sm:py-3 font-bold text-xs sm:text-sm capitalize transition-all border-b-2 -mb-px whitespace-nowrap shrink-0 ${
-                            activeTab === tab 
-                            ? 'border-green-600 text-green-600' 
+                        className={`px-3.5 sm:px-6 py-2.5 sm:py-3 font-bold text-xs sm:text-sm capitalize transition-all border-b-2 -mb-px whitespace-nowrap shrink-0 ${activeTab === tab
+                            ? 'border-green-600 text-green-600'
                             : 'border-transparent text-gray-400 hover:text-gray-600'
-                        }`}
+                            }`}
                     >
                         {tab === 'tracking' ? 'Live Tracking' : tab}
                     </button>
@@ -293,10 +292,10 @@ const DeliveryManagement = () => {
                     <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             {/* Availability Card */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4 dark:bg-slate-900 dark:border-slate-800">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h3 className="text-lg font-black text-gray-900 dark:text-white">Delivery Status</h3>
+                                        <h3 className="text-lg font-black text-gray-900">Delivery Status</h3>
                                         <p className="text-xs text-gray-400">Toggle whether your restaurant currently takes delivery orders.</p>
                                     </div>
                                     <button
@@ -318,7 +317,7 @@ const DeliveryManagement = () => {
                                         <select
                                             value={settings.deliveryType}
                                             onChange={(e) => setSettings(prev => ({ ...prev, deliveryType: e.target.value }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                         >
                                             <option value="Self">Self Delivery (Own Staff)</option>
                                             <option value="Third-Party">Third-Party (Uber, Dunzo, etc.)</option>
@@ -336,16 +335,16 @@ const DeliveryManagement = () => {
                                                 onChange={(e) => setSettings(prev => ({ ...prev, radius: Number(e.target.value) }))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
                                             />
-                                            <span className="font-extrabold text-sm text-gray-700 whitespace-nowrap dark:text-slate-200">{settings.radius} km</span>
+                                            <span className="font-extrabold text-sm text-gray-700 whitespace-nowrap">{settings.radius} km</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Charges & Fees Card */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Rates & Surcharges</h3>
+                                    <h3 className="text-lg font-black text-gray-900">Rates & Surcharges</h3>
                                     <p className="text-xs text-gray-400">Configure delivery charges, limits, and extra multipliers.</p>
                                 </div>
 
@@ -356,7 +355,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.freeRadius}
                                             onChange={(e) => setSettings(prev => ({ ...prev, freeRadius: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -366,7 +365,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.minOrderAmountForFreeDelivery}
                                             onChange={(e) => setSettings(prev => ({ ...prev, minOrderAmountForFreeDelivery: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -376,7 +375,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.baseFee}
                                             onChange={(e) => setSettings(prev => ({ ...prev, baseFee: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -386,7 +385,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.perKmCharge}
                                             onChange={(e) => setSettings(prev => ({ ...prev, perKmCharge: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -396,7 +395,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.peakHourFee}
                                             onChange={(e) => setSettings(prev => ({ ...prev, peakHourFee: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -406,7 +405,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.rainSurcharge}
                                             onChange={(e) => setSettings(prev => ({ ...prev, rainSurcharge: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -416,7 +415,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.minOrderAmountForDelivery || 0}
                                             onChange={(e) => setSettings(prev => ({ ...prev, minOrderAmountForDelivery: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                             min="0"
                                         />
                                     </div>
@@ -425,14 +424,14 @@ const DeliveryManagement = () => {
                                         <input
                                             type="time"
                                             value={settings.deliveryOperatingHours?.start || '09:00'}
-                                            onChange={(e) => setSettings(prev => ({ 
-                                                ...prev, 
-                                                deliveryOperatingHours: { 
-                                                    ...(prev.deliveryOperatingHours || {}), 
-                                                    start: e.target.value 
-                                                } 
+                                            onChange={(e) => setSettings(prev => ({
+                                                ...prev,
+                                                deliveryOperatingHours: {
+                                                    ...(prev.deliveryOperatingHours || {}),
+                                                    start: e.target.value
+                                                }
                                             }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                         />
                                     </div>
                                     <div>
@@ -440,14 +439,14 @@ const DeliveryManagement = () => {
                                         <input
                                             type="time"
                                             value={settings.deliveryOperatingHours?.end || '22:00'}
-                                            onChange={(e) => setSettings(prev => ({ 
-                                                ...prev, 
-                                                deliveryOperatingHours: { 
-                                                    ...(prev.deliveryOperatingHours || {}), 
-                                                    end: e.target.value 
-                                                } 
+                                            onChange={(e) => setSettings(prev => ({
+                                                ...prev,
+                                                deliveryOperatingHours: {
+                                                    ...(prev.deliveryOperatingHours || {}),
+                                                    end: e.target.value
+                                                }
                                             }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
                                         />
                                     </div>
                                 </div>
@@ -455,9 +454,9 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* Real Interactive Google / Leaflet Radius Map */}
-                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-full space-y-4 dark:bg-slate-900 dark:border-slate-800">
+                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-full space-y-4">
                             <div>
-                                <h3 className="text-lg font-black text-gray-900 dark:text-white">Map Bounding Area</h3>
+                                <h3 className="text-lg font-black text-gray-900">Map Bounding Area</h3>
                                 <p className="text-xs text-gray-400">Interactive Google Maps style view enforcing the {settings.radius} km order constraint.</p>
                             </div>
 
@@ -482,7 +481,7 @@ const DeliveryManagement = () => {
                                     <span className="font-mono text-slate-800 font-semibold">{settings.location?.longitude || 80.2090}</span>
                                 </div>
                             </div>
-                            
+
                             <button
                                 type="submit"
                                 className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-2xl shadow-lg shadow-green-600/15 text-sm transition-all"
@@ -498,7 +497,7 @@ const DeliveryManagement = () => {
                     <div className="space-y-6 min-w-0 pr-1.5 flex-1">
                         {/* Title and Add Button */}
                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-black text-gray-900 dark:text-white">Registered Delivery Staff</h3>
+                            <h3 className="text-lg font-black text-gray-900">Registered Delivery Staff</h3>
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-green-600/15"
@@ -508,11 +507,11 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* List */}
-                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider dark:bg-slate-950 dark:border-slate-800">
+                                        <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
                                             <th className="py-4 px-6">Partner Name</th>
                                             <th className="py-4 px-6">Phone Number</th>
                                             <th className="py-4 px-6">Vehicle Details</th>
@@ -531,7 +530,7 @@ const DeliveryManagement = () => {
                                         ) : (
                                             partners.map(p => (
                                                 <tr key={p._id} className="hover:bg-gray-50/50">
-                                                    <td className="py-4 px-6 font-bold text-gray-900 flex items-center gap-3 dark:text-white">
+                                                    <td className="py-4 px-6 font-bold text-gray-900 flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold text-xs">
                                                             {p.userId?.name?.slice(0, 2).toUpperCase()}
                                                         </div>
@@ -545,27 +544,25 @@ const DeliveryManagement = () => {
                                                             <p className="text-[10px] text-gray-400">{p.userId?.email}</p>
                                                         </div>
                                                     </td>
-                                                    <td className="py-4 px-6 text-gray-600 dark:text-slate-300">{p.userId?.phoneNumber || '—'}</td>
+                                                    <td className="py-4 px-6 text-gray-600">{p.userId?.phoneNumber || '—'}</td>
                                                     <td className="py-4 px-6">
-                                                        <span className="font-semibold text-gray-800 dark:text-slate-100">{p.vehicleDetails?.type}</span>
+                                                        <span className="font-semibold text-gray-800">{p.vehicleDetails?.type}</span>
                                                         <p className="text-[10px] text-gray-400">{p.vehicleDetails?.model || 'No model specified'}</p>
                                                     </td>
                                                     <td className="py-4 px-6 text-center">
-                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                                            p.status === 'Online' 
-                                                            ? 'bg-green-50 text-green-700 border border-green-200' 
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${p.status === 'Online'
+                                                            ? 'bg-green-50 text-green-700 border border-green-200'
                                                             : 'bg-gray-100 text-gray-500'
-                                                        }`}>
+                                                            }`}>
                                                             {p.status}
                                                         </span>
                                                     </td>
                                                     <td className="py-4 px-6 text-center">
-                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                                            p.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' :
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${p.verificationStatus === 'Approved' ? 'bg-green-100 text-green-700' :
                                                             p.verificationStatus === 'Rejected' ? 'bg-red-100 text-red-700' :
-                                                            p.verificationStatus === 'Suspended' ? 'bg-orange-100 text-orange-700' :
-                                                            'bg-yellow-100 text-yellow-700'
-                                                        }`}>
+                                                                p.verificationStatus === 'Suspended' ? 'bg-orange-100 text-orange-700' :
+                                                                    'bg-yellow-100 text-yellow-700'
+                                                            }`}>
                                                             {p.verificationStatus}
                                                         </span>
                                                     </td>
@@ -599,11 +596,10 @@ const DeliveryManagement = () => {
                                                         )}
                                                         <button
                                                             onClick={() => handleToggleActive(p._id)}
-                                                            className={`p-1.5 rounded-lg inline-flex items-center transition-all ${
-                                                                p.userId?.isActive !== false
+                                                            className={`p-1.5 rounded-lg inline-flex items-center transition-all ${p.userId?.isActive !== false
                                                                 ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                                                                 : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                                                            }`}
+                                                                }`}
                                                             title={p.userId?.isActive !== false ? "Deactivate Partner" : "Activate Partner"}
                                                         >
                                                             {p.userId?.isActive !== false ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
@@ -623,9 +619,9 @@ const DeliveryManagement = () => {
                 {activeTab === 'tracking' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Active Orders List */}
-                        <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4 dark:bg-slate-900 dark:border-slate-800">
+                        <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                             <div>
-                                <h3 className="text-lg font-black text-gray-900 dark:text-white">Active Delivery Orders</h3>
+                                <h3 className="text-lg font-black text-gray-900">Active Delivery Orders</h3>
                                 <p className="text-xs text-gray-400">List of orders currently out for delivery or pending assign.</p>
                             </div>
 
@@ -636,25 +632,24 @@ const DeliveryManagement = () => {
                                     </div>
                                 ) : (
                                     activeOrders.map(o => (
-                                        <div 
-                                            key={o._id} 
+                                        <div
+                                            key={o._id}
                                             onClick={() => setSelectedTrackingOrder(o)}
-                                            className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-3 ${
-                                                selectedTrackingOrder?._id === o._id 
-                                                ? 'bg-blue-50/70 border-blue-400 shadow-md ring-2 ring-blue-400/10' 
+                                            className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-3 ${selectedTrackingOrder?._id === o._id
+                                                ? 'bg-blue-50/70 border-blue-400 shadow-md ring-2 ring-blue-400/10'
                                                 : 'bg-gray-50 border-gray-200 hover:bg-gray-100/75'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex justify-between items-center">
-                                                <span className="text-xs font-black text-gray-900 dark:text-white">#{o._id.substring(o._id.length - 4).toUpperCase()}</span>
+                                                <span className="text-xs font-black text-gray-900">#{o._id.substring(o._id.length - 4).toUpperCase()}</span>
                                                 <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase">{o.status}</span>
                                             </div>
 
-                                            <div className="text-xs text-gray-500 space-y-1 dark:text-slate-400">
+                                            <div className="text-xs text-gray-500 space-y-1">
                                                 <p>Address: <strong>{o.shippingAddress?.address || 'Any'}</strong></p>
                                                 <p>Distance: <strong>{o.deliveryDistance || 0} km</strong></p>
                                                 {o.deliveryPartner ? (
-                                                    <div className="space-y-1 mt-2 pt-2 border-t border-gray-200/60 text-[10px] font-semibold text-gray-600 dark:text-slate-300">
+                                                    <div className="space-y-1 mt-2 pt-2 border-t border-gray-200/60 text-[10px] font-semibold text-gray-600">
                                                         <div className="flex justify-between">
                                                             <span>Partner:</span>
                                                             <strong className="text-emerald-700">{(o.deliveryPartner && typeof o.deliveryPartner === 'object') ? (o.deliveryPartner.name || 'Assigned') : 'Assigned'}</strong>
@@ -679,7 +674,7 @@ const DeliveryManagement = () => {
                                                     </button>
                                                     <select
                                                         onChange={(e) => handleManualAssign(o._id, e.target.value)}
-                                                        className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold px-2 py-1 dark:bg-slate-900 dark:border-slate-800"
+                                                        className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold px-2 py-1"
                                                     >
                                                         <option value="">Manual Assign</option>
                                                         {partners.filter(p => p.status === 'Online' && p.verificationStatus === 'Approved').map(p => (
@@ -695,10 +690,10 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* Interactive Tracking Map Visualizer */}
-                        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-[580px] space-y-4 dark:bg-slate-900 dark:border-slate-800">
+                        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-[580px] space-y-4">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Live Delivery Route Tracker</h3>
+                                    <h3 className="text-lg font-black text-gray-900">Live Delivery Route Tracker</h3>
                                     <p className="text-xs text-gray-400">Map simulation of active delivery partner coordinates.</p>
                                 </div>
                                 {selectedTrackingOrder && (
@@ -710,7 +705,7 @@ const DeliveryManagement = () => {
 
                             {/* Stepper Milestones (Zomato/Swiggy Style) */}
                             {selectedTrackingOrder ? (
-                                <div className="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center text-[10px] font-bold text-gray-500 dark:text-slate-400">
+                                <div className="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center text-[10px] font-bold text-gray-500">
                                     {[
                                         { label: 'Accepted', active: ['Accepted', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered'].includes(selectedTrackingOrder.status) },
                                         { label: 'Preparing', active: ['Preparing', 'Ready', 'Out for Delivery', 'Delivered'].includes(selectedTrackingOrder.status) },
@@ -718,11 +713,10 @@ const DeliveryManagement = () => {
                                         { label: 'Out for Delivery', active: ['Out for Delivery', 'Delivered'].includes(selectedTrackingOrder.status) }
                                     ].map((step, index) => (
                                         <div key={index} className="flex flex-col items-center gap-1">
-                                            <div className={`w-4 h-4 rounded-full flex items-center justify-center border text-[8px] font-black ${
-                                                step.active 
-                                                ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm shadow-emerald-500/20' 
+                                            <div className={`w-4 h-4 rounded-full flex items-center justify-center border text-[8px] font-black ${step.active
+                                                ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm shadow-emerald-500/20'
                                                 : 'bg-white border-gray-200 text-gray-300'
-                                            }`}>
+                                                }`}>
                                                 {step.active ? '✓' : index + 1}
                                             </div>
                                             <span className={step.active ? 'text-emerald-700 font-extrabold' : 'text-gray-400'}>{step.label}</span>
@@ -731,7 +725,7 @@ const DeliveryManagement = () => {
                                 </div>
                             ) : null}
 
-                            <div className="relative flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex flex-col min-h-[380px] bg-slate-50 dark:border-slate-800">
+                            <div className="relative flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex flex-col min-h-[380px] bg-slate-50">
                                 <LiveOrderMap
                                     customerLocation={selectedTrackingOrder ? (selectedTrackingOrder.customerLocation || selectedTrackingOrder.shippingAddress) : null}
                                     restaurantLocation={selectedTrackingOrder ? selectedTrackingOrder.restaurantLocation : (settings.location || { latitude: 13.0475, longitude: 80.2090 })}
@@ -743,7 +737,7 @@ const DeliveryManagement = () => {
                                 />
 
                                 {!selectedTrackingOrder && (
-                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur px-5 py-2.5 rounded-2xl border border-slate-200 shadow-xl text-center dark:border-slate-800">
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur px-5 py-2.5 rounded-2xl border border-slate-200 shadow-xl text-center">
                                         <p className="text-xs font-extrabold text-slate-800">Showing Branch Map Overview</p>
                                         <p className="text-[10px] font-medium text-slate-400">Select an active delivery order on the left to inspect its live OSRM route & rider location.</p>
                                     </div>
@@ -766,13 +760,13 @@ const DeliveryManagement = () => {
                             ].map((kpi, idx) => {
                                 const Icon = kpi.icon;
                                 return (
-                                    <div key={idx} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
+                                    <div key={idx} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
                                         <div className={`p-4 rounded-2xl ${kpi.color}`}>
                                             <Icon size={24} />
                                         </div>
                                         <div>
                                             <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block leading-tight break-words">{kpi.title}</p>
-                                            <h4 className="text-xl font-black text-gray-900 mt-1 dark:text-white">{kpi.value}</h4>
+                                            <h4 className="text-xl font-black text-gray-900 mt-1">{kpi.value}</h4>
                                         </div>
                                     </div>
                                 );
@@ -782,12 +776,12 @@ const DeliveryManagement = () => {
                         {/* Summary Charts Panel */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Performance statistics */}
-                            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
+                            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Success Rate Trends</h3>
+                                    <h3 className="text-lg font-black text-gray-900">Success Rate Trends</h3>
                                     <p className="text-xs text-gray-400">Proportions of completed deliveries vs cancellations.</p>
                                 </div>
-                                
+
                                 <div className="space-y-4 min-w-0 pr-1.5 flex-1">
                                     {[
                                         { name: 'Completed Payouts', val: parseInt(analytics.deliverySuccessRate), color: 'bg-green-500' },
@@ -798,7 +792,7 @@ const DeliveryManagement = () => {
                                                 <span>{bar.name}</span>
                                                 <span>{bar.val}%</span>
                                             </div>
-                                            <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden border border-gray-100 dark:bg-slate-950 dark:border-slate-800">
+                                            <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
                                                 <div className={`h-full ${bar.color}`} style={{ width: `${bar.val}%` }}></div>
                                             </div>
                                         </div>
@@ -807,9 +801,9 @@ const DeliveryManagement = () => {
                             </div>
 
                             {/* Top Partners Leaderboard */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Top Deliverers</h3>
+                                    <h3 className="text-lg font-black text-gray-900">Top Deliverers</h3>
                                     <p className="text-xs text-gray-400 dark:text-slate-500">Partners ranked by rating and speed.</p>
                                 </div>
 
@@ -853,44 +847,44 @@ const DeliveryManagement = () => {
             {isAddModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}></div>
-                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col dark:bg-slate-900">
-                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
-                            <h3 className="font-black text-gray-900 text-lg dark:text-white">Register Delivery Partner</h3>
+                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h3 className="font-black text-gray-900 text-lg">Register Delivery Partner</h3>
                             <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={handleAddPartner} className="flex flex-col min-h-0 overflow-hidden">
                             <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh] custom-scrollbar text-left">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         required
                                         value={newPartner.name}
-                                        onChange={(e) => setNewPartner({...newPartner, name: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                        onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                         placeholder="e.g. Ramesh Singh"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email Address</label>
-                                    <input 
-                                        type="email" 
+                                    <input
+                                        type="email"
                                         required
                                         value={newPartner.email}
-                                        onChange={(e) => setNewPartner({...newPartner, email: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                        onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                         placeholder="e.g. ramesh@gmail.com"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phone Number</label>
-                                    <input 
-                                        type="tel" 
+                                    <input
+                                        type="tel"
                                         inputMode="numeric"
                                         maxLength={10}
                                         pattern="[6-9][0-9]{9}"
@@ -899,9 +893,9 @@ const DeliveryManagement = () => {
                                         onChange={(e) => {
                                             const clean = filterIndianMobile(e.target.value);
                                             if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
-                                            setNewPartner({...newPartner, phoneNumber: clean});
+                                            setNewPartner({ ...newPartner, phoneNumber: clean });
                                         }}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                         placeholder="e.g. 9876543210"
                                     />
                                 </div>
@@ -911,8 +905,8 @@ const DeliveryManagement = () => {
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Vehicle Type</label>
                                         <select
                                             value={newPartner.vehicleType}
-                                            onChange={(e) => setNewPartner({...newPartner, vehicleType: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, vehicleType: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500"
                                         >
                                             <option value="Bike">Bike</option>
                                             <option value="Scooter">Scooter</option>
@@ -922,11 +916,11 @@ const DeliveryManagement = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Vehicle Model</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             value={newPartner.vehicleModel}
-                                            onChange={(e) => setNewPartner({...newPartner, vehicleModel: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, vehicleModel: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                             placeholder="e.g. Activa 6G"
                                         />
                                     </div>
@@ -935,21 +929,21 @@ const DeliveryManagement = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">RC Book Number</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             value={newPartner.rcNumber}
-                                            onChange={(e) => setNewPartner({...newPartner, rcNumber: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, rcNumber: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                             placeholder="RC-XXXX"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">License Number</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             value={newPartner.licenseNumber}
-                                            onChange={(e) => setNewPartner({...newPartner, licenseNumber: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, licenseNumber: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                             placeholder="DL-XXXX"
                                         />
                                     </div>
@@ -957,11 +951,11 @@ const DeliveryManagement = () => {
 
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Profile Photo (URL)</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={newPartner.profilePhoto}
-                                        onChange={(e) => setNewPartner({...newPartner, profilePhoto: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                        onChange={(e) => setNewPartner({ ...newPartner, profilePhoto: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                         placeholder="https://example.com/avatar.jpg"
                                     />
                                 </div>
@@ -969,37 +963,37 @@ const DeliveryManagement = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Driving License (URL)</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             value={newPartner.drivingLicense}
-                                            onChange={(e) => setNewPartner({...newPartner, drivingLicense: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, drivingLicense: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                             placeholder="https://example.com/dl.pdf"
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">ID Proof (URL)</label>
-                                        <input 
+                                        <input
                                             type="text"
                                             value={newPartner.idProof}
-                                            onChange={(e) => setNewPartner({...newPartner, idProof: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
+                                            onChange={(e) => setNewPartner({ ...newPartner, idProof: e.target.value })}
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
                                             placeholder="https://example.com/id.pdf"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 dark:border-slate-800">
-                                <button 
-                                    type="button" 
+                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0">
+                                <button
+                                    type="button"
                                     onClick={() => setIsAddModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
+                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-sm shadow-green-600/20 transition-colors text-sm"
                                 >
                                     Register Partner

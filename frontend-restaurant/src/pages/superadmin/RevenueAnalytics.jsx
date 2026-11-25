@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-    TrendingUp, Award, Receipt, Store, 
+import {
+    TrendingUp, Award, Receipt, Store,
     Calendar, ShieldAlert, ArrowUpRight, DollarSign, Loader2, ArrowDownRight, RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -144,7 +144,7 @@ const RevenueAnalytics = () => {
                     <div>
                         <h3 className="font-black text-slate-900 dark:text-white text-base mb-1">Subscriber Tier Distribution</h3>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold mb-6">Distribution of active restaurants across plans.</p>
-                        
+
                         <div className="space-y-4 min-w-0 pr-1.5 flex-1">
                             {[
                                 { name: 'Basic', count: stats.basicSubscribers || 0, color: 'bg-emerald-500' },
@@ -174,7 +174,7 @@ const RevenueAnalytics = () => {
                     <div>
                         <h3 className="font-black text-slate-900 dark:text-white text-base mb-1">Revenue Performance Matrix</h3>
                         <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold mb-6">SaaS tier contribution statistics.</p>
-                        
+
                         <div className="divide-y divide-slate-50 dark:divide-slate-800">
                             {[
                                 { plan: 'Basic Tier', rate: '₹49/mo', count: stats.basicSubscribers || 0, total: (stats.basicSubscribers || 0) * 49 },
@@ -242,9 +242,8 @@ const RevenueAnalytics = () => {
                                         <td className="p-4 capitalize">{payment.billingCycle}</td>
                                         <td className="p-4 font-black text-slate-900 dark:text-white text-right">₹{payment.amount.toLocaleString('en-IN')}</td>
                                         <td className="p-4 text-center">
-                                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
-                                                payment.status === 'Completed' ? 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' : 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
-                                            }`}>
+                                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${payment.status === 'Completed' ? 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' : 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+                                                }`}>
                                                 {payment.status}
                                             </span>
                                         </td>

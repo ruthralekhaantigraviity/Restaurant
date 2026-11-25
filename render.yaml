@@ -12,4 +12,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: restaurant-restaurant-sigma.vercel.app
+        value: https://restaurant-restaurant-sigma.vercel.app
