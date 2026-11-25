@@ -284,7 +284,7 @@ const CustomerCareDashboard = () => {
                     <div className="pt-4 border-t border-gray-50 dark:border-slate-800">
                         <Link 
                             to="/admin/support/tickets" 
-                            className="w-full py-3 bg-gray-50 dark:bg-slate-950 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-900 dark:text-white text-center font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5 border border-gray-100 dark:border-slate-800"
+                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-center font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/10 cursor-pointer"
                         >
                             View Support Queue <ArrowRight size={14} />
                         </Link>

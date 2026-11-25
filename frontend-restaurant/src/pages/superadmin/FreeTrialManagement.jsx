@@ -223,7 +223,7 @@ const FreeTrialManagement = () => {
             {/* Filter Tabs & Search */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
                 {/* Search */}
-                <div className="relative w-full sm:w-80">
+                <div className="relative w-full sm:w-72 md:w-80 shrink-0">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input
                         type="text"
@@ -235,15 +235,15 @@ const FreeTrialManagement = () => {
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 whitespace-nowrap flex-nowrap shrink-0 max-w-full">
                     {['All', 'Pending', 'Active', 'Frozen', 'Expired', 'Rejected'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setFilterStatus(tab)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${filterStatus === tab
+                            className={`h-9 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center shrink-0 whitespace-nowrap ${filterStatus === tab
                                 ? 'bg-orange-500 text-white shadow-xs'
-                                : 'text-slate-600 hover:bg-slate-100'
-                                }`}
+                                : 'text-slate-600 hover:bg-slate-100 bg-slate-50 border border-slate-200'
+                            }`}
                         >
                             {tab}
                         </button>
@@ -251,459 +251,476 @@ const FreeTrialManagement = () => {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-                {loading ? (
-                    <div className="p-16 flex flex-col items-center justify-center gap-3 text-slate-400">
-                        <RefreshCw className="animate-spin text-orange-500" size={28} />
-                        <span className="text-xs font-semibold">Loading trial subscriptions...</span>
-                    </div>
-                ) : filteredRestaurants.length === 0 ? (
-                    <div className="p-16 text-center text-slate-400 space-y-2">
-                        <Store size={36} className="mx-auto opacity-40" />
-                        <p className="text-sm font-bold">No trial subscription requests found.</p>
-                        <p className="text-xs">Try adjusting your search query or filter status.</p>
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-black uppercase text-slate-500 tracking-wider">
-                                    <th className="p-4">Restaurant</th>
-                                    <th className="p-4">Owner Info</th>
-                                    <th className="p-4">Request Date</th>
-                                    <th className="p-4">Trial / Expiry</th>
-                                    <th className="p-4 text-center">Status</th>
-                                    <th className="p-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 text-xs">
-                                {filteredRestaurants.map(r => {
-                                    const sub = r.subscription || {};
-                                    const isPending = sub.status === 'Pending Approval';
-                                    const isFrozen = sub.manualFreeze || sub.status === 'Frozen';
-                                    const isExpired = sub.status === 'Expired';
-                                    const isRejected = sub.status === 'Rejected';
-                                    const isActive = sub.status?.toLowerCase() === 'active' || r.status?.toLowerCase() === 'active' || (!isPending && !isFrozen && !isExpired && !isRejected && (sub.trialActive || sub.status === 'Active' || r.isActive || r.approvalStatus === 'Approved'));
-
-                                    // Effective Trial / Expiry Date calculation
-                                    const rawExpiry = sub.trialEndDate || sub.expiryDate || sub.subscriptionEndDate;
-                                    const effectiveExpiry = rawExpiry
-                                        ? new Date(rawExpiry)
-                                        : (sub.trialRequestDate
-                                            ? new Date(new Date(sub.trialRequestDate).getTime() + 7 * 24 * 60 * 60 * 1000)
-                                            : (r.createdAt
-                                                ? new Date(new Date(r.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000)
-                                                : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                                            )
-                                        );
-
-                                    // Countdown calculation
-                                    const diff = effectiveExpiry.getTime() - Date.now();
-                                    const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-
-                                    return (
-                                        <tr key={r._id} className="hover:bg-slate-50/50 transition-colors">
-                                            {/* Restaurant */}
-                                            <td className="p-4">
-                                                <div className="font-extrabold text-slate-900">{r.name}</div>
-                                                <div className="text-[11px] text-slate-400 font-medium">
-                                                    Plan: <span className="font-bold text-slate-700">{sub.plan || 'Pro'}</span>
-                                                </div>
-                                            </td>
-
-                                            {/* Owner Info */}
-                                            <td className="p-4 space-y-0.5">
-                                                <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                                                    <User size={12} className="text-slate-400" />
-                                                    {r.ownerId?.name || 'Unknown Owner'}
-                                                </div>
-                                                <div className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
-                                                    <Mail size={12} className="text-slate-400" />
-                                                    {r.ownerId?.email || 'No email'}
-                                                </div>
-                                            </td>
-
-                                            {/* Request Date */}
-                                            <td className="p-4 text-slate-600 font-medium">
-                                                {sub.trialRequestDate ? new Date(sub.trialRequestDate).toLocaleDateString() : (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A')}
-                                            </td>
-
-                                            {/* Trial Expiry */}
-                                            <td className="p-4">
-                                                {isPending ? (
-                                                    <span className="text-[11px] text-amber-700 font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 inline-block">
-                                                        ⏳ Starts on Approval
-                                                    </span>
-                                                ) : isFrozen ? (
-                                                    <span className="text-[11px] text-slate-700 font-bold bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 inline-block">
-                                                        ❄️ Manually Frozen
-                                                    </span>
-                                                ) : isExpired ? (
-                                                    <span className="text-[11px] text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 inline-block">
-                                                        Expired {effectiveExpiry.toLocaleDateString()}
-                                                    </span>
-                                                ) : isRejected ? (
-                                                    <span className="text-[11px] text-red-700 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-200 inline-block">
-                                                        Rejected
-                                                    </span>
-                                                ) : (
-                                                    <div className="space-y-0.5">
-                                                        <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border inline-block ${daysLeft <= 3
-                                                            ? 'text-amber-700 bg-amber-50 border-amber-200'
-                                                            : 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                                                            }`}>
-                                                            {daysLeft === 0 ? 'Expires today' : `${daysLeft} days remaining`}
-                                                        </span>
-                                                        <div className="text-[10px] text-slate-500 font-medium">
-                                                            Until {effectiveExpiry.toLocaleDateString()}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </td>
-
-                                            {/* Status Badge */}
-                                            <td className="p-4 text-center">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${isPending ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                                                    isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold' :
-                                                        isFrozen ? 'bg-slate-900 text-white border-slate-950' :
-                                                            isExpired ? 'bg-rose-100 text-rose-800 border-rose-200' :
-                                                                'bg-slate-100 text-slate-700 border-slate-200'
-                                                    }`}>
-                                                    {isActive ? 'ACTIVE' : (sub.status || 'INACTIVE')}
-                                                </span>
-                                            </td>
-
-                                            {/* Actions */}
-                                            <td className="p-4 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    {/* View Details */}
-                                                    <button
-                                                        onClick={() => openModal(r, 'details')}
-                                                        className="p-1.5 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors cursor-pointer"
-                                                        title="View Details"
-                                                    >
-                                                        <Eye size={15} />
-                                                    </button>
-
-                                                    {/* Approve / Reject when Pending */}
-                                                    {isPending && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => openModal(r, 'approve')}
-                                                                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs flex items-center gap-1"
-                                                            >
-                                                                <CheckCircle size={13} /> Approve (7-Days)
-                                                            </button>
-                                                            <button
-                                                                onClick={() => openModal(r, 'reject')}
-                                                                className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </>
-                                                    )}
-
-                                                    {/* Manual Freeze / Unfreeze */}
-                                                    {!isPending && !isFrozen && (
-                                                        <button
-                                                            onClick={() => openModal(r, 'freeze')}
-                                                            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-                                                            title="Manually Freeze Dashboard"
-                                                        >
-                                                            <Lock size={12} /> Freeze
-                                                        </button>
-                                                    )}
-
-                                                    {isFrozen && (
-                                                        <button
-                                                            onClick={() => openModal(r, 'unfreeze')}
-                                                            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-                                                            title="Unfreeze Dashboard"
-                                                        >
-                                                            <Unlock size={12} /> Unfreeze
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
+                    {/* Table */}
+                    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                        {loading ? (
+                            <div className="p-16 flex flex-col items-center justify-center gap-3 text-slate-400">
+                                <RefreshCw className="animate-spin text-orange-500" size={28} />
+                                <span className="text-xs font-semibold">Loading trial subscriptions...</span>
+                            </div>
+                        ) : filteredRestaurants.length === 0 ? (
+                            <div className="p-16 text-center text-slate-400 space-y-2">
+                                <Store size={36} className="mx-auto opacity-40" />
+                                <p className="text-sm font-bold">No trial subscription requests found.</p>
+                                <p className="text-xs">Try adjusting your search query or filter status.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto custom-scrollbar">
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-black uppercase text-slate-500 tracking-wider">
+                                            <th className="p-4">Restaurant</th>
+                                            <th className="p-4">Owner Info</th>
+                                            <th className="p-4">Request Date</th>
+                                            <th className="p-4">Trial / Expiry</th>
+                                            <th className="p-4 text-center">Status</th>
+                                            <th className="p-4 text-right">Actions</th>
                                         </tr>
-                                    );
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-xs">
+                                        {filteredRestaurants.map(r => {
+                                            const sub = r.subscription || {};
+                                            const isPending = sub.status === 'Pending Approval';
+                                            const isFrozen = sub.manualFreeze || sub.status === 'Frozen';
+                                            const isExpired = sub.status === 'Expired';
+                                            const isRejected = sub.status === 'Rejected';
+                                            const isActive = sub.status?.toLowerCase() === 'active' || r.status?.toLowerCase() === 'active' || (!isPending && !isFrozen && !isExpired && !isRejected && (sub.trialActive || sub.status === 'Active' || r.isActive || r.approvalStatus === 'Approved'));
+
+                                            // Effective Trial / Expiry Date calculation
+                                            const rawExpiry = sub.trialEndDate || sub.expiryDate || sub.subscriptionEndDate;
+                                            const effectiveExpiry = rawExpiry
+                                                ? new Date(rawExpiry)
+                                                : (sub.trialRequestDate
+                                                    ? new Date(new Date(sub.trialRequestDate).getTime() + 7 * 24 * 60 * 60 * 1000)
+                                                    : (r.createdAt
+                                                        ? new Date(new Date(r.createdAt).getTime() + 14 * 24 * 60 * 60 * 1000)
+                                                        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                                    )
+                                                );
+
+                                            // Countdown calculation
+                                            const diff = effectiveExpiry.getTime() - Date.now();
+                                            const daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+
+                                            return (
+                                                <tr key={r._id} className="hover:bg-slate-50/50 transition-colors">
+                                                    {/* Restaurant */}
+                                                    <td className="p-4">
+                                                        <div className="font-extrabold text-slate-900">{r.name}</div>
+                                                        <div className="text-[11px] text-slate-400 font-medium">
+                                                            Plan: <span className="font-bold text-slate-700">{sub.plan || 'Pro'}</span>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Owner Info */}
+                                                    <td className="p-4 space-y-0.5">
+                                                        <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                                                            <User size={12} className="text-slate-400" />
+                                                            {r.ownerId?.name || 'Unknown Owner'}
+                                                        </div>
+                                                        <div className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
+                                                            <Mail size={12} className="text-slate-400" />
+                                                            {r.ownerId?.email || 'No email'}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Request Date */}
+                                                    <td className="p-4 text-slate-600 font-medium">
+                                                        {sub.trialRequestDate ? new Date(sub.trialRequestDate).toLocaleDateString() : (r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A')}
+                                                    </td>
+
+                                                    {/* Trial Expiry */}
+                                                    <td className="p-4">
+                                                        {isPending ? (
+                                                            <span className="text-[11px] text-amber-700 font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 inline-block">
+                                                                ⏳ Starts on Approval
+                                                            </span>
+                                                        ) : isFrozen ? (
+                                                            <span className="text-[11px] text-slate-700 font-bold bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 inline-block">
+                                                                ❄️ Manually Frozen
+                                                            </span>
+                                                        ) : isExpired ? (
+                                                            <span className="text-[11px] text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 inline-block">
+                                                                Expired {effectiveExpiry.toLocaleDateString()}
+                                                            </span>
+                                                        ) : isRejected ? (
+                                                            <span className="text-[11px] text-red-700 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-200 inline-block">
+                                                                Rejected
+                                                            </span>
+                                                        ) : (
+                                                            <div className="space-y-0.5">
+                                                                <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border inline-block ${daysLeft <= 3
+                                                                    ? 'text-amber-700 bg-amber-50 border-amber-200'
+                                                                    : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                                                                    }`}>
+                                                                    {daysLeft === 0 ? 'Expires today' : `${daysLeft} days remaining`}
+                                                                </span>
+                                                                <div className="text-[10px] text-slate-500 font-medium">
+                                                                    Until {effectiveExpiry.toLocaleDateString()}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </td>
+
+                                                    {/* Status Badge */}
+                                                    <td className="p-4 text-center">
+                                                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${isPending ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                                                            isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold' :
+                                                                isFrozen ? 'bg-slate-900 text-white border-slate-950' :
+                                                                    isExpired ? 'bg-rose-100 text-rose-800 border-rose-200' :
+                                                                        'bg-slate-100 text-slate-700 border-slate-200'
+                                                            }`}>
+                                                            {isActive ? 'ACTIVE' : (sub.status || 'INACTIVE')}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Actions */}
+                                                    <td className="p-4 text-right whitespace-nowrap">
+                                                        <div className="inline-flex items-center justify-end gap-2">
+                                                            {/* View Details */}
+                                                            <button
+                                                                onClick={() => openModal(r, 'details')}
+                                                                className="h-8 w-8 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 shadow-xs transition-colors cursor-pointer shrink-0"
+                                                                title="View Details"
+                                                            >
+                                                                <Eye size={15} />
+                                                            </button>
+
+                                                            {/* Approve / Reject when Pending */}
+                                                            {isPending && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => openModal(r, 'approve')}
+                                                                        className="h-8 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0"
+                                                                    >
+                                                                        <CheckCircle size={14} /> Approve (7-Days)
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => openModal(r, 'reject')}
+                                                                        className="h-8 px-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs inline-flex items-center justify-center shrink-0"
+                                                                    >
+                                                                        Reject
+                                                                    </button>
+                                                                </>
+                                                            )}
+
+                                                            {/* Manual Freeze / Unfreeze */}
+                                                            {!isPending && !isFrozen && (
+                                                                <button
+                                                                    onClick={() => openModal(r, 'freeze')}
+                                                                    className="h-8 px-3.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0"
+                                                                    title="Manually Freeze Dashboard"
+                                                                >
+                                                                    <Lock size={13} /> Freeze
+                                                                </button>
+                                                            )}
+
+                                                            {isFrozen && (
+                                                                <button
+                                                                    onClick={() => openModal(r, 'unfreeze')}
+                                                                    className="h-8 px-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0"
+                                                                    title="Unfreeze Dashboard"
+                                                                >
+                                                                    <Unlock size={13} /> Unfreeze
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                        </tr>
+                                                        );
                                 })}
-                            </tbody>
-                        </table>
+                                                    </tbody>
+                                                </table>
                     </div>
                 )}
-            </div>
+                            </div>
 
             {/* ACTION MODALS */}
 
-            {/* 1. APPROVE MODAL */}
-            {modalType === 'approve' && selectedRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                        <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
-                            <CheckCircle size={24} />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <h3 className="text-xl font-black text-slate-900">Approve 7-Day Free Trial</h3>
-                            <p className="text-xs text-slate-500 font-medium">
-                                Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
-                            </p>
-                        </div>
+                        {/* 1. APPROVE MODAL */}
+                        {modalType === 'approve' && selectedRestaurant && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+                                <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
+                                        <CheckCircle size={24} />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                        <h3 className="text-xl font-black text-slate-900">Approve 7-Day Free Trial</h3>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
+                                        </p>
+                                    </div>
 
-                        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs space-y-2 text-emerald-900">
-                            <p className="font-bold">⚠️ Trial Duration Notice:</p>
-                            <p className="leading-relaxed">
-                                The 7-day trial countdown will <strong>begin immediately right now</strong> upon your confirmation and will run for exactly 7 days (ending on {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}).
-                            </p>
-                            <p className="leading-relaxed font-semibold">
-                                Approval and trial start email notifications will be sent to <strong>{selectedRestaurant.ownerId?.email}</strong>.
-                            </p>
-                        </div>
+                                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs space-y-2 text-emerald-900">
+                                        <p className="font-bold">⚠️ Trial Duration Notice:</p>
+                                        <p className="leading-relaxed">
+                                            The 7-day trial countdown will <strong>begin immediately right now</strong> upon your confirmation and will run for exactly 7 days (ending on {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}).
+                                        </p>
+                                        <p className="leading-relaxed font-semibold">
+                                            Approval and trial start email notifications will be sent to <strong>{selectedRestaurant.ownerId?.email}</strong>.
+                                        </p>
+                                    </div>
 
-                        <div className="flex gap-3">
-                            <button
-                                onClick={closeModal}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleApprove}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
-                            >
-                                {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Confirm & Activate Trial'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 2. REJECT MODAL */}
-            {modalType === 'reject' && selectedRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                        <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
-                            <XCircle size={24} />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <h3 className="text-xl font-black text-slate-900">Reject Free Trial Request</h3>
-                            <p className="text-xs text-slate-500 font-medium">
-                                Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700 block">Rejection Reason (Emailed to owner)</label>
-                            <textarea
-                                value={actionReason}
-                                onChange={(e) => setActionReason(e.target.value)}
-                                placeholder="Explain why the trial request was rejected..."
-                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-rose-500 focus:bg-white min-h-[90px] resize-none"
-                            />
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={closeModal}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleReject}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
-                            >
-                                {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Reject Request'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 3. FREEZE MODAL */}
-            {modalType === 'freeze' && selectedRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                        <div className="w-12 h-12 bg-slate-900 text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
-                            <Lock size={24} />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <h3 className="text-xl font-black text-slate-900">Manually Freeze Dashboard</h3>
-                            <p className="text-xs text-slate-500 font-medium">
-                                Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700 block">Reason for Freeze (Required)</label>
-                            <textarea
-                                value={actionReason}
-                                onChange={(e) => setActionReason(e.target.value)}
-                                placeholder="Administrative review hold, compliance verification, etc."
-                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-slate-800 focus:bg-white min-h-[90px] resize-none"
-                            />
-                        </div>
-
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] text-slate-600 font-medium leading-relaxed">
-                            ❄️ Freezing immediately blocks protected operational dashboard APIs for this restaurant while securely preserving all data.
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={closeModal}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleFreeze}
-                                disabled={isSubmitting || !actionReason.trim()}
-                                className="flex-1 py-3 bg-slate-900 hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50"
-                            >
-                                {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Freeze Dashboard'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 4. UNFREEZE MODAL */}
-            {modalType === 'unfreeze' && selectedRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
-                            <Unlock size={24} />
-                        </div>
-                        <div className="text-center space-y-1">
-                            <h3 className="text-xl font-black text-slate-900">Unfreeze Dashboard Access</h3>
-                            <p className="text-xs text-slate-500 font-medium">
-                                Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
-                            </p>
-                        </div>
-
-                        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs space-y-2 text-blue-900">
-                            <p className="font-bold">Subscription Access Rule:</p>
-                            <p className="leading-relaxed">
-                                Unfreezing is permitted <strong>only if the restaurant has a valid, active trial or paid subscription</strong>. It will strictly reject unfreezing if the trial or payment is expired.
-                            </p>
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={closeModal}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleUnfreeze}
-                                disabled={isSubmitting}
-                                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
-                            >
-                                {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Confirm Unfreeze'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 5. DETAILS MODAL */}
-            {modalType === 'details' && selectedRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-                    <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                            <div>
-                                <h3 className="text-lg font-black text-slate-900">{selectedRestaurant.name}</h3>
-                                <p className="text-xs text-slate-500">Subscription & Trial Audit Log</p>
-                            </div>
-                            <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full font-black text-xs uppercase">
-                                {selectedRestaurant.subscription?.status || 'Inactive'}
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Name</span>
-                                <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.name || 'N/A'}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Email</span>
-                                <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.email || 'N/A'}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Phone</span>
-                                <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.phoneNumber || 'N/A'}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Payment Status</span>
-                                <p className="font-extrabold text-slate-800">{selectedRestaurant.subscription?.paymentStatus || 'Trial'}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Trial Start Date</span>
-                                <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.trialStartDate ? new Date(selectedRestaurant.subscription.trialStartDate).toLocaleString() : 'Not Started'}
-                                </p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Trial End Date</span>
-                                <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.trialEndDate ? new Date(selectedRestaurant.subscription.trialEndDate).toLocaleString() : 'Not Set'}
-                                </p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Approved By</span>
-                                <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.approvedBy?.name || 
-                                     (['Active', 'Paid'].includes(selectedRestaurant.subscription?.status) || selectedRestaurant.subscription?.paymentStatus === 'Paid'
-                                        ? 'SuperAdmin' 
-                                        : 'Pending')}
-                                </p>
-                            </div>
-                            <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Approved At</span>
-                                <p className="font-extrabold text-slate-800">
-                                    {selectedRestaurant.subscription?.approvedAt 
-                                        ? new Date(selectedRestaurant.subscription.approvedAt).toLocaleString() 
-                                        : (['Active', 'Paid'].includes(selectedRestaurant.subscription?.status) || selectedRestaurant.subscription?.paymentStatus === 'Paid'
-                                            ? (selectedRestaurant.subscription?.startDate ? new Date(selectedRestaurant.subscription.startDate).toLocaleString() : (selectedRestaurant.createdAt ? new Date(selectedRestaurant.createdAt).toLocaleString() : 'Active Plan'))
-                                            : 'Pending')}
-                                </p>
-                            </div>
-                        </div>
-
-                        {selectedRestaurant.subscription?.freezeReason && (
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Freeze Reason:</span>
-                                <p className="text-slate-800 font-semibold">{selectedRestaurant.subscription.freezeReason}</p>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={closeModal}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleApprove}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                                        >
+                                            {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Confirm & Activate Trial'}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {selectedRestaurant.subscription?.rejectionReason && (
-                            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs space-y-1">
-                                <span className="text-[10px] font-bold text-red-500 uppercase">Rejection Reason:</span>
-                                <p className="text-red-800 font-semibold">{selectedRestaurant.subscription.rejectionReason}</p>
+                        {/* 2. REJECT MODAL */}
+                        {modalType === 'reject' && selectedRestaurant && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+                                <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+                                        <XCircle size={24} />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                        <h3 className="text-xl font-black text-slate-900">Reject Free Trial Request</h3>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-700 block">Rejection Reason (Emailed to owner)</label>
+                                        <textarea
+                                            value={actionReason}
+                                            onChange={(e) => setActionReason(e.target.value)}
+                                            placeholder="Explain why the trial request was rejected..."
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-rose-500 focus:bg-white min-h-[90px] resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={closeModal}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleReject}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                                        >
+                                            {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Reject Request'}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        <button
-                            onClick={closeModal}
-                            className="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl"
-                        >
-                            Close Details
-                        </button>
+                        {/* 3. FREEZE MODAL */}
+                        {modalType === 'freeze' && selectedRestaurant && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+                                <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="w-12 h-12 bg-slate-900 text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
+                                        <Lock size={24} />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                        <h3 className="text-xl font-black text-slate-900">Manually Freeze Dashboard</h3>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-700 block">Reason for Freeze (Required)</label>
+                                        <textarea
+                                            value={actionReason}
+                                            onChange={(e) => setActionReason(e.target.value)}
+                                            placeholder="Administrative review hold, compliance verification, etc."
+                                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-slate-800 focus:bg-white min-h-[90px] resize-none"
+                                        />
+                                    </div>
+
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] text-slate-600 font-medium leading-relaxed">
+                                        ❄️ Freezing immediately blocks protected operational dashboard APIs for this restaurant while securely preserving all data.
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={closeModal}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleFreeze}
+                                            disabled={isSubmitting || !actionReason.trim()}
+                                            className="flex-1 py-3 bg-slate-900 hover:bg-black text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                        >
+                                            {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Freeze Dashboard'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 4. UNFREEZE MODAL */}
+                        {modalType === 'unfreeze' && selectedRestaurant && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+                                <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+                                        <Unlock size={24} />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                        <h3 className="text-xl font-black text-slate-900">Unfreeze Dashboard Access</h3>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            Restaurant: <span className="font-bold text-slate-800">{selectedRestaurant.name}</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs space-y-2 text-blue-900">
+                                        <p className="font-bold">Subscription Access Rule:</p>
+                                        <p className="leading-relaxed">
+                                            Unfreezing is permitted <strong>only if the restaurant has a valid, active trial or paid subscription</strong>. It will strictly reject unfreezing if the trial or payment is expired.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={closeModal}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleUnfreeze}
+                                            disabled={isSubmitting}
+                                            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                                        >
+                                            {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : 'Confirm Unfreeze'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 5. DETAILS MODAL */}
+                        {modalType === 'details' && selectedRestaurant && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+                                <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+                                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                                        <div>
+                                            <h3 className="text-lg font-black text-slate-900">{selectedRestaurant.name}</h3>
+                                            <p className="text-xs text-slate-500">Subscription & Trial Audit Log</p>
+                                        </div>
+                                        <span className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full font-black text-xs uppercase">
+                                            {selectedRestaurant.subscription?.status || 'Inactive'}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 text-xs">
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Name</span>
+                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.name || 'N/A'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Owner Email</span>
+                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.email || 'N/A'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Phone</span>
+                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.ownerId?.phoneNumber || 'N/A'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Payment Status</span>
+                                            <p className="font-extrabold text-slate-800">{selectedRestaurant.subscription?.paymentStatus || 'Trial'}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Trial Start Date</span>
+                                            <p className="font-extrabold text-slate-800">
+                                                {selectedRestaurant.subscription?.trialStartDate ? new Date(selectedRestaurant.subscription.trialStartDate).toLocaleString() : 'Not Started'}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Trial End Date</span>
+                                            <p className="font-extrabold text-slate-800">
+                                                {selectedRestaurant.subscription?.trialEndDate ? new Date(selectedRestaurant.subscription.trialEndDate).toLocaleString() : 'Not Set'}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Approved By</span>
+                                            <p className="font-extrabold text-slate-800">
+                                                {(() => {
+                                                    const subStatus = String(selectedRestaurant.subscription?.status || '').toLowerCase();
+                                                    const payStatus = String(selectedRestaurant.subscription?.paymentStatus || '').toLowerCase();
+                                                    const restStatus = String(selectedRestaurant.status || '').toLowerCase();
+                                                    const apprStatus = String(selectedRestaurant.approvalStatus || '').toLowerCase();
+                                                    const isActive = ['active', 'paid', 'approved'].includes(subStatus) || payStatus === 'paid' || ['approved', 'active'].includes(apprStatus) || restStatus === 'active';
+                                                    if (selectedRestaurant.subscription?.approvedBy?.name) {
+                                                        return selectedRestaurant.subscription.approvedBy.name;
+                                                    }
+                                                    return isActive ? 'SuperAdmin' : 'Pending';
+                                                })()}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Approved At</span>
+                                            <p className="font-extrabold text-slate-800">
+                                                {(() => {
+                                                    const subStatus = String(selectedRestaurant.subscription?.status || '').toLowerCase();
+                                                    const payStatus = String(selectedRestaurant.subscription?.paymentStatus || '').toLowerCase();
+                                                    const restStatus = String(selectedRestaurant.status || '').toLowerCase();
+                                                    const apprStatus = String(selectedRestaurant.approvalStatus || '').toLowerCase();
+                                                    const isActive = ['active', 'paid', 'approved'].includes(subStatus) || payStatus === 'paid' || ['approved', 'active'].includes(apprStatus) || restStatus === 'active';
+                                                    if (selectedRestaurant.subscription?.approvedAt) {
+                                                        return new Date(selectedRestaurant.subscription.approvedAt).toLocaleString();
+                                                    }
+                                                    if (isActive) {
+                                                        const d = selectedRestaurant.subscription?.startDate || selectedRestaurant.createdAt || new Date();
+                                                        return new Date(d).toLocaleString();
+                                                    }
+                                                    return 'Pending';
+                                                })()}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {selectedRestaurant.subscription?.freezeReason && (
+                                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">Freeze Reason:</span>
+                                            <p className="text-slate-800 font-semibold">{selectedRestaurant.subscription.freezeReason}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedRestaurant.subscription?.rejectionReason && (
+                                        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs space-y-1">
+                                            <span className="text-[10px] font-bold text-red-500 uppercase">Rejection Reason:</span>
+                                            <p className="text-red-800 font-semibold">{selectedRestaurant.subscription.rejectionReason}</p>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        onClick={closeModal}
+                                        className="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl"
+                                    >
+                                        Close Details
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
-        </div>
-    );
+                    );
 };
 
-export default FreeTrialManagement;
+                    export default FreeTrialManagement;
 

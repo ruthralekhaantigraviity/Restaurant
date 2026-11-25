@@ -289,15 +289,15 @@ const TablesManagement = () => {
             {/* Header & Unified Tabs */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         Table Management &amp; QR Digital Menu
                     </h2>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">
                         Manage dining tables, generate table QR codes, and enable contactless customer ordering.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex p-1 bg-gray-100 rounded-xl border border-gray-200">
+                    <div className="flex p-1 bg-gray-100 rounded-xl border border-gray-200 dark:border-slate-800">
                         <button
                             type="button"
                             onClick={() => setActiveTab('tables')}
@@ -327,7 +327,7 @@ const TablesManagement = () => {
 
             {/* Controls (only for Tables tab) */}
             {activeTab === 'tables' && (
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center">
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center dark:bg-slate-900 dark:border-slate-800">
                     <div className="relative w-full md:w-96">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input
@@ -335,7 +335,7 @@ const TablesManagement = () => {
                             placeholder="Search by table number..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                         />
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -353,7 +353,7 @@ const TablesManagement = () => {
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                         </div>
                     ) : tables.length === 0 ? (
-                        <div className="bg-white rounded-2xl border border-gray-100 p-20 text-center text-gray-500">
+                        <div className="bg-white rounded-2xl border border-gray-100 p-20 text-center text-gray-500 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800">
                             <QrCode size={48} className="mx-auto text-gray-300 mb-4" />
                             <p className="text-lg font-bold">No Tables Set Up</p>
                             <p className="text-sm mt-1">Go to <strong>Table Management</strong> to add tables first.</p>
@@ -361,10 +361,10 @@ const TablesManagement = () => {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                             {tables.map((table) => (
-                                <div key={table._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col p-5 space-y-4 hover:shadow-md transition-shadow items-center text-center">
+                                <div key={table._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col p-5 space-y-4 hover:shadow-md transition-shadow items-center text-center dark:bg-slate-900 dark:border-slate-800">
                                     <div className="bg-green-50 border border-green-100 rounded-xl p-3 w-full">
                                         <p className="text-xs font-bold text-green-600 uppercase tracking-widest">Table {table.tableNumber}</p>
-                                        <div className="bg-white p-2 rounded-lg mt-2 inline-block shadow-sm">
+                                        <div className="bg-white p-2 rounded-lg mt-2 inline-block shadow-sm dark:bg-slate-900">
                                             <QRCodeSVG
                                                 value={getQrUrl(table)}
                                                 size={112}
@@ -394,46 +394,48 @@ const TablesManagement = () => {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                     </div>
                 ) : filteredTables.length === 0 ? (
-                    <div className="bg-white rounded-2xl border border-gray-100 p-20 text-center text-gray-500">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-20 text-center text-gray-500 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800">
                         <QrCode size={48} className="mx-auto text-gray-300 mb-4" />
                         <p className="text-lg font-bold">No Tables Set Up</p>
                         <p className="text-sm mt-1">Click "Add Table" above to create tables and generate smart scan QR codes.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
                         {filteredTables.map((table) => (
-                            <div key={table._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col p-5 space-y-4 hover:shadow-md transition-shadow">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h4 className="text-xl font-black text-gray-900">Table {table.tableNumber}</h4>
-                                        <p className="text-xs text-gray-400 font-semibold uppercase mt-0.5 flex items-center gap-1">
-                                            <Store size={12} /> {table.branchId?.name || 'Main Branch'}
-                                        </p>
+                            <div key={table._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col justify-between p-5 hover:shadow-md transition-shadow h-full min-h-[220px] dark:bg-slate-900 dark:border-slate-800">
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <div className="min-w-0 flex-1">
+                                            <h4 className="text-xl font-black text-gray-900 truncate dark:text-white">Table {table.tableNumber}</h4>
+                                            <p className="text-xs text-gray-400 font-semibold uppercase mt-0.5 flex items-center gap-1 truncate">
+                                                <Store size={12} className="shrink-0" /> <span className="truncate">{table.branchId?.name || 'Main Branch'}</span>
+                                            </p>
+                                        </div>
+                                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border shrink-0 whitespace-nowrap ${getStatusColor(table.status)}`}>
+                                            {table.status}
+                                        </span>
                                     </div>
-                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getStatusColor(table.status)}`}>
-                                        {table.status}
-                                    </span>
+
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100 dark:bg-slate-950 dark:text-slate-400 dark:border-slate-800">
+                                        <Users size={16} className="text-gray-400 shrink-0" />
+                                        <span>Capacity: <strong>{table.capacity} guests</strong></span>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                                    <Users size={16} className="text-gray-400" />
-                                    <span>Capacity: <strong>{table.capacity} guests</strong></span>
-                                </div>
-
-                                <div className="flex gap-2 pt-2 border-t border-gray-100">
+                                <div className="flex items-center gap-2 pt-3 mt-4 border-t border-gray-100 dark:border-slate-800">
                                     <button
                                         onClick={() => openQrModal(table)}
-                                        className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-green-500/10 cursor-pointer"
+                                        className="flex-1 h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/10 cursor-pointer whitespace-nowrap shrink-0"
                                         title="View Table QR Code"
                                     >
-                                        <QrCode size={14} /> View QR
+                                        <QrCode size={14} className="shrink-0" /> View QR
                                     </button>
                                     <button
                                         onClick={() => handleDeleteClick(table)}
-                                        className="p-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all border border-red-100 flex items-center justify-center cursor-pointer"
+                                        className="h-10 w-10 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-all border border-red-100 inline-flex items-center justify-center cursor-pointer shrink-0"
                                         title="Delete Table"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={16} className="shrink-0" />
                                     </button>
                                 </div>
                             </div>
@@ -445,9 +447,9 @@ const TablesManagement = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                            <h3 className="font-bold text-gray-900 text-lg">Add New Table</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">Add New Table</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
@@ -455,37 +457,37 @@ const TablesManagement = () => {
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Table Number (ID)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Table Number (ID)</label>
                                 <input
                                     type="number"
                                     required
                                     value={formData.tableNumber}
                                     onChange={(e) => setFormData({ ...formData, tableNumber: e.target.value })}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="e.g. 1, 2, 3"
                                     min="1"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Capacity (Seats)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Capacity (Seats)</label>
                                 <input
                                     type="number"
                                     required
                                     value={formData.capacity}
                                     onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="e.g. 4, 6"
                                     min="1"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Branch</label>
                                 <select
                                     value={formData.branchId}
                                     onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     required
                                 >
                                     <option value="">Select Branch</option>
@@ -495,11 +497,11 @@ const TablesManagement = () => {
                                 </select>
                             </div>
 
-                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 mt-6 -mx-6 -mb-6">
+                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 mt-6 -mx-6 -mb-6 dark:border-slate-800">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                                 >
                                     Cancel
                                 </button>
@@ -519,7 +521,7 @@ const TablesManagement = () => {
             {isQrModalOpen && selectedTable && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsQrModalOpen(false)}></div>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col p-4 sm:p-5 items-center text-center">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col p-4 sm:p-5 items-center text-center dark:bg-slate-900">
                         <button
                             onClick={() => setIsQrModalOpen(false)}
                             className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer p-1"
@@ -569,7 +571,7 @@ const TablesManagement = () => {
                                 </div>
                             )}
 
-                            <div className="bg-white p-3 rounded-2xl border border-emerald-100 shadow-xs flex items-center justify-center mx-auto">
+                            <div className="bg-white p-3 rounded-2xl border border-emerald-100 shadow-xs flex items-center justify-center mx-auto dark:bg-slate-900">
                                 <QRCodeSVG
                                     id={`table-qr-svg-${selectedTable?._id || selectedTable?.tableNumber}`}
                                     value={getQrUrl(selectedTable)}
@@ -580,7 +582,7 @@ const TablesManagement = () => {
                             </div>
                         </div>
 
-                        <p className="text-[11px] font-medium text-gray-500 mb-2.5 max-w-[270px]">
+                        <p className="text-[11px] font-medium text-gray-500 mb-2.5 max-w-[270px] dark:text-slate-400">
                             Point any camera to scan, or open directly below to test customer ordering.
                         </p>
 
@@ -605,7 +607,7 @@ const TablesManagement = () => {
                                         navigator.clipboard.writeText(getQrUrl(selectedTable));
                                         toast.success('Table ordering URL copied to clipboard!');
                                     }}
-                                    className="text-[10px] sm:text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer shrink-0 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs hover:bg-emerald-50 transition-colors"
+                                    className="text-[10px] sm:text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer shrink-0 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs hover:bg-emerald-50 transition-colors dark:bg-slate-900"
                                 >
                                     Copy Link
                                 </button>
@@ -621,7 +623,7 @@ const TablesManagement = () => {
                             </button>
                             <button
                                 onClick={handleDownloadQr}
-                                className="py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-gray-200 cursor-pointer"
+                                className="py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-gray-200 cursor-pointer dark:text-slate-200 dark:border-slate-800"
                             >
                                 <Download size={14} /> Download
                             </button>

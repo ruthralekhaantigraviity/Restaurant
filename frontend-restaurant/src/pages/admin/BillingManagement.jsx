@@ -120,7 +120,7 @@ const BillingManagement = () => {
             if (bList.length > 0 && !posBranchId) {
                 setPosBranchId(bList[0]._id);
             }
-            try { sessionStorage.setItem('restosys_billing_orders', JSON.stringify(ordData)); } catch (_) {}
+            try { sessionStorage.setItem('restosys_billing_orders', JSON.stringify(ordData)); } catch (_) { }
         } catch (error) {
             console.error('Failed to fetch billing data', error);
         } finally {
@@ -135,511 +135,511 @@ const BillingManagement = () => {
         return () => clearInterval(interval);
     }, []);
 
-        // Time filtering helper
-        const filterByDate = (dateStr, period) => {
-            if (period === 'all') return true;
-            const target = new Date(dateStr);
-            const now = new Date();
-            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // Time filtering helper
+    const filterByDate = (dateStr, period) => {
+        if (period === 'all') return true;
+        const target = new Date(dateStr);
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-            if (period === 'today') {
-                return target >= todayStart;
-            }
-            if (period === 'yesterday') {
-                const yesterdayStart = new Date(todayStart);
-                yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-                return target >= yesterdayStart && target < todayStart;
-            }
-            if (period === 'week') {
-                const weekStart = new Date(todayStart);
-                weekStart.setDate(weekStart.getDate() - 7);
-                return target >= weekStart;
-            }
-            if (period === 'month') {
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                return target >= monthStart;
-            }
+        if (period === 'today') {
+            return target >= todayStart;
+        }
+        if (period === 'yesterday') {
+            const yesterdayStart = new Date(todayStart);
+            yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+            return target >= yesterdayStart && target < todayStart;
+        }
+        if (period === 'week') {
+            const weekStart = new Date(todayStart);
+            weekStart.setDate(weekStart.getDate() - 7);
+            return target >= weekStart;
+        }
+        if (period === 'month') {
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            return target >= monthStart;
+        }
+        return true;
+    };
+
+    // Filtered lists
+    const activeOpenBills = useMemo(() => {
+        return orders.filter(o => {
+            const isCompletedOrCancelled = o.status === 'Completed' || o.status === 'Cancelled' || o.status === 'Refunded';
+            if (isCompletedOrCancelled && o.isPaid) return false;
+            if (selectedBranchId !== 'All' && String(o.branchId) !== String(selectedBranchId)) return false;
             return true;
+        });
+    }, [orders, selectedBranchId]);
+
+    const historicalInvoices = useMemo(() => {
+        return orders.filter(o => {
+            if (selectedBranchId !== 'All' && String(o.branchId) !== String(selectedBranchId)) return false;
+            if (!filterByDate(o.createdAt, periodFilter)) return false;
+
+            if (statusFilter === 'Paid') {
+                if (!o.isPaid && o.status !== 'Completed') return false;
+            } else if (statusFilter === 'Pending') {
+                if (o.isPaid || o.status === 'Completed') return false;
+            } else if (statusFilter === 'Refunded') {
+                if (o.status !== 'Refunded') return false;
+            }
+
+            if (methodFilter !== 'All') {
+                const orderMethod = (o.paymentMethod || 'Card').toLowerCase();
+                if (orderMethod !== methodFilter.toLowerCase()) return false;
+            }
+
+            if (typeFilter !== 'All') {
+                if (o.orderType?.toLowerCase() !== typeFilter.toLowerCase()) return false;
+            }
+
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                const invId = `INV-${o._id?.slice(-6)}`.toLowerCase();
+                const ordId = `ORD-${o._id?.slice(-6)}`.toLowerCase();
+                const cust = (o.user?.name || '').toLowerCase();
+                const table = String(o.tableNumber || '').toLowerCase();
+                if (!invId.includes(query) && !ordId.includes(query) && !cust.includes(query) && !table.includes(query)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [orders, selectedBranchId, periodFilter, statusFilter, methodFilter, typeFilter, searchQuery]);
+
+    // Financial KPI Metrics
+    const metrics = useMemo(() => {
+        const todayOrders = orders.filter(o => filterByDate(o.createdAt, 'today'));
+        const paidToday = todayOrders.filter(o => o.isPaid || o.status === 'Completed');
+
+        const totalBilledToday = paidToday.reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+        const cashToday = paidToday
+            .filter(o => (o.paymentMethod || '').toLowerCase() === 'cash')
+            .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+        const upiToday = paidToday
+            .filter(o => (o.paymentMethod || '').toLowerCase() === 'upi')
+            .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+        const cardToday = paidToday
+            .filter(o => (o.paymentMethod || '').toLowerCase() === 'card')
+            .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+        const digitalToday = upiToday + cardToday;
+
+        const totalTaxToday = paidToday.reduce((sum, o) => sum + (Number(o.taxPrice) || 0), 0);
+        const openBillsCount = activeOpenBills.length;
+        const openBillsTotal = activeOpenBills.reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+
+        const refundsToday = todayOrders
+            .filter(o => o.status === 'Refunded')
+            .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
+
+        return {
+            totalBilledToday,
+            cashToday,
+            digitalToday,
+            upiToday,
+            cardToday,
+            totalTaxToday,
+            openBillsCount,
+            openBillsTotal,
+            refundsToday,
+            paidCountToday: paidToday.length
         };
+    }, [orders, activeOpenBills]);
 
-        // Filtered lists
-        const activeOpenBills = useMemo(() => {
-            return orders.filter(o => {
-                const isCompletedOrCancelled = o.status === 'Completed' || o.status === 'Cancelled' || o.status === 'Refunded';
-                if (isCompletedOrCancelled && o.isPaid) return false;
-                if (selectedBranchId !== 'All' && String(o.branchId) !== String(selectedBranchId)) return false;
-                return true;
+    // Handle Quick Settle
+    const openSettleModal = (order) => {
+        setSettleModalOrder(order);
+        setSettleMethod(order.paymentMethod || 'Card');
+        setSettleDiscountPct(0);
+        setSettleCashTendered('');
+    };
+
+    // Shared settle calculation used identically by confirmation & modal preview
+    const getSettleBreakdown = useCallback((order, discountPct) => {
+        if (!order) return { rawSubtotal: 0, discountAmt: 0, taxAmt: 0, finalTotal: 0 };
+        const items = order.orderItems || [];
+        const rawSubtotal = items.length > 0
+            ? items.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.qty || i.quantity) || 1)), 0)
+            : (Number(order.totalPrice) || 0);
+        const discountAmt = rawSubtotal * ((Number(discountPct) || 0) / 100);
+        const discountedBase = Math.max(0, rawSubtotal - discountAmt);
+        const taxAmt = Math.round(discountedBase * 0.05 * 100) / 100;
+        const finalTotal = Math.round((discountedBase + taxAmt) * 100) / 100;
+        return { rawSubtotal, discountAmt, taxAmt, finalTotal };
+    }, []);
+
+    const handleConfirmSettle = async () => {
+        if (!settleModalOrder) return;
+        setIsSubmittingSettle(true);
+        try {
+            const { taxAmt, finalTotal } = getSettleBreakdown(settleModalOrder, settleDiscountPct);
+
+            await api.put(`/orders/${settleModalOrder._id}/pay`, {
+                paymentMethod: settleMethod,
+                taxPrice: taxAmt,
+                totalPrice: finalTotal
             });
-        }, [orders, selectedBranchId]);
 
-        const historicalInvoices = useMemo(() => {
-            return orders.filter(o => {
-                if (selectedBranchId !== 'All' && String(o.branchId) !== String(selectedBranchId)) return false;
-                if (!filterByDate(o.createdAt, periodFilter)) return false;
-
-                if (statusFilter === 'Paid') {
-                    if (!o.isPaid && o.status !== 'Completed') return false;
-                } else if (statusFilter === 'Pending') {
-                    if (o.isPaid || o.status === 'Completed') return false;
-                } else if (statusFilter === 'Refunded') {
-                    if (o.status !== 'Refunded') return false;
-                }
-
-                if (methodFilter !== 'All') {
-                    const orderMethod = (o.paymentMethod || 'Card').toLowerCase();
-                    if (orderMethod !== methodFilter.toLowerCase()) return false;
-                }
-
-                if (typeFilter !== 'All') {
-                    if (o.orderType?.toLowerCase() !== typeFilter.toLowerCase()) return false;
-                }
-
-                if (searchQuery.trim()) {
-                    const query = searchQuery.toLowerCase();
-                    const invId = `INV-${o._id?.slice(-6)}`.toLowerCase();
-                    const ordId = `ORD-${o._id?.slice(-6)}`.toLowerCase();
-                    const cust = (o.user?.name || '').toLowerCase();
-                    const table = String(o.tableNumber || '').toLowerCase();
-                    if (!invId.includes(query) && !ordId.includes(query) && !cust.includes(query) && !table.includes(query)) {
-                        return false;
-                    }
-                }
-
-                return true;
+            await api.put(`/orders/${settleModalOrder._id}/status`, {
+                status: 'Completed'
             });
-        }, [orders, selectedBranchId, periodFilter, statusFilter, methodFilter, typeFilter, searchQuery]);
 
-        // Financial KPI Metrics
-        const metrics = useMemo(() => {
-            const todayOrders = orders.filter(o => filterByDate(o.createdAt, 'today'));
-            const paidToday = todayOrders.filter(o => o.isPaid || o.status === 'Completed');
+            toast.success(`Bill #${settleModalOrder._id.slice(-6).toUpperCase()} settled successfully!`);
 
-            const totalBilledToday = paidToday.reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-            const cashToday = paidToday
-                .filter(o => (o.paymentMethod || '').toLowerCase() === 'cash')
-                .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-            const upiToday = paidToday
-                .filter(o => (o.paymentMethod || '').toLowerCase() === 'upi')
-                .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-            const cardToday = paidToday
-                .filter(o => (o.paymentMethod || '').toLowerCase() === 'card')
-                .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-            const digitalToday = upiToday + cardToday;
-
-            const totalTaxToday = paidToday.reduce((sum, o) => sum + (Number(o.taxPrice) || 0), 0);
-            const openBillsCount = activeOpenBills.length;
-            const openBillsTotal = activeOpenBills.reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-
-            const refundsToday = todayOrders
-                .filter(o => o.status === 'Refunded')
-                .reduce((sum, o) => sum + (Number(o.totalPrice) || 0), 0);
-
-            return {
-                totalBilledToday,
-                cashToday,
-                digitalToday,
-                upiToday,
-                cardToday,
-                totalTaxToday,
-                openBillsCount,
-                openBillsTotal,
-                refundsToday,
-                paidCountToday: paidToday.length
+            // Auto open printable receipt
+            const settledObj = {
+                ...settleModalOrder,
+                isPaid: true,
+                status: 'Completed',
+                paymentMethod: settleMethod,
+                taxPrice: taxAmt,
+                totalPrice: finalTotal,
+                paidAt: new Date().toISOString()
             };
-        }, [orders, activeOpenBills]);
+            setSelectedInvoice(settledObj);
 
-        // Handle Quick Settle
-        const openSettleModal = (order) => {
-            setSettleModalOrder(order);
-            setSettleMethod(order.paymentMethod || 'Card');
-            setSettleDiscountPct(0);
-            setSettleCashTendered('');
-        };
+            setSettleModalOrder(null);
+            fetchData();
+        } catch (error) {
+            console.error('Failed to settle bill', error);
+            toast.error(error.response?.data?.message || 'Failed to settle bill');
+        } finally {
+            setIsSubmittingSettle(false);
+        }
+    };
 
-        // Shared settle calculation used identically by confirmation & modal preview
-        const getSettleBreakdown = useCallback((order, discountPct) => {
-            if (!order) return { rawSubtotal: 0, discountAmt: 0, taxAmt: 0, finalTotal: 0 };
-            const items = order.orderItems || [];
-            const rawSubtotal = items.length > 0
-                ? items.reduce((sum, i) => sum + ((Number(i.price) || 0) * (Number(i.qty || i.quantity) || 1)), 0)
-                : (Number(order.totalPrice) || 0);
-            const discountAmt = rawSubtotal * ((Number(discountPct) || 0) / 100);
-            const discountedBase = Math.max(0, rawSubtotal - discountAmt);
-            const taxAmt = Math.round(discountedBase * 0.05 * 100) / 100;
-            const finalTotal = Math.round((discountedBase + taxAmt) * 100) / 100;
-            return { rawSubtotal, discountAmt, taxAmt, finalTotal };
-        }, []);
+    // Handle Refund
+    const handleProcessRefund = async () => {
+        if (!refundModalOrder) return;
+        try {
+            await api.put(`/orders/${refundModalOrder._id}/refund`).catch(async () => {
+                // Fallback to status update
+                await api.put(`/orders/${refundModalOrder._id}/status`, { status: 'Refunded' });
+            });
+            toast.success(`Refund processed for order #${refundModalOrder._id.slice(-6).toUpperCase()}`);
+            setRefundModalOrder(null);
+            fetchData();
+        } catch (error) {
+            console.error('Failed to process refund', error);
+            toast.error('Failed to process refund');
+        }
+    };
 
-        const handleConfirmSettle = async () => {
-            if (!settleModalOrder) return;
-            setIsSubmittingSettle(true);
-            try {
-                const { taxAmt, finalTotal } = getSettleBreakdown(settleModalOrder, settleDiscountPct);
+    // POS Cart Helpers
+    const handleAddToCart = (item) => {
+        setPosCart(prev => {
+            const existing = prev.find(p => p._id === item._id);
+            if (existing) {
+                return prev.map(p => p._id === item._id ? { ...p, qty: p.qty + 1 } : p);
+            }
+            return [...prev, { _id: item._id, name: item.name, price: item.price, image: item.image || '', qty: 1 }];
+        });
+    };
 
-                await api.put(`/orders/${settleModalOrder._id}/pay`, {
-                    paymentMethod: settleMethod,
-                    taxPrice: taxAmt,
-                    totalPrice: finalTotal
+    const handleUpdateQty = (itemId, delta) => {
+        setPosCart(prev => {
+            return prev.map(p => {
+                if (p._id === itemId) {
+                    const newQty = p.qty + delta;
+                    return newQty > 0 ? { ...p, qty: newQty } : null;
+                }
+                return p;
+            }).filter(Boolean);
+        });
+    };
+
+    const posSubtotal = useMemo(() => {
+        return posCart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    }, [posCart]);
+
+    const posDiscountAmt = useMemo(() => {
+        return posSubtotal * (posDiscountPct / 100);
+    }, [posSubtotal, posDiscountPct]);
+
+    const posTaxAmt = useMemo(() => {
+        return Math.max(0, posSubtotal - posDiscountAmt) * 0.05; // 5% GST
+    }, [posSubtotal, posDiscountAmt]);
+
+    const posTotal = useMemo(() => {
+        return Math.round((posSubtotal - posDiscountAmt + posTaxAmt) * 100) / 100;
+    }, [posSubtotal, posDiscountAmt, posTaxAmt]);
+
+    // Handle Quick POS Generate & Settle Bill
+    const handleCreateAndSettlePosBill = async () => {
+        if (posCart.length === 0) {
+            toast.error('Cart is empty. Add items to create a bill.');
+            return;
+        }
+
+        if (posCustomerPhone) {
+            const cleanPhone = posCustomerPhone.trim();
+            if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                toast.error('Customer phone number must be a valid 10-digit number starting with 6, 7, 8, or 9.');
+                return;
+            }
+        }
+
+        setIsSubmittingPos(true);
+        try {
+            const orderPayload = {
+                orderItems: posCart.map(i => ({
+                    name: i.name,
+                    qty: i.qty,
+                    price: i.price,
+                    image: i.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800',
+                    product: i._id
+                })),
+                orderType: posOrderType,
+                tableNumber: posOrderType === 'Dine In' ? (posTableNum || 'Counter 1') : undefined,
+                paymentMethod: posPaymentMethod,
+                branchId: posBranchId || undefined,
+                taxPrice: posTaxAmt,
+                totalPrice: posTotal,
+                customerName: posCustomerName || 'Walk-in',
+                customerPhone: posCustomerPhone || '',
+                notes: `POS Bill created by Admin. Customer: ${posCustomerName || 'Walk-in'} (${posCustomerPhone || 'N/A'})`
+            };
+
+            const createRes = await api.post('/orders', orderPayload);
+            const createdOrder = createRes.data;
+
+            // Immediately mark as paid & completed
+            if (createdOrder?._id) {
+                await api.put(`/orders/${createdOrder._id}/pay`, {
+                    paymentMethod: posPaymentMethod,
+                    taxPrice: posTaxAmt,
+                    totalPrice: posTotal
                 });
-
-                await api.put(`/orders/${settleModalOrder._id}/status`, {
+                await api.put(`/orders/${createdOrder._id}/status`, {
                     status: 'Completed'
                 });
-
-                toast.success(`Bill #${settleModalOrder._id.slice(-6).toUpperCase()} settled successfully!`);
-
-                // Auto open printable receipt
-                const settledObj = {
-                    ...settleModalOrder,
-                    isPaid: true,
-                    status: 'Completed',
-                    paymentMethod: settleMethod,
-                    taxPrice: taxAmt,
-                    totalPrice: finalTotal,
-                    paidAt: new Date().toISOString()
-                };
-                setSelectedInvoice(settledObj);
-
-                setSettleModalOrder(null);
-                fetchData();
-            } catch (error) {
-                console.error('Failed to settle bill', error);
-                toast.error(error.response?.data?.message || 'Failed to settle bill');
-            } finally {
-                setIsSubmittingSettle(false);
             }
-        };
 
-        // Handle Refund
-        const handleProcessRefund = async () => {
-            if (!refundModalOrder) return;
-            try {
-                await api.put(`/orders/${refundModalOrder._id}/refund`).catch(async () => {
-                    // Fallback to status update
-                    await api.put(`/orders/${refundModalOrder._id}/status`, { status: 'Refunded' });
-                });
-                toast.success(`Refund processed for order #${refundModalOrder._id.slice(-6).toUpperCase()}`);
-                setRefundModalOrder(null);
-                fetchData();
-            } catch (error) {
-                console.error('Failed to process refund', error);
-                toast.error('Failed to process refund');
-            }
-        };
+            toast.success(`POS Bill created & settled for ₹${posTotal.toFixed(2)}!`);
 
-        // POS Cart Helpers
-        const handleAddToCart = (item) => {
-            setPosCart(prev => {
-                const existing = prev.find(p => p._id === item._id);
-                if (existing) {
-                    return prev.map(p => p._id === item._id ? { ...p, qty: p.qty + 1 } : p);
-                }
-                return [...prev, { _id: item._id, name: item.name, price: item.price, image: item.image || '', qty: 1 }];
+            // Open Receipt Print View
+            setSelectedInvoice({
+                ...createdOrder,
+                orderItems: orderPayload.orderItems,
+                isPaid: true,
+                status: 'Completed',
+                paymentMethod: posPaymentMethod,
+                taxPrice: posTaxAmt,
+                totalPrice: posTotal,
+                tableNumber: orderPayload.tableNumber,
+                paidAt: new Date().toISOString()
             });
-        };
 
-        const handleUpdateQty = (itemId, delta) => {
-            setPosCart(prev => {
-                return prev.map(p => {
-                    if (p._id === itemId) {
-                        const newQty = p.qty + delta;
-                        return newQty > 0 ? { ...p, qty: newQty } : null;
-                    }
-                    return p;
-                }).filter(Boolean);
-            });
-        };
+            // Reset cart
+            setPosCart([]);
+            setPosCustomerName('');
+            setPosCustomerPhone('');
+            setPosTableNum('');
+            fetchData();
+        } catch (error) {
+            console.error('POS creation error', error);
+            toast.error(error.response?.data?.message || 'Failed to generate POS bill');
+        } finally {
+            setIsSubmittingPos(false);
+        }
+    };
 
-        const posSubtotal = useMemo(() => {
-            return posCart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-        }, [posCart]);
+    // Print Receipt Function
+    const handleTriggerPrint = () => {
+        window.print();
+    };
 
-        const posDiscountAmt = useMemo(() => {
-            return posSubtotal * (posDiscountPct / 100);
-        }, [posSubtotal, posDiscountPct]);
+    // Export CSV of Invoices
+    const handleExportCSV = () => {
+        if (historicalInvoices.length === 0) {
+            toast.error('No invoices to export.');
+            return;
+        }
 
-        const posTaxAmt = useMemo(() => {
-            return Math.max(0, posSubtotal - posDiscountAmt) * 0.05; // 5% GST
-        }, [posSubtotal, posDiscountAmt]);
+        const headers = ['Invoice ID', 'Date', 'Customer', 'Order Type', 'Table', 'Payment Method', 'Items Count', 'Subtotal', 'Tax (GST)', 'Grand Total', 'Status'];
+        const rows = historicalInvoices.map(o => [
+            `INV-${o._id?.slice(-6).toUpperCase()}`,
+            new Date(o.createdAt).toLocaleString(),
+            `"${(o.user?.name || 'Walk-in Guest').replace(/"/g, '""')}"`,
+            o.orderType || 'Dine In',
+            o.tableNumber || 'N/A',
+            o.paymentMethod || 'Card',
+            o.orderItems?.length || 1,
+            ((o.totalPrice || 0) - (o.taxPrice || 0)).toFixed(2),
+            (o.taxPrice || 0).toFixed(2),
+            (o.totalPrice || 0).toFixed(2),
+            o.isPaid ? 'Paid' : o.status
+        ]);
 
-        const posTotal = useMemo(() => {
-            return Math.round((posSubtotal - posDiscountAmt + posTaxAmt) * 100) / 100;
-        }, [posSubtotal, posDiscountAmt, posTaxAmt]);
+        const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `Invoices_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Invoices exported to CSV!');
+    };
 
-        // Handle Quick POS Generate & Settle Bill
-        const handleCreateAndSettlePosBill = async () => {
-            if (posCart.length === 0) {
-                toast.error('Cart is empty. Add items to create a bill.');
-                return;
-            }
+    // Denominations calculation
+    const totalCashCounted = useMemo(() => {
+        return Object.entries(cashDenominations).reduce((sum, [denom, count]) => {
+            return sum + (Number(denom) * Number(count || 0));
+        }, 0);
+    }, [cashDenominations]);
 
-            if (posCustomerPhone) {
-                const cleanPhone = posCustomerPhone.trim();
-                if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-                    toast.error('Customer phone number must be a valid 10-digit number starting with 6, 7, 8, or 9.');
-                    return;
-                }
-            }
+    return (
+        <div className="p-2 sm:p-4 md:p-8 max-w-[1600px] mx-auto space-y-6 font-sans">
 
-            setIsSubmittingPos(true);
-            try {
-                const orderPayload = {
-                    orderItems: posCart.map(i => ({
-                        name: i.name,
-                        qty: i.qty,
-                        price: i.price,
-                        image: i.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800',
-                        product: i._id
-                    })),
-                    orderType: posOrderType,
-                    tableNumber: posOrderType === 'Dine In' ? (posTableNum || 'Counter 1') : undefined,
-                    paymentMethod: posPaymentMethod,
-                    branchId: posBranchId || undefined,
-                    taxPrice: posTaxAmt,
-                    totalPrice: posTotal,
-                    customerName: posCustomerName || 'Walk-in',
-                    customerPhone: posCustomerPhone || '',
-                    notes: `POS Bill created by Admin. Customer: ${posCustomerName || 'Walk-in'} (${posCustomerPhone || 'N/A'})`
-                };
-
-                const createRes = await api.post('/orders', orderPayload);
-                const createdOrder = createRes.data;
-
-                // Immediately mark as paid & completed
-                if (createdOrder?._id) {
-                    await api.put(`/orders/${createdOrder._id}/pay`, {
-                        paymentMethod: posPaymentMethod,
-                        taxPrice: posTaxAmt,
-                        totalPrice: posTotal
-                    });
-                    await api.put(`/orders/${createdOrder._id}/status`, {
-                        status: 'Completed'
-                    });
-                }
-
-                toast.success(`POS Bill created & settled for ₹${posTotal.toFixed(2)}!`);
-
-                // Open Receipt Print View
-                setSelectedInvoice({
-                    ...createdOrder,
-                    orderItems: orderPayload.orderItems,
-                    isPaid: true,
-                    status: 'Completed',
-                    paymentMethod: posPaymentMethod,
-                    taxPrice: posTaxAmt,
-                    totalPrice: posTotal,
-                    tableNumber: orderPayload.tableNumber,
-                    paidAt: new Date().toISOString()
-                });
-
-                // Reset cart
-                setPosCart([]);
-                setPosCustomerName('');
-                setPosCustomerPhone('');
-                setPosTableNum('');
-                fetchData();
-            } catch (error) {
-                console.error('POS creation error', error);
-                toast.error(error.response?.data?.message || 'Failed to generate POS bill');
-            } finally {
-                setIsSubmittingPos(false);
-            }
-        };
-
-        // Print Receipt Function
-        const handleTriggerPrint = () => {
-            window.print();
-        };
-
-        // Export CSV of Invoices
-        const handleExportCSV = () => {
-            if (historicalInvoices.length === 0) {
-                toast.error('No invoices to export.');
-                return;
-            }
-
-            const headers = ['Invoice ID', 'Date', 'Customer', 'Order Type', 'Table', 'Payment Method', 'Items Count', 'Subtotal', 'Tax (GST)', 'Grand Total', 'Status'];
-            const rows = historicalInvoices.map(o => [
-                `INV-${o._id?.slice(-6).toUpperCase()}`,
-                new Date(o.createdAt).toLocaleString(),
-                `"${(o.user?.name || 'Walk-in Guest').replace(/"/g, '""')}"`,
-                o.orderType || 'Dine In',
-                o.tableNumber || 'N/A',
-                o.paymentMethod || 'Card',
-                o.orderItems?.length || 1,
-                ((o.totalPrice || 0) - (o.taxPrice || 0)).toFixed(2),
-                (o.taxPrice || 0).toFixed(2),
-                (o.totalPrice || 0).toFixed(2),
-                o.isPaid ? 'Paid' : o.status
-            ]);
-
-            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement('a');
-            link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `Invoices_Export_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            toast.success('Invoices exported to CSV!');
-        };
-
-        // Denominations calculation
-        const totalCashCounted = useMemo(() => {
-            return Object.entries(cashDenominations).reduce((sum, [denom, count]) => {
-                return sum + (Number(denom) * Number(count || 0));
-            }, 0);
-        }, [cashDenominations]);
-
-        return (
-            <div className="p-2 sm:p-4 md:p-8 max-w-[1600px] mx-auto space-y-6 font-sans">
-
-                {/* Top Bar */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                                <Receipt size={24} />
-                            </span>
-                            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                                Billing Management
-                            </h2>
-                        </div>
-                        <p className="text-gray-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
-                            Live table bill settlements, tax invoices, POS counter billing &amp; daily register audit.
-                        </p>
+            {/* Top Bar */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <span className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                            <Receipt size={24} />
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                            Billing Management
+                        </h2>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                        <button
-                            onClick={() => setActiveTab('pos')}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer"
-                        >
-                            <Plus size={16} /> New Counter Bill
-                        </button>
-                        <button
-                            onClick={handleExportCSV}
-                            className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
-                        >
-                            <Download size={15} /> Export CSV
-                        </button>
-                        <button
-                            onClick={fetchData}
-                            className="p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl transition-colors cursor-pointer border border-gray-200 dark:border-slate-700"
-                            title="Refresh Data"
-                        >
-                            <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
-                        </button>
-                    </div>
+                    <p className="text-gray-500 dark:text-slate-400 text-xs sm:text-sm mt-1">
+                        Live table bill settlements, tax invoices, POS counter billing &amp; daily register audit.
+                    </p>
                 </div>
 
-                {/* KPI Metric Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Total Billed Today */}
-                    <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 shadow-sm relative overflow-hidden group">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                                Today's Billed Revenue
-                            </span>
-                            <span className="p-2 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 rounded-xl">
-                                <Banknote size={18} />
-                            </span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                ₹{metrics.totalBilledToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </h3>
-                        </div>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-semibold">
-                            <span className="text-emerald-600 dark:text-emerald-400 font-bold">● {metrics.paidCountToday} Invoices</span> settled today
-                        </p>
-                    </div>
-
-                    {/* Cash vs Digital */}
-                    <div className="bg-gradient-to-br from-blue-500/10 via-white to-white dark:from-blue-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-blue-100 dark:border-blue-900/40 shadow-sm relative overflow-hidden group">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
-                                Cash vs Digital Split
-                            </span>
-                            <span className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-xl">
-                                <Split size={18} />
-                            </span>
-                        </div>
-                        <div className="flex items-baseline justify-between">
-                            <div>
-                                <p className="text-[10px] uppercase font-bold text-gray-400">Cash</p>
-                                <h4 className="text-lg font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                    ₹{metrics.cashToday.toLocaleString('en-IN')}
-                                </h4>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[10px] uppercase font-bold text-gray-400">UPI + Card</p>
-                                <h4 className="text-lg font-black text-indigo-600 dark:text-indigo-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                    ₹{metrics.digitalToday.toLocaleString('en-IN')}
-                                </h4>
-                            </div>
-                        </div>
-                        <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden flex">
-                            <div
-                                className="bg-emerald-500 h-full"
-                                style={{ width: `${metrics.totalBilledToday > 0 ? (metrics.cashToday / metrics.totalBilledToday) * 100 : 50}%` }}
-                                title="Cash Portion"
-                            />
-                            <div
-                                className="bg-indigo-500 h-full"
-                                style={{ width: `${metrics.totalBilledToday > 0 ? (metrics.digitalToday / metrics.totalBilledToday) * 100 : 50}%` }}
-                                title="Digital Portion"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Open / Unsettled Bills */}
-                    <div
-                        onClick={() => setActiveTab('active')}
-                        className="bg-gradient-to-br from-amber-500/10 via-white to-white dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/40 shadow-sm relative overflow-hidden group cursor-pointer hover:shadow-md transition-all"
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <button
+                        onClick={() => setActiveTab('pos')}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer"
                     >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                                Active Open Bills
-                            </span>
-                            <span className="p-2 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 rounded-xl">
-                                <Clock size={18} />
-                            </span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                {metrics.openBillsCount} Tables
-                            </h3>
-                        </div>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 font-semibold flex items-center justify-between">
-                            <span>Pending Value: ₹{metrics.openBillsTotal.toLocaleString('en-IN')}</span>
-                            <span className="text-amber-600 font-bold hover:underline">Settle ↗</span>
-                        </p>
-                    </div>
+                        <Plus size={16} /> New Counter Bill
+                    </button>
+                    <button
+                        onClick={handleExportCSV}
+                        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                    >
+                        <Download size={15} /> Export CSV
+                    </button>
+                    <button
+                        onClick={fetchData}
+                        className="p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl transition-colors cursor-pointer border border-gray-200 dark:border-slate-700"
+                        title="Refresh Data"
+                    >
+                        <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
+                    </button>
+                </div>
+            </div>
 
-                    {/* Tax / GST Collected */}
-                    <div className="bg-gradient-to-br from-purple-500/10 via-white to-white dark:from-purple-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-purple-100 dark:border-purple-900/40 shadow-sm relative overflow-hidden group">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
-                                Taxes / GST Collected
-                            </span>
-                            <span className="p-2 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-xl">
-                                <Landmark size={18} />
-                            </span>
+            {/* KPI Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Total Billed Today */}
+                <div className="bg-gradient-to-br from-emerald-500/10 via-white to-white dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                            Today's Billed Revenue
+                        </span>
+                        <span className="p-2 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 rounded-xl">
+                            <Banknote size={18} />
+                        </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                            ₹{metrics.totalBilledToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-semibold">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">● {metrics.paidCountToday} Invoices</span> settled today
+                    </p>
+                </div>
+
+                {/* Cash vs Digital */}
+                <div className="bg-gradient-to-br from-blue-500/10 via-white to-white dark:from-blue-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-blue-100 dark:border-blue-900/40 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+                            Cash vs Digital Split
+                        </span>
+                        <span className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-xl">
+                            <Split size={18} />
+                        </span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-gray-400">Cash</p>
+                            <h4 className="text-lg font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                ₹{metrics.cashToday.toLocaleString('en-IN')}
+                            </h4>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                ₹{metrics.totalTaxToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </h3>
+                        <div className="text-right">
+                            <p className="text-[10px] uppercase font-bold text-gray-400">UPI + Card</p>
+                            <h4 className="text-lg font-black text-indigo-600 dark:text-indigo-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                ₹{metrics.digitalToday.toLocaleString('en-IN')}
+                            </h4>
                         </div>
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 font-semibold">
-                            CGST: ₹{(metrics.totalTaxToday / 2).toFixed(2)} · SGST: ₹{(metrics.totalTaxToday / 2).toFixed(2)}
-                        </p>
+                    </div>
+                    <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden flex">
+                        <div
+                            className="bg-emerald-500 h-full"
+                            style={{ width: `${metrics.totalBilledToday > 0 ? (metrics.cashToday / metrics.totalBilledToday) * 100 : 50}%` }}
+                            title="Cash Portion"
+                        />
+                        <div
+                            className="bg-indigo-500 h-full"
+                            style={{ width: `${metrics.totalBilledToday > 0 ? (metrics.digitalToday / metrics.totalBilledToday) * 100 : 50}%` }}
+                            title="Digital Portion"
+                        />
                     </div>
                 </div>
 
-                {/* Navigation Tabs Bar */}
-                <div className="bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-wrap gap-1.5 sm:gap-2">
+                {/* Open / Unsettled Bills */}
+                <div
+                    onClick={() => setActiveTab('active')}
+                    className="bg-gradient-to-br from-amber-500/10 via-white to-white dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/40 shadow-sm relative overflow-hidden group cursor-pointer hover:shadow-md transition-all"
+                >
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                            Active Open Bills
+                        </span>
+                        <span className="p-2 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 rounded-xl">
+                            <Clock size={18} />
+                        </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                            {metrics.openBillsCount} Tables
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 font-semibold flex items-center justify-between">
+                        <span>Pending Value: ₹{metrics.openBillsTotal.toLocaleString('en-IN')}</span>
+                        <span className="text-amber-600 font-bold hover:underline">Settle ↗</span>
+                    </p>
+                </div>
+
+                {/* Tax / GST Collected */}
+                <div className="bg-gradient-to-br from-purple-500/10 via-white to-white dark:from-purple-950/40 dark:via-slate-900 dark:to-slate-900 p-5 rounded-2xl border border-purple-100 dark:border-purple-900/40 shadow-sm relative overflow-hidden group">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
+                            Taxes / GST Collected
+                        </span>
+                        <span className="p-2 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-xl">
+                            <Landmark size={18} />
+                        </span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                            ₹{metrics.totalTaxToday.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 font-semibold">
+                        CGST: ₹{(metrics.totalTaxToday / 2).toFixed(2)} · SGST: ₹{(metrics.totalTaxToday / 2).toFixed(2)}
+                    </p>
+                </div>
+            </div>
+
+            {/* Navigation Tabs Bar */}
+            <div className="bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
                     <button
                         onClick={() => setActiveTab('active')}
                         className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'active'
@@ -762,7 +762,7 @@ const BillingManagement = () => {
 
                                             <div className="border-t border-gray-100 dark:border-slate-800 pt-3 mt-2">
                                                 <div className="flex items-baseline justify-between mb-3">
-                                                    <span className="text-xs font-bold text-gray-500">Total Amount:</span>
+                                                    <span className="text-xs font-bold text-gray-500 dark:text-slate-400">Total Amount:</span>
                                                     <span className="text-xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
                                                         ₹{(bill.totalPrice || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                     </span>
@@ -868,92 +868,92 @@ const BillingManagement = () => {
                                     <p className="text-xs text-gray-400 mt-2">Loading invoice records...</p>
                                 </div>
                             ) : historicalInvoices.length === 0 ? (
-                                    <div className="py-20 text-center text-gray-400 space-y-2">
-                                        <Receipt className="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" />
-                                        <p className="text-sm font-semibold">No invoices found matching criteria.</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left whitespace-nowrap">
-                                            <thead className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
-                                                <tr>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice / Bill #</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Date &amp; Time</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Customer / Table</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Order Type</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Payment Method</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Tax (5%)</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Grand Total</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                                    <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-xs sm:text-sm">
-                                                {historicalInvoices.map(invoice => {
-                                                    const badge = getStatusBadge(invoice.isPaid, invoice.status);
-                                                    const method = getMethodBadge(invoice.paymentMethod);
-                                                    const MethodIcon = method.icon;
-                                                    return (
-                                                        <tr key={invoice._id} className="hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                                                            <td className="px-5 py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                                                                INV-{invoice._id.slice(-6).toUpperCase()}
-                                                            </td>
-                                                            <td className="px-5 py-3.5 text-gray-500 dark:text-slate-400 text-xs">
-                                                                {new Date(invoice.createdAt).toLocaleDateString()} {new Date(invoice.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            </td>
-                                                            <td className="px-5 py-3.5">
-                                                                <p className="font-bold text-gray-900 dark:text-white">{invoice.user?.name || 'Walk-in Guest'}</p>
-                                                                <p className="text-[11px] text-gray-400">{invoice.tableNumber ? `Table #${invoice.tableNumber}` : 'Counter'}</p>
-                                                            </td>
-                                                            <td className="px-5 py-3.5">
-                                                                <span className="font-semibold text-gray-700 dark:text-slate-300">
-                                                                    {invoice.orderType || 'Dine In'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-5 py-3.5">
-                                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${method.color}`}>
-                                                                    <MethodIcon size={13} /> {invoice.paymentMethod || 'Card'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-5 py-3.5 font-medium text-gray-500 dark:text-slate-400">
-                                                                ₹{(invoice.taxPrice || 0).toFixed(2)}
-                                                            </td>
-                                                            <td className="px-5 py-3.5 font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
-                                                                ₹{(invoice.totalPrice || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                                                            </td>
-                                                            <td className="px-5 py-3.5">
-                                                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.style}`}>
-                                                                    {badge.label}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-5 py-3.5 text-right">
-                                                                <div className="flex items-center justify-end gap-1.5">
-                                                                    <button
-                                                                        onClick={() => setSelectedInvoice(invoice)}
-                                                                        className="px-2.5 py-1.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-lg font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
-                                                                        title="View / Print Invoice"
-                                                                    >
-                                                                        <Printer size={13} /> Invoice
-                                                                    </button>
+                                <div className="py-20 text-center text-gray-400 space-y-2">
+                                    <Receipt className="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" />
+                                    <p className="text-sm font-semibold">No invoices found matching criteria.</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left whitespace-nowrap">
+                                        <thead className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+                                            <tr>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Invoice / Bill #</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Date &amp; Time</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Customer / Table</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Order Type</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Payment Method</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Tax (5%)</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Grand Total</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Status</th>
+                                                <th className="px-5 py-3.5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-xs sm:text-sm">
+                                            {historicalInvoices.map(invoice => {
+                                                const badge = getStatusBadge(invoice.isPaid, invoice.status);
+                                                const method = getMethodBadge(invoice.paymentMethod);
+                                                const MethodIcon = method.icon;
+                                                return (
+                                                    <tr key={invoice._id} className="hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                                                        <td className="px-5 py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
+                                                            INV-{invoice._id.slice(-6).toUpperCase()}
+                                                        </td>
+                                                        <td className="px-5 py-3.5 text-gray-500 dark:text-slate-400 text-xs">
+                                                            {new Date(invoice.createdAt).toLocaleDateString()} {new Date(invoice.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </td>
+                                                        <td className="px-5 py-3.5">
+                                                            <p className="font-bold text-gray-900 dark:text-white">{invoice.user?.name || 'Walk-in Guest'}</p>
+                                                            <p className="text-[11px] text-gray-400">{invoice.tableNumber ? `Table #${invoice.tableNumber}` : 'Counter'}</p>
+                                                        </td>
+                                                        <td className="px-5 py-3.5">
+                                                            <span className="font-semibold text-gray-700 dark:text-slate-300">
+                                                                {invoice.orderType || 'Dine In'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-5 py-3.5">
+                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${method.color}`}>
+                                                                <MethodIcon size={13} /> {invoice.paymentMethod || 'Card'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-5 py-3.5 font-medium text-gray-500 dark:text-slate-400">
+                                                            ₹{(invoice.taxPrice || 0).toFixed(2)}
+                                                        </td>
+                                                        <td className="px-5 py-3.5 font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                                            ₹{(invoice.totalPrice || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        </td>
+                                                        <td className="px-5 py-3.5">
+                                                            <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.style}`}>
+                                                                {badge.label}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-5 py-3.5 text-right">
+                                                            <div className="flex items-center justify-end gap-1.5">
+                                                                <button
+                                                                    onClick={() => setSelectedInvoice(invoice)}
+                                                                    className="px-2.5 py-1.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-lg font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                                                                    title="View / Print Invoice"
+                                                                >
+                                                                    <Printer size={13} /> Invoice
+                                                                </button>
 
-                                                                    {invoice.isPaid && invoice.status !== 'Refunded' && (
-                                                                        <button
-                                                                            onClick={() => setRefundModalOrder(invoice)}
-                                                                            className="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
-                                                                            title="Refund Invoice"
-                                                                        >
-                                                                            <RefreshCcw size={14} />
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
+                                                                {invoice.isPaid && invoice.status !== 'Refunded' && (
+                                                                    <button
+                                                                        onClick={() => setRefundModalOrder(invoice)}
+                                                                        className="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors cursor-pointer"
+                                                                        title="Refund Invoice"
+                                                                    >
+                                                                        <RefreshCcw size={14} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -1137,14 +1137,14 @@ const BillingManagement = () => {
 
                             {/* Bill Breakdown Calculations */}
                             <div className="space-y-2 text-xs border-t border-gray-100 dark:border-slate-800 pt-3">
-                                <div className="flex justify-between text-gray-500">
+                                <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                     <span>Subtotal</span>
                                     <span className="font-bold text-gray-800 dark:text-slate-200">₹{posSubtotal.toFixed(2)}</span>
                                 </div>
 
                                 {/* Discount selector */}
                                 <div className="flex items-center justify-between">
-                                    <span className="text-gray-500">Discount</span>
+                                    <span className="text-gray-500 dark:text-slate-400">Discount</span>
                                     <div className="flex items-center gap-1">
                                         {[0, 5, 10, 15].map(d => (
                                             <button
@@ -1159,7 +1159,7 @@ const BillingManagement = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between text-gray-500">
+                                <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                     <span>GST (5% CGST+SGST)</span>
                                     <span className="font-bold text-gray-800 dark:text-slate-200">+₹{posTaxAmt.toFixed(2)}</span>
                                 </div>
@@ -1319,13 +1319,13 @@ const BillingManagement = () => {
 
                             <div className="border-t border-gray-100 dark:border-slate-800 pt-3 space-y-2 text-xs">
                                 <div className="flex justify-between items-center">
-                                    <span className="font-bold text-gray-500">Physical Cash Counted</span>
+                                    <span className="font-bold text-gray-500 dark:text-slate-400">Physical Cash Counted</span>
                                     <span className="font-black text-base text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
                                         ₹{totalCashCounted.toFixed(2)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="font-bold text-gray-500">System Cash Expected</span>
+                                    <span className="font-bold text-gray-500 dark:text-slate-400">System Cash Expected</span>
                                     <span className="font-black text-base text-emerald-600" style={{ fontFamily: 'Manrope, sans-serif' }}>
                                         ₹{metrics.cashToday.toFixed(2)}
                                     </span>
@@ -1369,14 +1369,14 @@ const BillingManagement = () => {
                                 const { rawSubtotal, taxAmt, finalTotal } = getSettleBreakdown(settleModalOrder, settleDiscountPct);
                                 return (
                                     <div className="bg-gray-50 dark:bg-slate-800/50 p-3.5 rounded-xl space-y-1.5 text-xs">
-                                        <div className="flex justify-between text-gray-500">
+                                        <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                             <span>Items Subtotal ({settleModalOrder.orderItems?.length || 1} items)</span>
                                             <span className="font-bold text-gray-900 dark:text-white">
                                                 ₹{rawSubtotal.toFixed(2)}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-gray-500">Discount Applicable</span>
+                                            <span className="text-gray-500 dark:text-slate-400">Discount Applicable</span>
                                             <div className="flex items-center gap-1.5">
                                                 {[0, 5, 10, 15].map(d => (
                                                     <button
@@ -1389,7 +1389,7 @@ const BillingManagement = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="flex justify-between text-gray-500">
+                                        <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                             <span>Taxes (5% GST)</span>
                                             <span className="font-bold text-gray-900 dark:text-white">
                                                 ₹{taxAmt.toFixed(2)}
@@ -1548,7 +1548,7 @@ const BillingManagement = () => {
                                     {(selectedInvoice.orderItems || []).map((item, i) => (
                                         <div key={i} className="flex justify-between items-center text-[11px]">
                                             <span className="truncate max-w-[150px] font-medium">{item.name}</span>
-                                            <span className="text-gray-500">{item.qty || item.quantity || 1} × ₹{item.price}</span>
+                                            <span className="text-gray-500 dark:text-slate-400">{item.qty || item.quantity || 1} × ₹{item.price}</span>
                                             <span className="font-bold">₹{((item.price || 0) * (item.qty || item.quantity || 1)).toFixed(2)}</span>
                                         </div>
                                     ))}
@@ -1556,15 +1556,15 @@ const BillingManagement = () => {
 
                                 {/* Total Breakdown */}
                                 <div className="space-y-1 text-xs border-b border-gray-200 dark:border-slate-800 pb-3">
-                                    <div className="flex justify-between text-gray-500">
+                                    <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                         <span>Subtotal</span>
                                         <span>₹{((selectedInvoice.totalPrice || 0) - (selectedInvoice.taxPrice || 0)).toFixed(2)}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-500">
+                                    <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                         <span>CGST (2.5%)</span>
                                         <span>₹{((selectedInvoice.taxPrice || 0) / 2).toFixed(2)}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-500">
+                                    <div className="flex justify-between text-gray-500 dark:text-slate-400">
                                         <span>SGST (2.5%)</span>
                                         <span>₹{((selectedInvoice.taxPrice || 0) / 2).toFixed(2)}</span>
                                     </div>
@@ -1577,10 +1577,17 @@ const BillingManagement = () => {
                                 </div>
 
                                 {/* Payment Method & Footer */}
-                                <div className="text-center space-y-1 pt-1 text-[11px]">
-                                    <p className="font-bold uppercase text-emerald-600">
-                                        Payment Method: {selectedInvoice.paymentMethod || 'Card'} · {selectedInvoice.isPaid ? 'PAID' : 'PENDING'}
-                                    </p>
+                                <div className="text-center space-y-1.5 pt-2 text-[11px] border-t border-gray-100 dark:border-slate-800">
+                                    <div className="font-bold uppercase text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 flex-wrap">
+                                        <span>Payment Method: {selectedInvoice.paymentMethod || 'Card'}</span>
+                                        <span>·</span>
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-wider ${selectedInvoice.isPaid
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                                            : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700 animate-pulse'
+                                            }`}>
+                                            {selectedInvoice.isPaid ? 'PAID' : 'PENDING'}
+                                        </span>
+                                    </div>
                                     <p className="text-gray-400 text-[10px]">
                                         Thank you for dining with us! Please visit again.
                                     </p>
@@ -1622,7 +1629,7 @@ const BillingManagement = () => {
                 )}
 
             </div>
-        );
-    };
+    );
+};
 
-    export default BillingManagement;
+export default BillingManagement;

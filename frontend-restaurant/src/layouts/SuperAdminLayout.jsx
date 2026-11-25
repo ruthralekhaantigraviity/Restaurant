@@ -350,7 +350,9 @@ const SuperAdminLayout = () => {
                 
                 {/* ── Page Content ─────────────────────────────────── */}
                 <main className="flex-1 overflow-y-auto overflow-x-hidden p-2.5 sm:p-4 md:p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 custom-scrollbar">
-                    <Outlet />
+                    <div className="max-w-[1920px] mx-auto w-full">
+                        <Outlet />
+                    </div>
                 </main>
             </div>
 

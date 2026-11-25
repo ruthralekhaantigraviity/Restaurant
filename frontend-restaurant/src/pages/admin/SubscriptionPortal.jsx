@@ -573,7 +573,7 @@ const SubscriptionPortal = () => {
                                 <button
                                     onClick={() => handleSelectPlan(plan)}
                                     disabled={isSubmitting}
-                                    className={`w-full py-3 rounded-2xl font-black text-xs transition-all mt-auto pt-3 cursor-pointer ${isCurrent && isPaidActive
+                                    className={`w-full h-12 px-6 py-3 rounded-2xl font-black text-sm tracking-wide transition-all mt-auto inline-flex items-center justify-center text-center cursor-pointer active:scale-98 shadow-sm ${isCurrent && isPaidActive
                                         ? 'bg-orange-50 text-orange-600 border border-orange-200 cursor-default'
                                         : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
                                         }`}
@@ -674,7 +674,7 @@ const SubscriptionPortal = () => {
                         {/* Dummy UPI QR Code Scanner */}
                         {qrData?.qrImageUrl && (
                             <div className="p-5 bg-orange-50/50 dark:bg-slate-800/80 rounded-2xl border border-orange-200 dark:border-orange-900/40 flex flex-col items-center gap-2.5">
-                                <div className="w-44 h-44 bg-white p-2 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+                                <div className="w-44 h-44 bg-white p-2 rounded-xl shadow-md border border-slate-200 flex items-center justify-center dark:bg-slate-900 dark:border-slate-800">
                                     <img
                                         src={qrData.qrImageUrl}
                                         alt="UPI QR Scanner"

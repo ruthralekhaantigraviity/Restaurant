@@ -159,12 +159,12 @@ const FeatureManagement = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 whitespace-nowrap w-full">
                 {categories.map(cat => (
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all shrink-0 cursor-pointer ${
                             selectedCategory === cat
                             ? 'bg-slate-900 text-white shadow-md'
                             : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -177,8 +177,8 @@ const FeatureManagement = () => {
 
             {/* Feature Table Matrix */}
             <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[850px]">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
                                 <th className="p-5 text-xs font-black uppercase text-slate-500 tracking-wider w-1/4">Feature Module</th>

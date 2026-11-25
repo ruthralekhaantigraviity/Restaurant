@@ -91,14 +91,14 @@ const getAttendancePill = (status) => {
 
 const getPayrollBadge = (status) => {
     switch (status) {
-        case 'Paid': return <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold">Paid</span>;
-        case 'Partially Paid': return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-bold">Partially Paid</span>;
-        case 'Approved': return <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 px-2.5 py-1 rounded-full text-xs font-bold">Approved</span>;
-        case 'Generated': return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold">Generated</span>;
+        case 'Paid': return <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Paid</span>;
+        case 'Partially Paid': return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Partially Paid</span>;
+        case 'Approved': return <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Approved</span>;
+        case 'Generated': return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Generated</span>;
         case 'Pending Payment':
-        case 'Pending': return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold">Pending</span>;
-        case 'Draft': return <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold">Draft</span>;
-        default: return <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold">{status}</span>;
+        case 'Pending': return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Pending</span>;
+        case 'Draft': return <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Draft</span>;
+        default: return <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">{status}</span>;
     }
 };
 
@@ -1193,7 +1193,7 @@ const StaffManagement = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
                 <button
                     onClick={() => handleTabChange('staff')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
@@ -1903,7 +1903,7 @@ const StaffManagement = () => {
                                         <th className="py-4 px-6">Overtime</th>
                                         <th className="py-4 px-6">Gross Pay</th>
                                         <th className="py-4 px-6">Net Payable</th>
-                                        <th className="py-4 px-6">Status</th>
+                                        <th className="py-4 px-6 text-center whitespace-nowrap min-w-[130px]">Status</th>
                                         <th className="py-4 px-6 text-right">Actions</th>
                                     </tr>
                                 </thead>
@@ -1950,7 +1950,7 @@ const StaffManagement = () => {
                                                     <td className="py-4 px-6 font-mono font-bold text-slate-900 dark:text-white">
                                                         ₹{(c.netSalaryPayable || 0).toLocaleString('en-IN')}
                                                     </td>
-                                                    <td className="py-4 px-6">
+                                                    <td className="py-4 px-6 text-center whitespace-nowrap min-w-[130px]">
                                                         {getPayrollBadge(p.paymentStatus || p.status)}
                                                     </td>
                                                     <td className="py-4 px-6 text-right">
@@ -2082,7 +2082,7 @@ const StaffManagement = () => {
 
                     {/* Report KPI Cards */}
                     {payrollReportsData && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
                             {/* Card 1: Total Net Payable */}
                             <div className="bg-gradient-to-br from-indigo-500/10 via-white to-white dark:from-indigo-950/30 dark:via-slate-800 dark:to-slate-800 p-4 sm:p-5 rounded-2xl border-l-4 border-l-indigo-500 border border-slate-200/80 dark:border-slate-700/60 shadow-xs relative overflow-hidden group hover:shadow-md transition-all">
                                 <div className="flex items-center justify-between mb-2">
@@ -2639,8 +2639,8 @@ const StaffManagement = () => {
 
                 return (
                     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-                        <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 text-slate-900 my-8">
-                            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                        <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 text-slate-900 my-8 dark:bg-slate-900 dark:border-slate-800">
+                            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
                                 <div>
                                     <h3 className="text-xl font-black text-slate-900">{restaurant?.name || 'Restaurant Business'}</h3>
                                     <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Official Salary Slip</p>
@@ -2703,8 +2703,8 @@ const StaffManagement = () => {
                                 </div>
 
                                 {/* Earnings & Deductions Table */}
-                                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs mb-4">
-                                    <div className="grid grid-cols-2 bg-slate-100 font-bold p-2.5 border-b border-slate-200">
+                                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs mb-4 dark:border-slate-800">
+                                    <div className="grid grid-cols-2 bg-slate-100 font-bold p-2.5 border-b border-slate-200 dark:border-slate-800">
                                         <div>Earnings &amp; Allowances</div>
                                         <div>Deductions &amp; Adjustments</div>
                                     </div>
@@ -2726,7 +2726,7 @@ const StaffManagement = () => {
                                                 <span className="text-slate-500">Allowances:</span>
                                                 <span className="font-semibold text-emerald-600">+₹{(salarySlipData.calculations?.allowances ?? salarySlipData.allowances ?? 0).toLocaleString('en-IN')}</span>
                                             </div>
-                                            <div className="flex justify-between pt-1 border-t border-slate-200 font-bold">
+                                            <div className="flex justify-between pt-1 border-t border-slate-200 font-bold dark:border-slate-800">
                                                 <span className="text-slate-700">Gross Salary:</span>
                                                 <span className="text-slate-900">₹{(salarySlipData.calculations?.grossSalary ?? salarySlipData.grossPayable ?? 0).toLocaleString('en-IN')}</span>
                                             </div>
@@ -2773,7 +2773,7 @@ const StaffManagement = () => {
                                     </div>
                                 </div>
 
-                                <div className="pt-4 mt-3 border-t border-slate-200 text-center text-[10px] text-slate-400">
+                                <div className="pt-4 mt-3 border-t border-slate-200 text-center text-[10px] text-slate-400 dark:border-slate-800">
                                     Computer generated salary slip. Confirmed and verified against actual attendance logs.
                                 </div>
                             </div>

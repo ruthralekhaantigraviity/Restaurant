@@ -156,7 +156,7 @@ const TicketDetails = () => {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div>
-                <p className="text-sm font-semibold text-gray-500">Loading conversation thread...</p>
+                <p className="text-sm font-semibold text-gray-500 dark:text-slate-400">Loading conversation thread...</p>
             </div>
         );
     }

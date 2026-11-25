@@ -95,22 +95,40 @@ export const getExpenses = async (req, res) => {
             filter.paymentStatus = req.query.paymentStatus;
         }
 
-        // Date range filtering
+        // Date range and Search query filtering
         const { start, end } = parseDateRange(req.query.period, req.query.startDate, req.query.endDate);
+        const conditions = [];
+
         if (start || end) {
-            filter.date = {};
-            if (start) filter.date.$gte = start;
-            if (end) filter.date.$lte = end;
+            const dateCond = {};
+            if (start) dateCond.$gte = start;
+            if (end) dateCond.$lte = end;
+
+            conditions.push({
+                $or: [
+                    { date: dateCond },
+                    { paymentDate: dateCond },
+                    { 'payments.paidDate': dateCond }
+                ]
+            });
         }
 
-        // Search query
         if (req.query.search) {
             const query = req.query.search.trim();
-            filter.$or = [
-                { description: { $regex: query, $options: 'i' } },
-                { billingPeriod: { $regex: query, $options: 'i' } },
-                { staff: { $regex: query, $options: 'i' } }
-            ];
+            conditions.push({
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },
+                    { description: { $regex: query, $options: 'i' } },
+                    { billingPeriod: { $regex: query, $options: 'i' } },
+                    { staff: { $regex: query, $options: 'i' } }
+                ]
+            });
+        }
+
+        if (conditions.length === 1) {
+            Object.assign(filter, conditions[0]);
+        } else if (conditions.length > 1) {
+            filter.$and = conditions;
         }
 
         let expenses = await Expense.find(filter)
@@ -188,7 +206,7 @@ export const getExpenses = async (req, res) => {
         }
 
         if (duplicateExpIds.length > 0) {
-            Expense.deleteMany({ _id: { $in: duplicateExpIds } }).catch(() => {});
+            Expense.deleteMany({ _id: { $in: duplicateExpIds } }).catch(() => { });
         }
 
         res.json(deduplicated);
@@ -219,9 +237,14 @@ export const getExpenseSummary = async (req, res) => {
 
         const { start, end } = parseDateRange(req.query.period, req.query.startDate, req.query.endDate);
         if (start || end) {
-            matchFilter.date = {};
-            if (start) matchFilter.date.$gte = start;
-            if (end) matchFilter.date.$lte = end;
+            const dateCond = {};
+            if (start) dateCond.$gte = start;
+            if (end) dateCond.$lte = end;
+            matchFilter.$or = [
+                { date: dateCond },
+                { paymentDate: dateCond },
+                { 'payments.paidDate': dateCond }
+            ];
         }
 
         const expenses = await Expense.find(matchFilter);
@@ -243,7 +266,23 @@ export const getExpenseSummary = async (req, res) => {
             const balance = Math.max(0, amount - paid);
 
             totalIncurred += amount;
-            totalPaid += paid;
+
+            // Sum payments made in the period if filter applied
+            let periodPaid = paid;
+            if ((start || end) && Array.isArray(exp.payments) && exp.payments.length > 0) {
+                const windowPayments = exp.payments.filter(p => {
+                    if (!p.paidDate) return false;
+                    const pDate = new Date(p.paidDate);
+                    if (start && pDate < start) return false;
+                    if (end && pDate > end) return false;
+                    return true;
+                });
+                if (windowPayments.length > 0) {
+                    periodPaid = windowPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+                }
+            }
+
+            totalPaid += periodPaid;
             totalOutstanding += balance;
 
             // Category breakdown
@@ -431,7 +470,7 @@ export const updateExpense = async (req, res) => {
 // @route   POST /api/expenses/:id/pay
 // @access  Private
 export const recordExpensePayment = async (req, res) => {
-    const { amount, paymentMethod, reference, notes, paidDate } = req.body;
+    const { amount, paymentMethod, reference, paymentReference, notes, paidDate, penaltyAmount } = req.body;
 
     try {
         const restaurantId = await getUserRestaurantId(req.user);
@@ -450,23 +489,45 @@ export const recordExpensePayment = async (req, res) => {
             return res.status(400).json({ message: 'Valid payment amount is required' });
         }
 
-        const newPaid = Math.min(expense.amount, (expense.paidAmount || 0) + payAmt);
-        const newBalance = Math.max(0, expense.amount - newPaid);
-        const newStatus = newPaid >= expense.amount ? 'Paid' : (newPaid > 0 ? 'Partially Paid' : 'Pending');
-
         const paymentTimestamp = paidDate ? new Date(paidDate) : new Date();
+        const now = new Date();
+
+        // Calculate and apply late penalty if overdue
+        const isOverdue = expense.dueDate && new Date(expense.dueDate) < now && (expense.balanceDue || expense.amount) > 0;
+        let appliedPenalty = Number(penaltyAmount) || 0;
+
+        if (isOverdue && appliedPenalty === 0 && (!expense.penaltyAmount || expense.penaltyAmount === 0)) {
+            // Apply standard late penalty of 2% of outstanding balance (minimum ₹250)
+            const remaining = expense.balanceDue || Math.max(0, expense.amount - (expense.paidAmount || 0));
+            appliedPenalty = Math.max(250, Math.round(remaining * 0.02));
+        }
+
+        if (appliedPenalty > 0) {
+            expense.penaltyAmount = (expense.penaltyAmount || 0) + appliedPenalty;
+            expense.amount = (expense.amount || 0) + appliedPenalty;
+            expense.notes = `${expense.notes ? expense.notes + ' | ' : ''}Late payment penalty of ₹${appliedPenalty} applied on ${now.toLocaleDateString()}`;
+        }
+
+        const totalPayable = expense.amount;
+        const newPaid = Math.min(totalPayable, (expense.paidAmount || 0) + payAmt);
+        const newBalance = Math.max(0, totalPayable - newPaid);
+        const newStatus = newPaid >= totalPayable ? 'Paid' : (newPaid > 0 ? 'Partially Paid' : 'Pending');
 
         expense.paidAmount = newPaid;
         expense.balanceDue = newBalance;
         expense.paymentStatus = newStatus;
         expense.paymentDate = paymentTimestamp;
-        expense.paymentMethod = paymentMethod || expense.paymentMethod || 'Cash';
+        // Keep primary expense date aligned with payment date so it reflects under Today / This Month expenses
+        expense.date = paymentTimestamp;
+        expense.paymentMethod = paymentMethod || expense.paymentMethod || 'Bank Transfer';
+
+        const finalRef = paymentReference || reference || '';
         expense.payments.push({
             amount: payAmt,
             paidDate: paymentTimestamp,
-            paymentMethod: paymentMethod || 'Cash',
-            reference: reference || '',
-            notes: notes || '',
+            paymentMethod: paymentMethod || 'Bank Transfer',
+            reference: finalRef,
+            notes: notes ? `${notes} (Ref: ${finalRef})` : (finalRef ? `Ref: ${finalRef}` : ''),
             recordedBy: req.user._id
         });
 
@@ -476,7 +537,13 @@ export const recordExpensePayment = async (req, res) => {
             .populate('branchId', 'name')
             .populate('payments.recordedBy', 'name');
 
-        res.json({ message: 'Payment recorded successfully', expense: populated });
+        res.json({
+            message: appliedPenalty > 0
+                ? `Payment recorded successfully with ₹${appliedPenalty} late penalty included`
+                : 'Payment recorded successfully',
+            expense: populated,
+            appliedPenalty
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

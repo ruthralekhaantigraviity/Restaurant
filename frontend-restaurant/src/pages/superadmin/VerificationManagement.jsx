@@ -226,8 +226,8 @@ const VerificationManagement = () => {
 
                 {/* Verification list table */}
                 <div className="xl:col-span-2 bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse min-w-[700px]">
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
                                     <th className="p-4 font-bold">Restaurant</th>
@@ -348,7 +348,10 @@ const VerificationManagement = () => {
 
                                 {Object.keys(docLabels).map(key => {
                                     const doc = selectedReview.documents?.[key];
-                                    const isApproved = doc?.status === 'Approved' || selectedReview.status === 'Verified' || selectedReview.restaurantId?.approvalStatus === 'Approved';
+                                    const isApproved = doc?.status === 'Approved' || 
+                                        String(selectedReview.status || '').toLowerCase() === 'verified' || 
+                                        String(selectedReview.restaurantId?.approvalStatus || '').toLowerCase() === 'approved' ||
+                                        String(selectedReview.restaurantId?.verificationStatus || '').toLowerCase() === 'verified';
                                     const hasFile = Boolean(doc && doc.filePath);
 
                                     if (!hasFile) {
@@ -395,10 +398,9 @@ const VerificationManagement = () => {
                                                 <div className="space-y-0.5 min-w-0 pr-1.5 flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-xs font-black text-gray-800 block">{docLabels[key]}</span>
-                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                                            doc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
+                                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${doc.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' :
                                                             doc.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
-                                                        }`}>
+                                                            }`}>
                                                             {doc.status || 'Uploaded'}
                                                         </span>
                                                     </div>

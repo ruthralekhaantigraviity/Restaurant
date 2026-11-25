@@ -6,7 +6,8 @@ import {
 import {
     TrendingUp, Sparkles, RefreshCw, Download, FileSpreadsheet,
     FileText, Calendar, Building2, Filter, DollarSign, Percent,
-    ArrowUpRight, ArrowDownRight, Layers, BarChart3, PieChart as PieIcon
+    ArrowUpRight, ArrowDownRight, Layers, BarChart3, PieChart as PieIcon,
+    ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
@@ -69,7 +70,7 @@ const BusinessIntelligence = () => {
                 sessionStorage.setItem('restosys_bi_branches', JSON.stringify(bList));
                 sessionStorage.setItem('restosys_bi_orders', JSON.stringify(oList));
                 sessionStorage.setItem('restosys_bi_expenses', JSON.stringify(eList));
-            } catch (_) {}
+            } catch (_) { }
         } catch (err) {
             console.error('Failed to load live BI metrics', err);
         } finally {
@@ -111,8 +112,8 @@ const BusinessIntelligence = () => {
             : expenses;
 
         // If no explicit branches configured yet, synthesize Main Outlet from general restaurant orders
-        const effectiveBranches = branches.length > 0 
-            ? branches 
+        const effectiveBranches = branches.length > 0
+            ? branches
             : [{ _id: 'main', name: 'Main Outlet', location: 'Primary Location' }];
 
         return effectiveBranches.map((branch) => {
@@ -280,10 +281,10 @@ const BusinessIntelligence = () => {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 print:hidden">
+                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-nowrap print:hidden">
                     <button
                         onClick={fetchBIData}
-                        className="p-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-200 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                        className="h-10 w-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-200 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-xs shrink-0 cursor-pointer"
                         title="Refresh BI Metrics"
                     >
                         <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
@@ -291,14 +292,14 @@ const BusinessIntelligence = () => {
 
                     <button
                         onClick={handleExportExcel}
-                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                        className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all inline-flex items-center gap-2 shrink-0 whitespace-nowrap cursor-pointer"
                     >
                         <FileSpreadsheet size={15} /> Export Excel (CSV)
                     </button>
 
                     <button
                         onClick={handleExportPDF}
-                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                        className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all inline-flex items-center gap-2 shrink-0 whitespace-nowrap cursor-pointer"
                     >
                         <FileText size={15} /> Export PDF Report
                     </button>
@@ -306,57 +307,66 @@ const BusinessIntelligence = () => {
             </div>
 
             {/* Filter Bar (Timeframe, Outlet Branch, Category) */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
-                <div className="flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 print:hidden">
+                <div className="flex items-center gap-2 shrink-0">
                     <Sparkles size={16} className="text-indigo-500 animate-pulse" />
                     <span className="text-xs font-black text-gray-900 dark:text-slate-100 uppercase tracking-wider">BI Controls & Filters</span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
                     {/* Timeframe Filter */}
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500">Period:</span>
-                        <select
-                            value={selectedTimeframe}
-                            onChange={(e) => setSelectedTimeframe(e.target.value)}
-                            className="px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl focus:outline-none"
-                        >
-                            <option value="Today">Today</option>
-                            <option value="This Week">This Week</option>
-                            <option value="This Month">This Month</option>
-                            <option value="This Quarter">This Quarter</option>
-                            <option value="This Year">This Year</option>
-                        </select>
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-gray-200/80 dark:border-slate-800">
+                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500 shrink-0">Period:</span>
+                        <div className="relative inline-flex items-center">
+                            <select
+                                value={selectedTimeframe}
+                                onChange={(e) => setSelectedTimeframe(e.target.value)}
+                                className="bg-transparent text-gray-800 dark:text-slate-200 text-xs font-bold focus:outline-none pr-5 appearance-none cursor-pointer"
+                            >
+                                <option value="Today">Today</option>
+                                <option value="This Week">This Week</option>
+                                <option value="This Month">This Month</option>
+                                <option value="This Quarter">This Quarter</option>
+                                <option value="This Year">This Year</option>
+                            </select>
+                            <ChevronDown size={13} className="text-gray-400 pointer-events-none absolute right-0" />
+                        </div>
                     </div>
 
                     {/* Outlet Branch Filter */}
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500">Outlet:</span>
-                        <select
-                            value={selectedOutlet}
-                            onChange={(e) => setSelectedOutlet(e.target.value)}
-                            className="px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl focus:outline-none"
-                        >
-                            <option value="All">All Outlets ({rawOutletsData.length})</option>
-                            {rawOutletsData.map(o => (
-                                <option key={o.outlet} value={o.outlet}>{o.outlet}</option>
-                            ))}
-                        </select>
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-gray-200/80 dark:border-slate-800">
+                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500 shrink-0">Outlet:</span>
+                        <div className="relative inline-flex items-center">
+                            <select
+                                value={selectedOutlet}
+                                onChange={(e) => setSelectedOutlet(e.target.value)}
+                                className="bg-transparent text-gray-800 dark:text-slate-200 text-xs font-bold focus:outline-none pr-5 appearance-none cursor-pointer"
+                            >
+                                <option value="All">All Outlets ({rawOutletsData.length})</option>
+                                {rawOutletsData.map(o => (
+                                    <option key={o.outlet} value={o.outlet}>{o.outlet}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={13} className="text-gray-400 pointer-events-none absolute right-0" />
+                        </div>
                     </div>
 
                     {/* Category Filter */}
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500">Category:</span>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="px-3 py-2 bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 text-gray-800 dark:text-slate-200 text-xs font-bold rounded-xl focus:outline-none"
-                        >
-                            <option value="All">All Categories</option>
-                            <option value="Pizzas & Pastas">Pizzas & Pastas</option>
-                            <option value="Combos & Bundles">Combos & Bundles</option>
-                            <option value="Beverages & Desserts">Beverages & Desserts</option>
-                        </select>
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-gray-200/80 dark:border-slate-800">
+                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500 shrink-0">Category:</span>
+                        <div className="relative inline-flex items-center">
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="bg-transparent text-gray-800 dark:text-slate-200 text-xs font-bold focus:outline-none pr-5 appearance-none cursor-pointer"
+                            >
+                                <option value="All">All Categories</option>
+                                <option value="Pizzas & Pastas">Pizzas & Pastas</option>
+                                <option value="Combos & Bundles">Combos & Bundles</option>
+                                <option value="Beverages & Desserts">Beverages & Desserts</option>
+                            </select>
+                            <ChevronDown size={13} className="text-gray-400 pointer-events-none absolute right-0" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -426,7 +436,7 @@ const BusinessIntelligence = () => {
                                 </h3>
                                 <p className="text-xs text-gray-400 mt-0.5">Realized net margins by physical branch outlet</p>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">{selectedTimeframe}</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full dark:text-slate-400">{selectedTimeframe}</span>
                         </div>
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
@@ -434,7 +444,7 @@ const BusinessIntelligence = () => {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.4} />
                                     <XAxis dataKey="outlet" stroke="#9ca3af" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
                                     <YAxis stroke="#9ca3af" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
-                                    <Tooltip 
+                                    <Tooltip
                                         contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '14px', color: '#fff', fontSize: '12px' }}
                                         formatter={(v) => [`${v}%`, 'Profit Margin']}
                                     />
@@ -454,7 +464,7 @@ const BusinessIntelligence = () => {
                                 </h3>
                                 <p className="text-xs text-gray-400 mt-0.5">Net realized earnings after operational overheads</p>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">{selectedTimeframe}</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full dark:text-slate-400">{selectedTimeframe}</span>
                         </div>
                         <div className="h-64 w-full">
                             <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
@@ -462,7 +472,7 @@ const BusinessIntelligence = () => {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.4} />
                                     <XAxis dataKey="outlet" stroke="#9ca3af" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} />
                                     <YAxis stroke="#9ca3af" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${Number(v).toLocaleString('en-IN')}`} />
-                                    <Tooltip 
+                                    <Tooltip
                                         contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '14px', color: '#fff', fontSize: '12px' }}
                                         formatter={(v) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Net Profit']}
                                     />
@@ -482,7 +492,7 @@ const BusinessIntelligence = () => {
                                 </h3>
                                 <p className="text-xs text-gray-400 mt-0.5">Distribution of revenue by food category</p>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">Menu Breakdown</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full dark:text-slate-400">Menu Breakdown</span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                             <div className="h-56">
@@ -502,7 +512,7 @@ const BusinessIntelligence = () => {
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        <Tooltip 
+                                        <Tooltip
                                             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                                             formatter={(val, name) => [`₹${Number(val).toLocaleString('en-IN')}`, name]}
                                         />
@@ -537,15 +547,14 @@ const BusinessIntelligence = () => {
                                 </h3>
                                 <p className="text-xs text-gray-400 mt-0.5">High profitability performers driving restaurant revenue</p>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">Top 5</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full dark:text-slate-400">Top 5</span>
                         </div>
                         <div className="space-y-2">
                             {topDishes.map((dish, idx) => (
                                 <div key={dish.name} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/60 dark:hover:bg-slate-800 transition-all border border-slate-100/80 dark:border-slate-800/60 text-xs">
                                     <div className="flex items-center gap-2.5 min-w-0">
-                                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                                            idx === 0 ? 'bg-amber-500 text-white shadow-xs' : idx === 1 ? 'bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                                        }`}>
+                                        <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${idx === 0 ? 'bg-amber-500 text-white shadow-xs' : idx === 1 ? 'bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                                            }`}>
                                             {idx + 1}
                                         </span>
                                         <div className="min-w-0">

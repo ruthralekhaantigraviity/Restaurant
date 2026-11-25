@@ -140,21 +140,21 @@ const CommissionManagement = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse table-fixed">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[850px]">
                         <thead>
                             <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="p-3.5 sm:p-4 font-bold w-[28%]">Restaurant</th>
-                                <th className="p-3.5 sm:p-4 font-bold w-[26%]">Owner Email</th>
-                                <th className="p-3.5 sm:p-4 font-bold w-[18%]">Subscription Plan</th>
-                                <th className="p-3.5 sm:p-4 font-bold w-[14%]">Commission Rate</th>
-                                <th className="p-3.5 sm:p-4 font-bold text-right w-[14%]">Actions</th>
+                                <th className="p-4 font-bold">Restaurant</th>
+                                <th className="p-4 font-bold">Owner Email</th>
+                                <th className="p-4 font-bold text-center">Subscription Plan</th>
+                                <th className="p-4 font-bold text-center">Commission Rate</th>
+                                <th className="p-4 font-bold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {filteredRestaurants.map(restaurant => (
                                 <tr key={restaurant._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                    <td className="p-3.5 sm:p-4 align-middle">
+                                    <td className="p-4 align-middle">
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                                 {restaurant.logo ? (
@@ -168,22 +168,22 @@ const CommissionManagement = () => {
                                             <span className="font-bold text-gray-900 truncate">{restaurant.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-3.5 sm:p-4 align-middle text-gray-500 font-medium truncate">
+                                    <td className="p-4 align-middle text-gray-500 font-medium truncate">
                                         {restaurant.ownerId?.email || 'N/A'}
                                     </td>
-                                    <td className="p-3.5 sm:p-4 align-middle whitespace-nowrap">
-                                        <span className="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-lg border border-purple-100">
+                                    <td className="p-4 align-middle text-center whitespace-nowrap">
+                                        <span className="inline-block px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-lg border border-purple-100">
                                             {restaurant.subscription?.plan || 'N/A'}
                                         </span>
                                     </td>
-                                    <td className="p-3.5 sm:p-4 align-middle whitespace-nowrap">
+                                    <td className="p-4 align-middle text-center whitespace-nowrap">
                                         {editingId === restaurant._id ? (
-                                            <div className="flex items-center gap-2">
+                                            <div className="inline-flex items-center justify-center gap-2">
                                                 <input
                                                     type="number"
                                                     value={editingRate}
                                                     onChange={(e) => setEditingRate(Number(e.target.value))}
-                                                    className="w-20 px-2.5 py-1 border border-gray-200 rounded-lg text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-20 px-2.5 py-1 border border-gray-200 rounded-lg text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
                                                     min="0"
                                                     max="100"
                                                 />
@@ -195,39 +195,39 @@ const CommissionManagement = () => {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="p-3.5 sm:p-4 align-middle text-right whitespace-nowrap">
+                                    <td className="p-4 align-middle text-right whitespace-nowrap">
                                         {editingId === restaurant._id ? (
-                                            <div className="flex justify-end gap-2">
+                                            <div className="inline-flex items-center justify-end gap-2">
                                                 <button 
                                                     onClick={() => handleSaveRate(restaurant._id)}
-                                                    className="p-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                                                    className="h-8 px-3 text-green-700 bg-green-50 hover:bg-green-100 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors cursor-pointer"
                                                     title="Save"
                                                 >
-                                                    <Check size={16} />
+                                                    <Check size={14} /> Save
                                                 </button>
                                                 <button 
                                                     onClick={() => setEditingId(null)}
-                                                    className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                                    className="h-8 px-3 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl font-bold text-xs inline-flex items-center gap-1 transition-colors cursor-pointer"
                                                     title="Cancel"
                                                 >
-                                                    <X size={16} />
+                                                    <X size={14} /> Cancel
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="flex justify-end gap-2">
+                                            <div className="inline-flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => handleStartEditing(restaurant)}
-                                                    className="px-3.5 py-1.5 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all flex items-center gap-1.5 active:scale-[0.97]"
+                                                    className="h-8 px-3.5 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
                                                 >
                                                     <Edit2 size={12} /> Edit Rate
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteRestaurant(restaurant._id, restaurant.name)}
                                                     disabled={deletingId === restaurant._id}
-                                                    className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50"
+                                                    className="h-8 w-8 inline-flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all cursor-pointer active:scale-[0.97] disabled:opacity-50"
                                                     title="Delete Restaurant"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={15} />
                                                 </button>
                                             </div>
                                         )}

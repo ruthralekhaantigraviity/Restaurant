@@ -111,11 +111,11 @@ const RoleManagement = () => {
     };
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 relative">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-6 relative">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Role Management</h2>
-                    <p className="text-gray-500 text-sm mt-1">Create custom roles and manage system permissions.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Role Management</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Create custom roles and manage system permissions.</p>
                 </div>
                 <button 
                     onClick={() => setIsCreateModalOpen(true)}
@@ -129,12 +129,12 @@ const RoleManagement = () => {
                 
                 {/* Roles List */}
                 <div className="lg:col-span-1 space-y-4">
-                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center mb-2">
+                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center mb-2 dark:bg-slate-900 dark:border-slate-800">
                         <Search className="text-gray-400 ml-2 mr-3" size={18} />
                         <input type="text" placeholder="Search roles..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-transparent text-sm focus:outline-none" />
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50 min-h-[400px]">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50 min-h-[400px] dark:bg-slate-900 dark:border-slate-800">
                         {loading ? (
                              <div className="flex justify-center p-10">
                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
@@ -150,9 +150,9 @@ const RoleManagement = () => {
                                         <h3 className={`font-bold text-sm ${idx === selectedRoleIndex ? 'text-green-800' : 'text-gray-900'}`}>
                                             {role.name} {role.isCoreRole && <span title="Core Role">🔒</span>}
                                         </h3>
-                                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{role.users} Users</span>
+                                        <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full dark:text-slate-400">{role.users} Users</span>
                                     </div>
-                                    <p className="text-xs text-gray-500 line-clamp-2">{role.desc}</p>
+                                    <p className="text-xs text-gray-500 line-clamp-2 dark:text-slate-400">{role.desc}</p>
                                 </div>
                             ))
                         )}
@@ -160,15 +160,15 @@ const RoleManagement = () => {
                 </div>
 
                 {/* Permissions Matrix for Selected Role */}
-                <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full min-h-[600px]">
+                <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full min-h-[600px] dark:bg-slate-900 dark:border-slate-800">
                     {selectedRole && currentPermissions && (
                         <>
-                            <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-wrap gap-4 justify-between items-center">
+                            <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-wrap gap-4 justify-between items-center dark:border-slate-800">
                                 <div>
                                     <div className="flex items-center gap-2 text-green-700 font-bold mb-1">
                                         <Shield size={18} /> Viewing Permissions
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>{selectedRole.name}</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>{selectedRole.name}</h3>
                                 </div>
                                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                     {selectedRole.isCoreRole ? (
@@ -178,7 +178,7 @@ const RoleManagement = () => {
                                             </span>
                                             <button 
                                                 onClick={handleActionClick}
-                                                className="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold shadow-sm cursor-not-allowed transition-colors"
+                                                className="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold shadow-sm cursor-not-allowed transition-colors dark:text-slate-400"
                                             >
                                                 Save Changes
                                             </button>
@@ -206,8 +206,8 @@ const RoleManagement = () => {
                             <div className="p-6 flex-1 overflow-y-auto">
                                 {Object.entries(currentPermissions).map(([module, permsArray], i) => (
                                     <div key={i} className="mb-6 last:mb-0">
-                                        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider">{module}</h4>
-                                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
+                                        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wider dark:text-white">{module}</h4>
+                                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100 dark:bg-slate-900 dark:border-slate-800">
                                             {['View Data', 'Create Records', 'Edit Records', 'Delete Records'].map((permName, j) => {
                                                 const isChecked = permsArray[j];
                                                 
@@ -248,31 +248,31 @@ const RoleManagement = () => {
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsCreateModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900 text-lg">Create Custom Role</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">Create Custom Role</h3>
                             <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleCreateRole} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Role Name</label>
                                 <input 
                                     type="text" 
                                     required
                                     value={newRoleData.name}
                                     onChange={(e) => setNewRoleData({...newRoleData, name: e.target.value})}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="e.g. Senior Waiter"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Description</label>
                                 <textarea 
                                     value={newRoleData.desc}
                                     onChange={(e) => setNewRoleData({...newRoleData, desc: e.target.value})}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all min-h-[80px]"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all min-h-[80px] dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="What can this role do?"
                                 />
                             </div>
@@ -281,7 +281,7 @@ const RoleManagement = () => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm"
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm dark:text-slate-200"
                                 >
                                     Cancel
                                 </button>
@@ -301,19 +301,19 @@ const RoleManagement = () => {
             {roleToDelete && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setRoleToDelete(null)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
                         <div className="p-6 text-center">
                             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <AlertTriangle size={32} />
                             </div>
-                            <h3 className="font-bold text-gray-900 text-xl mb-2">Delete Role?</h3>
-                            <p className="text-gray-500 text-sm mb-6">
+                            <h3 className="font-bold text-gray-900 text-xl mb-2 dark:text-white">Delete Role?</h3>
+                            <p className="text-gray-500 text-sm mb-6 dark:text-slate-400">
                                 Are you sure you want to delete <strong>{roleToDelete.name}</strong>? Users assigned to this role will lose their permissions.
                             </p>
                             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                                 <button 
                                     onClick={() => setRoleToDelete(null)}
-                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm"
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm dark:text-slate-200"
                                 >
                                     Cancel
                                 </button>

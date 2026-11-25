@@ -428,7 +428,7 @@ const AdminCustomerCare = () => {
                                                         type="button"
                                                         disabled={isUpdating}
                                                         onClick={() => handleUpdateStatus(inq._id, 'In Progress')}
-                                                        className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-gray-500 hover:text-gray-700 text-xs font-semibold transition-all cursor-pointer"
+                                                        className="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-800 text-gray-500 hover:text-gray-700 text-xs font-semibold transition-all cursor-pointer dark:text-slate-400"
                                                     >
                                                         Reopen
                                                     </button>
@@ -558,7 +558,7 @@ const AdminCustomerCare = () => {
                                 <button
                                     type="button"
                                     onClick={() => setReplyModal({ open: false, inquiry: null, replyText: '' })}
-                                    className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800"
+                                    className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 dark:text-slate-300"
                                 >
                                     Cancel
                                 </button>

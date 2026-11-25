@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../utils/axiosInstance';
-import { 
-    Plus, Check, X, Ban, RefreshCw, Eye, EyeOff, Trash2, Search, Store, 
-    Sparkles, TrendingUp, ShieldCheck, AlertCircle, Building2, Calendar, 
+import {
+    Plus, Check, X, Ban, RefreshCw, Eye, EyeOff, Trash2, Search, Store,
+    Sparkles, TrendingUp, ShieldCheck, AlertCircle, Building2, Calendar,
     Phone, Mail, MapPin, RotateCcw, CheckCircle2, ShieldAlert, Lock, Unlock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -71,7 +71,7 @@ const PlatformRestaurants = () => {
         isOpen: false,
         title: '',
         message: '',
-        onConfirm: () => {},
+        onConfirm: () => { },
         isDestructive: true
     });
 
@@ -90,7 +90,7 @@ const PlatformRestaurants = () => {
     }, [api]);
 
     // Handle Restaurant Approval
-    
+
     const handleFreezeRestaurant = (id, name) => {
         setFreezeReason('Administrative review hold');
         setFreezeTarget({ id, name });
@@ -130,7 +130,7 @@ const PlatformRestaurants = () => {
     const handleApproval = async (id, status) => {
         try {
             await api.put(`/super-admin/restaurants/${id}/approval`, { approvalStatus: status });
-            setRestaurants(prev => prev.map(r => 
+            setRestaurants(prev => prev.map(r =>
                 r._id === id ? { ...r, approvalStatus: status } : r
             ));
             toast.success(`Restaurant ${status.toLowerCase()} successfully!`);
@@ -142,17 +142,17 @@ const PlatformRestaurants = () => {
     // Update Visibility Status (Active, Inactive, Suspended)
     const handleUpdateStatus = (id, newStatus, name) => {
         const isDestructive = newStatus === 'Suspended' || newStatus === 'Inactive';
-        const title = newStatus === 'Active' 
+        const title = newStatus === 'Active'
             ? `Activate ${name || 'Restaurant'}`
             : newStatus === 'Inactive'
-            ? `Hide / Deactivate ${name || 'Restaurant'}`
-            : `Suspend ${name || 'Restaurant'}`;
+                ? `Hide / Deactivate ${name || 'Restaurant'}`
+                : `Suspend ${name || 'Restaurant'}`;
 
         const message = newStatus === 'Active'
             ? `Activate and publish "${name}" to the customer marketplace? Customers will be able to discover the restaurant, view the menu, and place orders (subject to approval).`
             : newStatus === 'Inactive'
-            ? `Deactivate "${name}"? It will be hidden immediately from customer discovery, explore listings, and public menus. Existing historical orders and billing records remain intact.`
-            : `Suspend "${name}"? The restaurant will be blocked from public customer listings and prevented from accepting new customer orders immediately.`;
+                ? `Deactivate "${name}"? It will be hidden immediately from customer discovery, explore listings, and public menus. Existing historical orders and billing records remain intact.`
+                : `Suspend "${name}"? The restaurant will be blocked from public customer listings and prevented from accepting new customer orders immediately.`;
 
         setConfirmModal({
             isOpen: true,
@@ -162,7 +162,7 @@ const PlatformRestaurants = () => {
             onConfirm: async () => {
                 try {
                     const res = await api.put(`/super-admin/restaurants/${id}/status`, { status: newStatus });
-                    setRestaurants(prev => prev.map(r => 
+                    setRestaurants(prev => prev.map(r =>
                         r._id === id ? { ...r, status: newStatus, isActive: newStatus === 'Active' } : r
                     ));
                     toast.success(res.data?.message || `Restaurant status updated to ${newStatus}!`);
@@ -184,7 +184,7 @@ const PlatformRestaurants = () => {
             onConfirm: async () => {
                 try {
                     const res = await api.delete(`/super-admin/restaurants/${id}`);
-                    setRestaurants(prev => prev.map(r => 
+                    setRestaurants(prev => prev.map(r =>
                         r._id === id ? { ...r, status: 'Deleted', isDeleted: true, isActive: false, deletedAt: new Date() } : r
                     ));
                     toast.success(res.data?.message || 'Restaurant soft-deleted successfully! Historical records preserved.');
@@ -206,7 +206,7 @@ const PlatformRestaurants = () => {
             onConfirm: async () => {
                 try {
                     const res = await api.put(`/super-admin/restaurants/${id}/restore`);
-                    setRestaurants(prev => prev.map(r => 
+                    setRestaurants(prev => prev.map(r =>
                         r._id === id ? { ...r, status: 'Active', isDeleted: false, isActive: true, deletedAt: null } : r
                     ));
                     toast.success(res.data?.message || 'Restaurant restored successfully!');
@@ -297,23 +297,23 @@ const PlatformRestaurants = () => {
                         Comprehensive management for all {totalCount} registered restaurants, marketplace visibility, and custom POS systems.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
-                        <TrendingUp size={14} className="text-emerald-600" />
-                        MRR: ₹{totalSaaSMRR.toLocaleString('en-IN')}/mo
+                <div className="flex items-center gap-3 shrink-0">
+                    <span className="h-10 px-4 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-black inline-flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap shrink-0">
+                        <TrendingUp size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>MRR: ₹{totalSaaSMRR.toLocaleString('en-IN')}/mo</span>
                     </span>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                        className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap shrink-0"
                     >
-                        <Plus size={15} />
-                        Add Restaurant
+                        <Plus size={16} className="shrink-0" />
+                        <span>Add Restaurant</span>
                     </button>
                 </div>
             </div>
 
             {/* Metrics Ribbon */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
                 <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                     <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Outlets</div>
                     <div className="text-2xl font-black text-gray-900 mt-1">{totalCount}</div>
@@ -379,16 +379,14 @@ const PlatformRestaurants = () => {
                                     <button
                                         key={tab.key}
                                         onClick={() => setActiveFilterTab(tab.key)}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                                            isActive
-                                                ? 'bg-gray-900 text-white shadow-sm'
-                                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                                        }`}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${isActive
+                                            ? 'bg-gray-900 text-white shadow-sm'
+                                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                            }`}
                                     >
                                         <span>{tab.label}</span>
-                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
-                                            isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-                                        }`}>
+                                        <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                                            }`}>
                                             {tab.count}
                                         </span>
                                     </button>
@@ -398,8 +396,8 @@ const PlatformRestaurants = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[950px]">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
                                 <th className="p-4 font-bold">Restaurant & Location</th>
@@ -416,7 +414,7 @@ const PlatformRestaurants = () => {
                             {filteredRestaurants.map(restaurant => {
                                 const isDeleted = Boolean(restaurant.isDeleted || restaurant.status === 'Deleted');
                                 const restStatus = isDeleted ? 'Deleted' : (restaurant.status || (restaurant.isActive === false ? 'Inactive' : 'Active'));
-                                
+
                                 const planLower = (restaurant.subscription?.plan || 'basic').toLowerCase();
                                 const isEnterprise = planLower === 'enterprise';
                                 const isPro = planLower === 'pro' || planLower === 'professional';
@@ -436,10 +434,10 @@ const PlatformRestaurants = () => {
                                             <div className="flex items-center gap-3">
                                                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                                     {restaurant.logo ? (
-                                                        <img 
-                                                            src={restaurant.logo.startsWith('http') || restaurant.logo.startsWith('data:') ? restaurant.logo : `${getOrigin()}${restaurant.logo.startsWith('/') ? '' : '/'}${restaurant.logo}`} 
-                                                            alt={restaurant.name} 
-                                                            className="w-full h-full object-cover" 
+                                                        <img
+                                                            src={restaurant.logo.startsWith('http') || restaurant.logo.startsWith('data:') ? restaurant.logo : `${getOrigin()}${restaurant.logo.startsWith('/') ? '' : '/'}${restaurant.logo}`}
+                                                            alt={restaurant.name}
+                                                            className="w-full h-full object-cover"
                                                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                                         />
                                                     ) : (
@@ -496,25 +494,23 @@ const PlatformRestaurants = () => {
                                         </td>
                                         <td className="p-4 align-middle whitespace-nowrap">
                                             <div className="flex flex-col gap-1 items-start">
-                                                <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${
-                                                    isEnterprise 
-                                                        ? 'bg-purple-50 text-purple-700 border-purple-200' 
-                                                        : isPro 
-                                                            ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                                                            : 'bg-gray-50 text-gray-700 border-gray-200'
-                                                }`}>
+                                                <span className={`px-2.5 py-1 text-xs font-black rounded-lg border ${isEnterprise
+                                                    ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                    : isPro
+                                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                        : 'bg-gray-50 text-gray-700 border-gray-200'
+                                                    }`}>
                                                     {restaurant.subscription?.plan || 'Basic'}
                                                 </span>
                                                 <span className="text-[11px] font-bold text-gray-700">
                                                     {planPrice}<span className="text-[10px] text-gray-400 font-normal">/{cycle === 'yearly' ? 'yr' : 'mo'}</span>
                                                 </span>
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${
-                                                    (restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
-                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                        : (restaurant.subscription?.paymentStatus === 'Trial'
-                                                            ? 'bg-purple-50 text-purple-700 border-purple-200'
-                                                            : 'bg-amber-50 text-amber-700 border-amber-200')
-                                                }`}>
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
+                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                    : (restaurant.subscription?.paymentStatus === 'Trial'
+                                                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-200')
+                                                    }`}>
                                                     {(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid' ? '● Verified Paid' : (restaurant.subscription?.paymentStatus === 'Trial' ? '● Trial Access' : '○ Payment Pending')}
                                                 </span>
                                             </div>
@@ -538,13 +534,12 @@ const PlatformRestaurants = () => {
                                         <td className="p-4 align-middle whitespace-nowrap min-w-[130px]">
                                             {diffDays !== null ? (
                                                 <div>
-                                                    <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap inline-flex items-center gap-1 border ${
-                                                        diffDays < 0
-                                                            ? 'bg-red-50 text-red-700 border-red-200'
-                                                            : diffDays <= 7
-                                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                    }`}>
+                                                    <span className={`text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap inline-flex items-center gap-1 border ${diffDays < 0
+                                                        ? 'bg-red-50 text-red-700 border-red-200'
+                                                        : diffDays <= 7
+                                                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        }`}>
                                                         {diffDays < 0 ? `Expired ${Math.abs(diffDays)}d ago` : diffDays === 0 ? 'Expires today' : `${diffDays} days left`}
                                                     </span>
                                                     <span className="text-[10px] text-gray-400 block mt-0.5">
@@ -557,9 +552,9 @@ const PlatformRestaurants = () => {
                                         </td>
                                         <td className="p-4 align-middle text-right whitespace-nowrap">
                                             <div className="flex items-center justify-end gap-1.5">
-                                                <button 
-                                                    onClick={() => setViewingRestaurant(restaurant)} 
-                                                    className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors" 
+                                                <button
+                                                    onClick={() => setViewingRestaurant(restaurant)}
+                                                    className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
                                                     title="View Full Profile & Subscription"
                                                 >
                                                     <Eye size={16} />
@@ -607,7 +602,7 @@ const PlatformRestaurants = () => {
 
                                                         {/* Visibility Control: Toggle Active / Inactive */}
                                                         {restStatus === 'Active' ? (
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleUpdateStatus(restaurant._id, 'Inactive', restaurant.name)}
                                                                 className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-xl transition-colors"
                                                                 title="Hide / Deactivate Restaurant (Remove from Customer Apps)"
@@ -615,7 +610,7 @@ const PlatformRestaurants = () => {
                                                                 <EyeOff size={16} />
                                                             </button>
                                                         ) : (
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleUpdateStatus(restaurant._id, 'Active', restaurant.name)}
                                                                 className="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors"
                                                                 title="Activate Restaurant (Make Visible in Customer Apps)"
@@ -626,7 +621,7 @@ const PlatformRestaurants = () => {
 
                                                         {/* Visibility Control: Suspend / Unsuspend */}
                                                         {restStatus === 'Suspended' ? (
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleUpdateStatus(restaurant._id, 'Active', restaurant.name)}
                                                                 className="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors"
                                                                 title="Unsuspend Restaurant"
@@ -634,7 +629,7 @@ const PlatformRestaurants = () => {
                                                                 <RefreshCw size={16} />
                                                             </button>
                                                         ) : (
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleUpdateStatus(restaurant._id, 'Suspended', restaurant.name)}
                                                                 className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors"
                                                                 title="Suspend Restaurant"
@@ -644,9 +639,9 @@ const PlatformRestaurants = () => {
                                                         )}
 
                                                         {/* Safe Soft Delete */}
-                                                        <button 
-                                                            onClick={() => handleDeleteRestaurant(restaurant._id, restaurant.name)} 
-                                                            className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors" 
+                                                        <button
+                                                            onClick={() => handleDeleteRestaurant(restaurant._id, restaurant.name)}
+                                                            className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
                                                             title="Soft-Delete Restaurant (Preserves Financial & Order Records)"
                                                         >
                                                             <Trash2 size={16} />
@@ -690,10 +685,10 @@ const PlatformRestaurants = () => {
                             <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
                                 <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                     {viewingRestaurant.logo ? (
-                                        <img 
-                                            src={viewingRestaurant.logo.startsWith('http') || viewingRestaurant.logo.startsWith('data:') ? viewingRestaurant.logo : `${getOrigin()}${viewingRestaurant.logo.startsWith('/') ? '' : '/'}${viewingRestaurant.logo}`} 
-                                            alt={viewingRestaurant.name} 
-                                            className="w-full h-full object-cover" 
+                                        <img
+                                            src={viewingRestaurant.logo.startsWith('http') || viewingRestaurant.logo.startsWith('data:') ? viewingRestaurant.logo : `${getOrigin()}${viewingRestaurant.logo.startsWith('/') ? '' : '/'}${viewingRestaurant.logo}`}
+                                            alt={viewingRestaurant.name}
+                                            className="w-full h-full object-cover"
                                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                         />
                                     ) : (
@@ -711,7 +706,7 @@ const PlatformRestaurants = () => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="space-y-2.5 text-sm">
                                 {/* Marketplace Visibility Status */}
                                 <div className="flex justify-between items-center">
@@ -721,13 +716,12 @@ const PlatformRestaurants = () => {
                                             Soft-Deleted
                                         </span>
                                     ) : (
-                                        <span className={`px-3 py-1 text-xs font-black rounded-lg border ${
-                                            (viewingRestaurant.status || 'Active') === 'Active'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : viewingRestaurant.status === 'Suspended'
+                                        <span className={`px-3 py-1 text-xs font-black rounded-lg border ${(viewingRestaurant.status || 'Active') === 'Active'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            : viewingRestaurant.status === 'Suspended'
                                                 ? 'bg-rose-50 text-rose-700 border-rose-200'
                                                 : 'bg-amber-50 text-amber-700 border-amber-200'
-                                        }`}>
+                                            }`}>
                                             {viewingRestaurant.status || 'Active'}
                                         </span>
                                     )}
@@ -750,25 +744,23 @@ const PlatformRestaurants = () => {
                                     <span className="text-gray-900 font-black">
                                         ₹{(viewingRestaurant.subscription?.price || (
                                             (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'enterprise' ? 12999 :
-                                            (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
+                                                (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
                                         )).toLocaleString('en-IN')} / {viewingRestaurant.subscription?.billingCycle === 'yearly' ? 'year' : 'month'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Subscription Status:</span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${
-                                        viewingRestaurant.subscription?.status === 'Active' 
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                            : 'bg-red-50 text-red-700 border-red-200'
-                                    }`}>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.subscription?.status === 'Active'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : 'bg-red-50 text-red-700 border-red-200'
+                                        }`}>
                                         {viewingRestaurant.subscription?.status || 'Active'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Platform Approval:</span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${
-                                        viewingRestaurant.approvalStatus === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                                    }`}>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.approvalStatus === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                                        }`}>
                                         {viewingRestaurant.approvalStatus || 'Approved'}
                                     </span>
                                 </div>
@@ -874,8 +866,8 @@ const PlatformRestaurants = () => {
                                     {viewingRestaurant.address}
                                 </div>
                             )}
-                            
-                            <button 
+
+                            <button
                                 onClick={() => setViewingRestaurant(null)}
                                 className="w-full mt-2 py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
                             >
@@ -886,7 +878,7 @@ const PlatformRestaurants = () => {
                 </div>
             )}
 
-                        {showAddModal && (
+            {showAddModal && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
                     <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 my-8">
                         <div className="flex items-center justify-between pb-4 border-b border-gray-100">
@@ -1030,9 +1022,9 @@ const PlatformRestaurants = () => {
                 </div>
             )}
 
-            <ConfirmModal 
-                {...confirmModal} 
-                onClose={() => setConfirmModal({...confirmModal, isOpen: false})} 
+            <ConfirmModal
+                {...confirmModal}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
             />
 
             {freezeTarget && (

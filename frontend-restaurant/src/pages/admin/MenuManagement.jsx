@@ -199,11 +199,11 @@ const MenuManagement = () => {
             {/* Header & Unified Tabs */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Poppins, sans-serif' }}>Menu &amp; Category Management</h2>
-                    <p className="text-gray-500 text-sm mt-1">Manage your restaurant&apos;s digital menu items and categories in one place.</p>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>Menu &amp; Category Management</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Manage your restaurant&apos;s digital menu items and categories in one place.</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <div className="flex p-1 bg-gray-100 rounded-xl border border-gray-200">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 shrink-0">
+                    <div className="flex p-1 bg-gray-100 rounded-xl border border-gray-200 dark:border-slate-800">
                         <button
                             type="button"
                             onClick={() => setActiveSection('items')}
@@ -240,7 +240,7 @@ const MenuManagement = () => {
                 <>
 
             {/* Controls */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center dark:bg-slate-900 dark:border-slate-800">
                 <div className="relative w-full md:w-80">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input 
@@ -248,11 +248,11 @@ const MenuManagement = () => {
                         placeholder="Search menu items..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                        className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                     />
                 </div>
                 <div className="flex gap-3">
-                    <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500">
+                    <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800">
                         <option>All Categories</option>
                         <option value="Meal">Meal</option>
                         <option value="Starter">Starter</option>
@@ -267,7 +267,7 @@ const MenuManagement = () => {
                             )
                         ))}
                     </select>
-                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500">
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800">
 
                         <option>All Statuses</option>
                         <option>Available</option>
@@ -277,22 +277,22 @@ const MenuManagement = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                        <thead className="bg-gray-50 border-b border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Item Name</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Item Name</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Category</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Price</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Status</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-10 text-gray-500">
+                                    <td colSpan="5" className="text-center py-10 text-gray-500 dark:text-slate-400">
                                         <div className="flex justify-center">
                                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
                                         </div>
@@ -300,13 +300,13 @@ const MenuManagement = () => {
                                 </tr>
                             ) : filteredMenu.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-10 text-gray-500">No menu items found.</td>
+                                    <td colSpan="5" className="text-center py-10 text-gray-500 dark:text-slate-400">No menu items found.</td>
                                 </tr>
                             ) : filteredMenu.map(item => (
                                 <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 shrink-0 overflow-hidden border border-gray-200">
+                                        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 shrink-0">
+                                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 shrink-0 overflow-hidden border border-gray-200 dark:border-slate-800">
                                                 <img 
                                                     src={getItemImage(item)} 
                                                     onError={(e) => { e.target.onerror = null; e.target.src = getItemImage({ ...item, image: '' }); }}
@@ -315,7 +315,7 @@ const MenuManagement = () => {
                                                 />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-gray-900">{item.name}</p>
+                                                <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
                                                 {item.tags && item.tags.length > 0 && (
                                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded text-white bg-green-600`}>
                                                         {item.tags[0]}
@@ -325,12 +325,12 @@ const MenuManagement = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md">
+                                        <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md dark:text-slate-300">
                                             <Tag size={14} className="text-gray-400" />
                                             {item.category}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                    <td className="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
                                         ₹{item.price.toFixed(2)}
                                     </td>
                                     <td className="px-6 py-4">
@@ -367,9 +367,9 @@ const MenuManagement = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                            <h3 className="font-bold text-gray-900 text-lg">{editingItem ? 'Edit Menu Item' : 'Add New Item'}</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">{editingItem ? 'Edit Menu Item' : 'Add New Item'}</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
@@ -378,46 +378,46 @@ const MenuManagement = () => {
                         <form id="menu-form" onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
                             <div className="overflow-y-auto p-6 space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Item Name</label>
                                     <input 
                                         type="text" 
                                         value={formData.name}
                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. Margherita Pizza"
                                     />
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Description</label>
                                     <textarea 
                                         rows="2"
                                         value={formData.description}
                                         onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all resize-none"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all resize-none dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="Brief description of the dish..."
                                     />
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Price (₹)</label>
                                         <input 
                                             type="number" 
                                             step="0.01"
                                             min="0"
                                             value={formData.price}
                                             onChange={(e) => setFormData({...formData, price: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="0.00"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Category</label>
                                         <select 
                                             value={formData.category}
                                             onChange={(e) => setFormData({...formData, category: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         >
                                             <option value="Meal">Meal</option>
                                             <option value="Starter">Starter</option>
@@ -437,23 +437,23 @@ const MenuManagement = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL (Optional)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Image URL (Optional)</label>
                                     <input 
                                         type="url" 
                                         value={formData.image}
                                         onChange={(e) => setFormData({...formData, image: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="https://example.com/image.jpg"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tags (Comma separated)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Tags (Comma separated)</label>
                                     <input 
                                         type="text" 
                                         value={formData.tags}
                                         onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. Vegetarian, Spicy, Best Seller"
                                     />
                                 </div>
@@ -469,17 +469,17 @@ const MenuManagement = () => {
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                                     </label>
-                                    <label htmlFor="isActive" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    <label htmlFor="isActive" className="text-sm font-medium text-gray-700 cursor-pointer dark:text-slate-200">
                                         Item is Available (Active)
                                     </label>
                                 </div>
                             </div>
                             
-                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0">
+                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 dark:border-slate-800">
                                 <button 
                                     type="button" 
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                                 >
                                     Cancel
                                 </button>

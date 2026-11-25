@@ -43,49 +43,49 @@ const SystemSettings = () => {
         <button
             id={id}
             onClick={() => onChange(!value)}
-            className={`relative w-11 h-6 rounded-full transition-colors ${value ? 'bg-blue-600' : 'bg-gray-300'}`}
+            className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${value ? 'bg-blue-600' : 'bg-gray-300 dark:bg-slate-700'}`}
         >
             <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${value ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
     );
 
     const Field = ({ label, description, children }) => (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 border-b border-gray-50 last:border-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 border-b border-gray-100 dark:border-slate-800 last:border-0">
             <div>
-                <p className="font-bold text-gray-900 text-sm">{label}</p>
-                {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+                <p className="font-bold text-gray-900 dark:text-white text-sm">{label}</p>
+                {description && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{description}</p>}
             </div>
             <div className="shrink-0">{children}</div>
         </div>
     );
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in duration-500 text-slate-900 dark:text-slate-100">
             <div className="flex items-start justify-between flex-wrap gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 font-sans tracking-tight">System Settings</h2>
-                    <p className="text-gray-500 mt-1">Configure global platform-level settings and defaults.</p>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white font-sans tracking-tight">System Settings</h2>
+                    <p className="text-gray-500 dark:text-slate-400 mt-1">Configure global platform-level settings and defaults.</p>
                 </div>
-                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-2.5 shrink-0">
                     <button
                         onClick={handleReset}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm"
+                        className="h-10 px-4 inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold rounded-xl transition-colors text-xs sm:text-sm cursor-pointer shrink-0"
                     >
-                        <RefreshCw size={15} /> Reset
+                        <RefreshCw size={14} /> Reset
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-sm disabled:opacity-60"
+                        className="h-10 px-5 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-xs sm:text-sm disabled:opacity-60 cursor-pointer shadow-md shadow-blue-600/20 shrink-0 whitespace-nowrap"
                     >
-                        {saving ? <><RefreshCw size={15} className="animate-spin" /> Saving…</> : <><Save size={15} /> Save Changes</>}
+                        {saving ? <><RefreshCw size={14} className="animate-spin" /> Saving…</> : <><Save size={14} /> Save Changes</>}
                     </button>
                 </div>
             </div>
 
             {/* Maintenance Mode Alert */}
             {settings.maintenanceMode && (
-                <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-3 text-orange-700">
+                <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 rounded-2xl p-4 flex items-center gap-3 text-orange-700 dark:text-orange-300">
                     <AlertTriangle size={20} className="shrink-0" />
                     <p className="font-bold text-sm">Platform is currently in Maintenance Mode. All user-facing pages will show a maintenance notice.</p>
                 </div>
@@ -95,12 +95,12 @@ const SystemSettings = () => {
             <ThemeSettingCard />
 
             {/* General */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                    <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-slate-800">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
                         <Globe size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-900">General Settings</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white">General Settings</h3>
                 </div>
 
                 <Field label="Platform Name" description="Displayed across the app and emails.">
@@ -108,14 +108,14 @@ const SystemSettings = () => {
                         type="text"
                         value={settings.platformName}
                         onChange={e => handleChange('platformName', e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </Field>
                 <Field label="Billing Currency" description="Primary currency for all transactions.">
                     <select
                         value={settings.billingCurrency}
                         onChange={e => handleChange('billingCurrency', e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         {['INR', 'USD', 'EUR', 'GBP', 'AED'].map(c => <option key={c}>{c}</option>)}
                     </select>
@@ -132,19 +132,19 @@ const SystemSettings = () => {
             </div>
 
             {/* Email */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                    <div className="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-slate-800">
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 flex items-center justify-center text-purple-600 dark:text-purple-400">
                         <Mail size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-900">Email & Communication</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Email & Communication</h3>
                 </div>
                 <Field label="Platform Contact Email" description="Public-facing email address.">
                     <input
                         type="email"
                         value={settings.contactEmail}
                         onChange={e => handleChange('contactEmail', e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </Field>
                 <Field label="Support Email" description="Routed to the support team.">
@@ -152,7 +152,7 @@ const SystemSettings = () => {
                         type="email"
                         value={settings.supportEmail}
                         onChange={e => handleChange('supportEmail', e.target.value)}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-medium w-56 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </Field>
                 <Field label="Require Email Verification" description="New users must verify their email before accessing the dashboard.">
@@ -161,19 +161,19 @@ const SystemSettings = () => {
             </div>
 
             {/* Finance */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                    <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-slate-800">
+                    <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-950/50 flex items-center justify-center text-green-600 dark:text-green-400">
                         <Percent size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-900">Finance & Billing Defaults</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Finance & Billing Defaults</h3>
                 </div>
                 <Field label="Default Commission Rate (%)" description="Applied globally unless overridden per restaurant.">
                     <input
                         type="number"
                         value={settings.defaultCommissionRate}
                         onChange={e => handleChange('defaultCommissionRate', Number(e.target.value))}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="0"
                         max="100"
                     />
@@ -183,7 +183,7 @@ const SystemSettings = () => {
                         type="number"
                         value={settings.defaultTaxRate}
                         onChange={e => handleChange('defaultTaxRate', Number(e.target.value))}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="0"
                         max="100"
                     />
@@ -191,19 +191,19 @@ const SystemSettings = () => {
             </div>
 
             {/* Security */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                    <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 p-6">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-slate-800">
+                    <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/50 flex items-center justify-center text-red-600 dark:text-red-400">
                         <Shield size={18} />
                     </div>
-                    <h3 className="font-bold text-gray-900">Security Settings</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-white">Security Settings</h3>
                 </div>
                 <Field label="Session Timeout (minutes)" description="Auto-logout after inactivity period.">
                     <input
                         type="number"
                         value={settings.sessionTimeout}
                         onChange={e => handleChange('sessionTimeout', Number(e.target.value))}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="5"
                     />
                 </Field>
@@ -212,7 +212,7 @@ const SystemSettings = () => {
                         type="number"
                         value={settings.maxLoginAttempts}
                         onChange={e => handleChange('maxLoginAttempts', Number(e.target.value))}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-gray-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl text-sm font-bold w-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="1"
                         max="20"
                     />

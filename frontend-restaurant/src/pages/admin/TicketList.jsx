@@ -79,7 +79,7 @@ const TicketList = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900">Support Tickets</h2>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white">Support Tickets</h2>
                     <p className="text-xs text-gray-400 font-semibold mt-0.5">Manage and track your reported support tickets.</p>
                 </div>
                 <Link 
@@ -91,7 +91,7 @@ const TicketList = () => {
             </div>
 
             {/* Filter toolbar */}
-            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <div className="relative w-full md:w-72">
                         <input 
@@ -99,7 +99,7 @@ const TicketList = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by ID or subject..."
-                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm font-semibold transition-all"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 text-sm font-semibold transition-all dark:bg-slate-950 dark:border-slate-800"
                         />
                         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     </div>
@@ -107,12 +107,12 @@ const TicketList = () => {
 
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
                     {/* Status filter */}
-                    <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl px-2.5 py-1">
+                    <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl px-2.5 py-1 dark:bg-slate-950 dark:border-slate-800">
                         <span className="text-[10px] uppercase font-bold text-gray-400 mr-1.5">Status</span>
                         <select 
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer py-1 pr-2"
+                            className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer py-1 pr-2 dark:text-slate-200"
                         >
                             <option value="">All Statuses</option>
                             <option value="Open">Open</option>
@@ -125,12 +125,12 @@ const TicketList = () => {
                     </div>
 
                     {/* Priority filter */}
-                    <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl px-2.5 py-1">
+                    <div className="flex items-center gap-1 bg-gray-50 border border-gray-100 rounded-xl px-2.5 py-1 dark:bg-slate-950 dark:border-slate-800">
                         <span className="text-[10px] uppercase font-bold text-gray-400 mr-1.5">Priority</span>
                         <select 
                             value={priorityFilter}
                             onChange={(e) => setPriorityFilter(e.target.value)}
-                            className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer py-1 pr-2"
+                            className="bg-transparent text-xs font-bold text-gray-700 outline-none cursor-pointer py-1 pr-2 dark:text-slate-200"
                         >
                             <option value="">All Priorities</option>
                             <option value="Low">Low</option>
@@ -143,7 +143,7 @@ const TicketList = () => {
             </div>
 
             {/* Support Tickets queue table */}
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 {loading ? (
                     /* Loading Skeleton */
                     <div className="p-8 space-y-4">
@@ -151,7 +151,7 @@ const TicketList = () => {
                             <div key={n} className="flex items-center justify-between py-4 border-b border-gray-50 animate-pulse">
                                 <div className="space-y-2 flex-1">
                                     <div className="h-4 bg-gray-100 rounded w-1/3"></div>
-                                    <div className="h-3 bg-gray-50 rounded w-1/2"></div>
+                                    <div className="h-3 bg-gray-50 rounded w-1/2 dark:bg-slate-950"></div>
                                 </div>
                                 <div className="flex gap-4">
                                     <div className="h-6 bg-gray-100 rounded-full w-20"></div>
@@ -167,8 +167,8 @@ const TicketList = () => {
                             <LifeBuoy size={40} />
                         </div>
                         <div className="space-y-1 max-w-sm">
-                            <h3 className="font-extrabold text-gray-900 text-lg">No tickets found</h3>
-                            <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                            <h3 className="font-extrabold text-gray-900 text-lg dark:text-white">No tickets found</h3>
+                            <p className="text-xs text-gray-500 font-semibold leading-relaxed dark:text-slate-400">
                                 You don't have any support tickets registered under these filters. Need help? Create a new ticket right away.
                             </p>
                         </div>
@@ -184,7 +184,7 @@ const TicketList = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-gray-50/50 border-b border-gray-100 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                                <tr className="bg-gray-50/50 border-b border-gray-100 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:border-slate-800">
                                     <th className="p-5">Ticket Info</th>
                                     <th className="p-5">Category</th>
                                     <th className="p-5">Priority</th>
@@ -203,12 +203,12 @@ const TicketList = () => {
                                         <td className="p-5 max-w-sm">
                                             <div className="space-y-1 min-w-0 pr-1.5 flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-black text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md font-mono">{ticket.ticketId}</span>
+                                                    <span className="text-xs font-black text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md font-mono dark:text-white">{ticket.ticketId}</span>
                                                     {ticket.priority === 'Critical' && (
                                                         <span className="flex h-2 w-2 rounded-full bg-red-600 animate-ping"></span>
                                                     )}
                                                 </div>
-                                                <h4 className="text-sm font-bold text-gray-800 group-hover:text-green-600 transition-colors line-clamp-1">{ticket.subject}</h4>
+                                                <h4 className="text-sm font-bold text-gray-800 group-hover:text-green-600 transition-colors line-clamp-1 dark:text-slate-100">{ticket.subject}</h4>
                                                 {ticket.branchId && (
                                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Branch: {ticket.branchId.name}</span>
                                                 )}
@@ -217,7 +217,7 @@ const TicketList = () => {
                                         
                                         {/* Category */}
                                         <td className="p-5">
-                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
+                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-slate-300">
                                                 <Tag size={12} className="text-gray-400" />
                                                 <span>{ticket.category}</span>
                                             </div>

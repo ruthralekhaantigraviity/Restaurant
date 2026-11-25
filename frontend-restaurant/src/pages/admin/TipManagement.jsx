@@ -81,7 +81,7 @@ const TipManagement = () => {
     const uniqueWaiters = summary?.waiterSummary || [];
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-in fade-in duration-300">
+        <div className="space-y-6 max-w-[1800px] w-full mx-auto pb-12 animate-in fade-in duration-300">
             {/* Header */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

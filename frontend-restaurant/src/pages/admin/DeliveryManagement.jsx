@@ -254,7 +254,7 @@ const DeliveryManagement = () => {
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-gray-50">
+            <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-slate-950">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
             </div>
         );
@@ -264,12 +264,12 @@ const DeliveryManagement = () => {
         <div className="space-y-6 pb-20">
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Delivery Partner Management</h2>
-                <p className="text-gray-500 text-sm mt-1">Configure settings, register delivery staff, monitor live order tracking, and view analytics reports.</p>
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Delivery Partner Management</h2>
+                <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Configure settings, register delivery staff, monitor live order tracking, and view analytics reports.</p>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex gap-1 sm:gap-2 border-b border-gray-200 pb-px overflow-x-auto no-scrollbar max-w-full min-w-0 flex-nowrap">
+            <div className="flex gap-1 sm:gap-2 border-b border-gray-200 pb-px overflow-x-auto no-scrollbar max-w-full min-w-0 flex-nowrap dark:border-slate-800">
                 {['settings', 'partners', 'tracking', 'analytics'].map(tab => (
                     <button
                         key={tab}
@@ -293,10 +293,10 @@ const DeliveryManagement = () => {
                     <form onSubmit={handleSaveSettings} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             {/* Availability Card */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4 dark:bg-slate-900 dark:border-slate-800">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h3 className="text-lg font-black text-gray-900">Delivery Status</h3>
+                                        <h3 className="text-lg font-black text-gray-900 dark:text-white">Delivery Status</h3>
                                         <p className="text-xs text-gray-400">Toggle whether your restaurant currently takes delivery orders.</p>
                                     </div>
                                     <button
@@ -318,7 +318,7 @@ const DeliveryManagement = () => {
                                         <select
                                             value={settings.deliveryType}
                                             onChange={(e) => setSettings(prev => ({ ...prev, deliveryType: e.target.value }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         >
                                             <option value="Self">Self Delivery (Own Staff)</option>
                                             <option value="Third-Party">Third-Party (Uber, Dunzo, etc.)</option>
@@ -336,16 +336,16 @@ const DeliveryManagement = () => {
                                                 onChange={(e) => setSettings(prev => ({ ...prev, radius: Number(e.target.value) }))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
                                             />
-                                            <span className="font-extrabold text-sm text-gray-700 whitespace-nowrap">{settings.radius} km</span>
+                                            <span className="font-extrabold text-sm text-gray-700 whitespace-nowrap dark:text-slate-200">{settings.radius} km</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Charges & Fees Card */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Rates & Surcharges</h3>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Rates & Surcharges</h3>
                                     <p className="text-xs text-gray-400">Configure delivery charges, limits, and extra multipliers.</p>
                                 </div>
 
@@ -356,7 +356,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.freeRadius}
                                             onChange={(e) => setSettings(prev => ({ ...prev, freeRadius: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -366,7 +366,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.minOrderAmountForFreeDelivery}
                                             onChange={(e) => setSettings(prev => ({ ...prev, minOrderAmountForFreeDelivery: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -376,7 +376,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.baseFee}
                                             onChange={(e) => setSettings(prev => ({ ...prev, baseFee: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -386,7 +386,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.perKmCharge}
                                             onChange={(e) => setSettings(prev => ({ ...prev, perKmCharge: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -396,7 +396,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.peakHourFee}
                                             onChange={(e) => setSettings(prev => ({ ...prev, peakHourFee: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -406,7 +406,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.rainSurcharge}
                                             onChange={(e) => setSettings(prev => ({ ...prev, rainSurcharge: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -416,7 +416,7 @@ const DeliveryManagement = () => {
                                             type="number"
                                             value={settings.minOrderAmountForDelivery || 0}
                                             onChange={(e) => setSettings(prev => ({ ...prev, minOrderAmountForDelivery: Number(e.target.value) }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             min="0"
                                         />
                                     </div>
@@ -432,7 +432,7 @@ const DeliveryManagement = () => {
                                                     start: e.target.value 
                                                 } 
                                             }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         />
                                     </div>
                                     <div>
@@ -447,7 +447,7 @@ const DeliveryManagement = () => {
                                                     end: e.target.value 
                                                 } 
                                             }))}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         />
                                     </div>
                                 </div>
@@ -455,9 +455,9 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* Real Interactive Google / Leaflet Radius Map */}
-                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-full space-y-4">
+                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-full space-y-4 dark:bg-slate-900 dark:border-slate-800">
                             <div>
-                                <h3 className="text-lg font-black text-gray-900">Map Bounding Area</h3>
+                                <h3 className="text-lg font-black text-gray-900 dark:text-white">Map Bounding Area</h3>
                                 <p className="text-xs text-gray-400">Interactive Google Maps style view enforcing the {settings.radius} km order constraint.</p>
                             </div>
 
@@ -498,7 +498,7 @@ const DeliveryManagement = () => {
                     <div className="space-y-6 min-w-0 pr-1.5 flex-1">
                         {/* Title and Add Button */}
                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-black text-gray-900">Registered Delivery Staff</h3>
+                            <h3 className="text-lg font-black text-gray-900 dark:text-white">Registered Delivery Staff</h3>
                             <button
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-green-600/15"
@@ -508,11 +508,11 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* List */}
-                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider dark:bg-slate-950 dark:border-slate-800">
                                             <th className="py-4 px-6">Partner Name</th>
                                             <th className="py-4 px-6">Phone Number</th>
                                             <th className="py-4 px-6">Vehicle Details</th>
@@ -531,7 +531,7 @@ const DeliveryManagement = () => {
                                         ) : (
                                             partners.map(p => (
                                                 <tr key={p._id} className="hover:bg-gray-50/50">
-                                                    <td className="py-4 px-6 font-bold text-gray-900 flex items-center gap-3">
+                                                    <td className="py-4 px-6 font-bold text-gray-900 flex items-center gap-3 dark:text-white">
                                                         <div className="w-9 h-9 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold text-xs">
                                                             {p.userId?.name?.slice(0, 2).toUpperCase()}
                                                         </div>
@@ -545,9 +545,9 @@ const DeliveryManagement = () => {
                                                             <p className="text-[10px] text-gray-400">{p.userId?.email}</p>
                                                         </div>
                                                     </td>
-                                                    <td className="py-4 px-6 text-gray-600">{p.userId?.phoneNumber || '—'}</td>
+                                                    <td className="py-4 px-6 text-gray-600 dark:text-slate-300">{p.userId?.phoneNumber || '—'}</td>
                                                     <td className="py-4 px-6">
-                                                        <span className="font-semibold text-gray-800">{p.vehicleDetails?.type}</span>
+                                                        <span className="font-semibold text-gray-800 dark:text-slate-100">{p.vehicleDetails?.type}</span>
                                                         <p className="text-[10px] text-gray-400">{p.vehicleDetails?.model || 'No model specified'}</p>
                                                     </td>
                                                     <td className="py-4 px-6 text-center">
@@ -623,9 +623,9 @@ const DeliveryManagement = () => {
                 {activeTab === 'tracking' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Active Orders List */}
-                        <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                        <div className="lg:col-span-1 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4 dark:bg-slate-900 dark:border-slate-800">
                             <div>
-                                <h3 className="text-lg font-black text-gray-900">Active Delivery Orders</h3>
+                                <h3 className="text-lg font-black text-gray-900 dark:text-white">Active Delivery Orders</h3>
                                 <p className="text-xs text-gray-400">List of orders currently out for delivery or pending assign.</p>
                             </div>
 
@@ -646,15 +646,15 @@ const DeliveryManagement = () => {
                                             }`}
                                         >
                                             <div className="flex justify-between items-center">
-                                                <span className="text-xs font-black text-gray-900">#{o._id.substring(o._id.length - 4).toUpperCase()}</span>
+                                                <span className="text-xs font-black text-gray-900 dark:text-white">#{o._id.substring(o._id.length - 4).toUpperCase()}</span>
                                                 <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase">{o.status}</span>
                                             </div>
 
-                                            <div className="text-xs text-gray-500 space-y-1">
+                                            <div className="text-xs text-gray-500 space-y-1 dark:text-slate-400">
                                                 <p>Address: <strong>{o.shippingAddress?.address || 'Any'}</strong></p>
                                                 <p>Distance: <strong>{o.deliveryDistance || 0} km</strong></p>
                                                 {o.deliveryPartner ? (
-                                                    <div className="space-y-1 mt-2 pt-2 border-t border-gray-200/60 text-[10px] font-semibold text-gray-600">
+                                                    <div className="space-y-1 mt-2 pt-2 border-t border-gray-200/60 text-[10px] font-semibold text-gray-600 dark:text-slate-300">
                                                         <div className="flex justify-between">
                                                             <span>Partner:</span>
                                                             <strong className="text-emerald-700">{(o.deliveryPartner && typeof o.deliveryPartner === 'object') ? (o.deliveryPartner.name || 'Assigned') : 'Assigned'}</strong>
@@ -679,7 +679,7 @@ const DeliveryManagement = () => {
                                                     </button>
                                                     <select
                                                         onChange={(e) => handleManualAssign(o._id, e.target.value)}
-                                                        className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold px-2 py-1"
+                                                        className="bg-white border border-gray-200 rounded-lg text-[10px] font-bold px-2 py-1 dark:bg-slate-900 dark:border-slate-800"
                                                     >
                                                         <option value="">Manual Assign</option>
                                                         {partners.filter(p => p.status === 'Online' && p.verificationStatus === 'Approved').map(p => (
@@ -695,10 +695,10 @@ const DeliveryManagement = () => {
                         </div>
 
                         {/* Interactive Tracking Map Visualizer */}
-                        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-[580px] space-y-4">
+                        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col h-[580px] space-y-4 dark:bg-slate-900 dark:border-slate-800">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Live Delivery Route Tracker</h3>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Live Delivery Route Tracker</h3>
                                     <p className="text-xs text-gray-400">Map simulation of active delivery partner coordinates.</p>
                                 </div>
                                 {selectedTrackingOrder && (
@@ -710,7 +710,7 @@ const DeliveryManagement = () => {
 
                             {/* Stepper Milestones (Zomato/Swiggy Style) */}
                             {selectedTrackingOrder ? (
-                                <div className="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center text-[10px] font-bold text-gray-500">
+                                <div className="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center text-[10px] font-bold text-gray-500 dark:text-slate-400">
                                     {[
                                         { label: 'Accepted', active: ['Accepted', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered'].includes(selectedTrackingOrder.status) },
                                         { label: 'Preparing', active: ['Preparing', 'Ready', 'Out for Delivery', 'Delivered'].includes(selectedTrackingOrder.status) },
@@ -731,7 +731,7 @@ const DeliveryManagement = () => {
                                 </div>
                             ) : null}
 
-                            <div className="relative flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex flex-col min-h-[380px] bg-slate-50">
+                            <div className="relative flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-inner flex flex-col min-h-[380px] bg-slate-50 dark:border-slate-800">
                                 <LiveOrderMap
                                     customerLocation={selectedTrackingOrder ? (selectedTrackingOrder.customerLocation || selectedTrackingOrder.shippingAddress) : null}
                                     restaurantLocation={selectedTrackingOrder ? selectedTrackingOrder.restaurantLocation : (settings.location || { latitude: 13.0475, longitude: 80.2090 })}
@@ -743,7 +743,7 @@ const DeliveryManagement = () => {
                                 />
 
                                 {!selectedTrackingOrder && (
-                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur px-5 py-2.5 rounded-2xl border border-slate-200 shadow-xl text-center">
+                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur px-5 py-2.5 rounded-2xl border border-slate-200 shadow-xl text-center dark:border-slate-800">
                                         <p className="text-xs font-extrabold text-slate-800">Showing Branch Map Overview</p>
                                         <p className="text-[10px] font-medium text-slate-400">Select an active delivery order on the left to inspect its live OSRM route & rider location.</p>
                                     </div>
@@ -766,13 +766,13 @@ const DeliveryManagement = () => {
                             ].map((kpi, idx) => {
                                 const Icon = kpi.icon;
                                 return (
-                                    <div key={idx} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+                                    <div key={idx} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 dark:bg-slate-900 dark:border-slate-800">
                                         <div className={`p-4 rounded-2xl ${kpi.color}`}>
                                             <Icon size={24} />
                                         </div>
                                         <div>
                                             <p className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block leading-tight break-words">{kpi.title}</p>
-                                            <h4 className="text-xl font-black text-gray-900 mt-1">{kpi.value}</h4>
+                                            <h4 className="text-xl font-black text-gray-900 mt-1 dark:text-white">{kpi.value}</h4>
                                         </div>
                                     </div>
                                 );
@@ -782,9 +782,9 @@ const DeliveryManagement = () => {
                         {/* Summary Charts Panel */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Performance statistics */}
-                            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Success Rate Trends</h3>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Success Rate Trends</h3>
                                     <p className="text-xs text-gray-400">Proportions of completed deliveries vs cancellations.</p>
                                 </div>
                                 
@@ -798,7 +798,7 @@ const DeliveryManagement = () => {
                                                 <span>{bar.name}</span>
                                                 <span>{bar.val}%</span>
                                             </div>
-                                            <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
+                                            <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden border border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                                                 <div className={`h-full ${bar.color}`} style={{ width: `${bar.val}%` }}></div>
                                             </div>
                                         </div>
@@ -807,9 +807,9 @@ const DeliveryManagement = () => {
                             </div>
 
                             {/* Top Partners Leaderboard */}
-                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+                            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-6 dark:bg-slate-900 dark:border-slate-800">
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900">Top Deliverers</h3>
+                                    <h3 className="text-lg font-black text-gray-900 dark:text-white">Top Deliverers</h3>
                                     <p className="text-xs text-gray-400">Partners ranked by rating and speed.</p>
                                 </div>
 
@@ -818,13 +818,13 @@ const DeliveryManagement = () => {
                                         { name: 'Ravi Kumar', rating: '4.9', count: '14 deliveries' },
                                         { name: 'Sandeep Sharma', rating: '4.8', count: '11 deliveries' }
                                     ].map((pat, i) => (
-                                        <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border border-gray-200">
+                                        <div key={i} className="flex justify-between items-center p-3 bg-gray-50 rounded-2xl border border-gray-200 dark:bg-slate-950 dark:border-slate-800">
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xs">
                                                     {i + 1}
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs font-bold text-gray-900">{pat.name}</p>
+                                                    <p className="text-xs font-bold text-gray-900 dark:text-white">{pat.name}</p>
                                                     <p className="text-[9px] text-gray-400">{pat.count}</p>
                                                 </div>
                                             </div>
@@ -844,9 +844,9 @@ const DeliveryManagement = () => {
             {isAddModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}></div>
-                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
-                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-black text-gray-900 text-lg">Register Delivery Partner</h3>
+                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col dark:bg-slate-900">
+                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-black text-gray-900 text-lg dark:text-white">Register Delivery Partner</h3>
                             <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
@@ -861,7 +861,7 @@ const DeliveryManagement = () => {
                                         required
                                         value={newPartner.name}
                                         onChange={(e) => setNewPartner({...newPartner, name: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. Ramesh Singh"
                                     />
                                 </div>
@@ -873,7 +873,7 @@ const DeliveryManagement = () => {
                                         required
                                         value={newPartner.email}
                                         onChange={(e) => setNewPartner({...newPartner, email: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. ramesh@gmail.com"
                                     />
                                 </div>
@@ -892,7 +892,7 @@ const DeliveryManagement = () => {
                                             if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
                                             setNewPartner({...newPartner, phoneNumber: clean});
                                         }}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. 9876543210"
                                     />
                                 </div>
@@ -903,7 +903,7 @@ const DeliveryManagement = () => {
                                         <select
                                             value={newPartner.vehicleType}
                                             onChange={(e) => setNewPartner({...newPartner, vehicleType: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         >
                                             <option value="Bike">Bike</option>
                                             <option value="Scooter">Scooter</option>
@@ -917,7 +917,7 @@ const DeliveryManagement = () => {
                                             type="text"
                                             value={newPartner.vehicleModel}
                                             onChange={(e) => setNewPartner({...newPartner, vehicleModel: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="e.g. Activa 6G"
                                         />
                                     </div>
@@ -930,7 +930,7 @@ const DeliveryManagement = () => {
                                             type="text"
                                             value={newPartner.rcNumber}
                                             onChange={(e) => setNewPartner({...newPartner, rcNumber: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="RC-XXXX"
                                         />
                                     </div>
@@ -940,7 +940,7 @@ const DeliveryManagement = () => {
                                             type="text"
                                             value={newPartner.licenseNumber}
                                             onChange={(e) => setNewPartner({...newPartner, licenseNumber: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="DL-XXXX"
                                         />
                                     </div>
@@ -952,7 +952,7 @@ const DeliveryManagement = () => {
                                         type="text"
                                         value={newPartner.profilePhoto}
                                         onChange={(e) => setNewPartner({...newPartner, profilePhoto: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="https://example.com/avatar.jpg"
                                     />
                                 </div>
@@ -964,7 +964,7 @@ const DeliveryManagement = () => {
                                             type="text"
                                             value={newPartner.drivingLicense}
                                             onChange={(e) => setNewPartner({...newPartner, drivingLicense: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="https://example.com/dl.pdf"
                                         />
                                     </div>
@@ -974,18 +974,18 @@ const DeliveryManagement = () => {
                                             type="text"
                                             value={newPartner.idProof}
                                             onChange={(e) => setNewPartner({...newPartner, idProof: e.target.value})}
-                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 dark:bg-slate-950 dark:border-slate-800"
                                             placeholder="https://example.com/id.pdf"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0">
+                            <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 dark:border-slate-800">
                                 <button 
                                     type="button" 
                                     onClick={() => setIsAddModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                    className="flex-1 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                                 >
                                     Cancel
                                 </button>

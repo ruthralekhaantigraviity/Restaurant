@@ -26,6 +26,12 @@ const reservationSchema = new mongoose.Schema({
         type: String, // e.g., '19:00 - 21:00'
         required: true,
     },
+    checkInTime: {
+        type: String, // e.g., '12:00'
+    },
+    checkOutTime: {
+        type: String, // e.g., '14:00'
+    },
     guestCount: {
         type: Number,
         required: true,

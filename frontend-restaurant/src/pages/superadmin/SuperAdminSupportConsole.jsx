@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { 
-    MessageSquare, Megaphone, Search
+import {
+    MessageSquare, Megaphone, Search, ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const SuperAdminSupportConsole = () => {
     const { api } = useAuth();
     const navigate = useNavigate();
-    
+
     const [activeTab, setActiveTab] = useState('tickets');
     const [tickets, setTickets] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
-    
+
     const [loading, setLoading] = useState(true);
 
     // Filter states
@@ -113,21 +113,19 @@ const SuperAdminSupportConsole = () => {
             <div className="flex gap-2 border-b border-gray-100 pb-3">
                 <button
                     onClick={() => setActiveTab('tickets')}
-                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-                        activeTab === 'tickets' 
-                        ? 'bg-slate-900 text-white' 
+                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${activeTab === 'tickets'
+                        ? 'bg-slate-900 text-white'
                         : 'text-gray-500 hover:bg-gray-50'
-                    }`}
+                        }`}
                 >
                     <MessageSquare size={14} /> Tickets Queue
                 </button>
                 <button
                     onClick={() => setActiveTab('announcements')}
-                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-                        activeTab === 'announcements' 
-                        ? 'bg-slate-900 text-white' 
+                    className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${activeTab === 'announcements'
+                        ? 'bg-slate-900 text-white'
                         : 'text-gray-500 hover:bg-gray-50'
-                    }`}
+                        }`}
                 >
                     <Megaphone size={14} /> Announcements
                 </button>
@@ -139,7 +137,7 @@ const SuperAdminSupportConsole = () => {
                     {/* Filters */}
                     <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
                         <div className="relative w-full md:w-72">
-                            <input 
+                            <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -149,30 +147,36 @@ const SuperAdminSupportConsole = () => {
                             <Search size={14} className="absolute left-3.5 top-3 text-gray-400" />
                         </div>
                         <div className="flex gap-3">
-                            <select 
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 outline-none"
-                            >
-                                <option value="">All Statuses</option>
-                                <option value="Open">Open</option>
-                                <option value="Assigned">Assigned</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Waiting for Customer">Waiting for Customer</option>
-                                <option value="Resolved">Resolved</option>
-                                <option value="Closed">Closed</option>
-                            </select>
-                            <select 
-                                value={priorityFilter}
-                                onChange={(e) => setPriorityFilter(e.target.value)}
-                                className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 outline-none"
-                            >
-                                <option value="">All Priorities</option>
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                                <option value="Critical">Critical</option>
-                            </select>
+                            <div className="relative inline-flex items-center">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="appearance-none pl-3.5 pr-8 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 outline-none cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-750 transition-colors"
+                                >
+                                    <option value="">All Statuses</option>
+                                    <option value="Open">Open</option>
+                                    <option value="Assigned">Assigned</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Waiting for Customer">Waiting for Customer</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 pointer-events-none" />
+                            </div>
+                            <div className="relative inline-flex items-center">
+                                <select
+                                    value={priorityFilter}
+                                    onChange={(e) => setPriorityFilter(e.target.value)}
+                                    className="appearance-none pl-3.5 pr-8 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 outline-none cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-750 transition-colors"
+                                >
+                                    <option value="">All Priorities</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
@@ -183,8 +187,8 @@ const SuperAdminSupportConsole = () => {
                         ) : tickets.length === 0 ? (
                             <div className="p-8 text-center text-xs font-bold text-gray-400 dark:text-slate-500">No support tickets found matching current filters.</div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
+                            <div className="overflow-x-auto custom-scrollbar">
+                                <table className="w-full text-left border-collapse min-w-[720px]">
                                     <thead>
                                         <tr className="bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
                                             <th className="p-4">Restaurant</th>
@@ -208,21 +212,19 @@ const SuperAdminSupportConsole = () => {
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                                                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase inline-flex items-center justify-center border ${
-                                                            t.priority === 'Critical' ? 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700'
-                                                        }`}>
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase inline-flex items-center justify-center border ${t.priority === 'Critical' ? 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700'
+                                                            }`}>
                                                             {t.priority}
                                                         </span>
-                                                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase inline-flex items-center justify-center border ${
-                                                            t.status === 'Resolved' ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' : 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
-                                                        }`}>
+                                                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase inline-flex items-center justify-center border ${t.status === 'Resolved' ? 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' : 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                                                            }`}>
                                                             {t.status}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <div className="flex items-center justify-center">
-                                                        <select 
+                                                        <select
                                                             value={t.status}
                                                             onChange={(e) => handleUpdateStatus(t._id, e.target.value)}
                                                             className="px-3 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-bold text-gray-700 dark:text-slate-200 text-center mx-auto block cursor-pointer transition-colors"
@@ -235,6 +237,22 @@ const SuperAdminSupportConsole = () => {
                                                             <option value="Resolved" className="text-center">Resolved</option>
                                                             <option value="Closed" className="text-center">Closed</option>
                                                         </select>
+                                                        <div className="relative inline-flex items-center justify-center min-w-[140px]">
+                                                            <select
+                                                                value={t.status}
+                                                                onChange={(e) => handleUpdateStatus(t._id, e.target.value)}
+                                                                className="w-full appearance-none px-4 py-1.5 pr-8 bg-gray-50 hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-750 border border-gray-200 dark:border-slate-700 rounded-xl outline-none font-bold text-gray-700 dark:text-slate-200 text-center cursor-pointer transition-all text-xs"
+                                                                style={{ textAlign: 'center', textAlignLast: 'center' }}
+                                                            >
+                                                                <option value="Open">Open</option>
+                                                                <option value="Assigned">Assigned</option>
+                                                                <option value="In Progress">In Progress</option>
+                                                                <option value="Waiting for Customer">Waiting for Customer</option>
+                                                                <option value="Resolved">Resolved</option>
+                                                                <option value="Closed">Closed</option>
+                                                            </select>
+                                                            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400 pointer-events-none" />
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -258,7 +276,7 @@ const SuperAdminSupportConsole = () => {
                         <form onSubmit={handleCreateAnnouncement} className="space-y-4 pt-2">
                             <div className="space-y-1.5 min-w-0 pr-1.5 flex-1">
                                 <label className="text-xs font-bold text-gray-600 dark:text-slate-300">Announcement Type</label>
-                                <select 
+                                <select
                                     value={annType}
                                     onChange={(e) => setAnnType(e.target.value)}
                                     className="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500/20 text-xs font-semibold"
@@ -271,7 +289,7 @@ const SuperAdminSupportConsole = () => {
                             </div>
                             <div className="space-y-1.5 min-w-0 pr-1.5 flex-1">
                                 <label className="text-xs font-bold text-gray-600 dark:text-slate-300">Title</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={annTitle}
                                     onChange={(e) => setAnnTitle(e.target.value)}
@@ -282,7 +300,7 @@ const SuperAdminSupportConsole = () => {
                             </div>
                             <div className="space-y-1.5 min-w-0 pr-1.5 flex-1">
                                 <label className="text-xs font-bold text-gray-600 dark:text-slate-300">Announcement Content</label>
-                                <textarea 
+                                <textarea
                                     value={annContent}
                                     onChange={(e) => setAnnContent(e.target.value)}
                                     placeholder="Details..."
@@ -291,7 +309,7 @@ const SuperAdminSupportConsole = () => {
                                     required
                                 />
                             </div>
-                            <button 
+                            <button
                                 type="submit"
                                 disabled={submittingAnn}
                                 className="w-full py-3 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
@@ -317,11 +335,10 @@ const SuperAdminSupportConsole = () => {
                                 {announcements.map((ann) => (
                                     <div key={ann._id} className="py-4 flex items-center justify-between gap-4 text-xs">
                                         <div className="space-y-1 flex-1 pr-6">
-                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase inline-block border ${
-                                                ann.type === 'Scheduled Maintenance' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' :
+                                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase inline-block border ${ann.type === 'Scheduled Maintenance' ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-800' :
                                                 ann.type === 'Feature Releases' ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' :
-                                                'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
-                                            }`}>
+                                                    'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                                                }`}>
                                                 {ann.type}
                                             </span>
                                             <h4 className="font-extrabold text-gray-800 dark:text-white mt-1">{ann.title}</h4>

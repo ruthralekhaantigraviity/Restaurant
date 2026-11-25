@@ -242,19 +242,19 @@ const DashboardLayout = () => {
     };
 
     return (
-        <div className="flex h-screen bg-[#FAFAF8] text-slate-900 overflow-hidden font-sans">
+        <div className="flex h-screen bg-[#FAFAF8] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden font-sans transition-colors">
             <Sidebar />
             
             <div className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
                 <Topbar />
                 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#FAFAF8] text-slate-900 p-2.5 sm:p-4 md:p-6 lg:p-8 relative custom-scrollbar">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#FAFAF8] dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-2.5 sm:p-4 md:p-6 lg:p-8 relative custom-scrollbar">
                     {isFrozen ? (
                         <SubscriptionFreezeOverlay onUnfrozen={() => fetchRestaurant()} />
                     ) : isUnverified && !isVerificationPage ? (
                        <VerificationBlockedOverlay />
                     ) : (
-                       <div className="relative w-full h-full min-h-[60vh]">
+                       <div className="relative w-full h-full min-h-[60vh] max-w-[1920px] mx-auto">
                            {isCustomModuleBlocked && (
                                <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-900/10 dark:bg-slate-950/40 backdrop-blur-[5px] rounded-3xl p-6">
                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-[2.5rem] p-8 shadow-2xl border border-white/50 dark:border-slate-800 max-w-md w-full text-center flex flex-col items-center gap-5 transform animate-in zoom-in-95 duration-300">

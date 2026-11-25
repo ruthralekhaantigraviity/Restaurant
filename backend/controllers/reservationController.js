@@ -40,15 +40,21 @@ export const getReservations = async (req, res) => {
 // @route   POST /api/reservations
 // @access  Private
 export const createReservation = async (req, res) => {
-    const { branch, guestName, guestPhone, date, timeSlot, guestCount, table } = req.body;
+    const { branch, guestName, guestPhone, date, timeSlot, checkInTime, checkOutTime, guestCount, table } = req.body;
 
     try {
+        const slot = timeSlot || (checkInTime && checkOutTime ? `${checkInTime} - ${checkOutTime}` : (checkInTime || '12:00 - 14:00'));
+        const inTime = checkInTime || (slot.includes('-') ? slot.split('-')[0].trim() : slot);
+        const outTime = checkOutTime || (slot.includes('-') ? slot.split('-')[1].trim() : '');
+
         const reservation = await Reservation.create({
             branch,
             guestName,
             guestPhone,
             date,
-            timeSlot,
+            timeSlot: slot,
+            checkInTime: inTime,
+            checkOutTime: outTime,
             guestCount,
             table: table || undefined, // Optional table assignment
             status: 'Confirmed'

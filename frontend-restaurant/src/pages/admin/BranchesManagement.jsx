@@ -141,12 +141,12 @@ const BranchesManagement = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>Branches</h2>
                     <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
-                        Manage your restaurant locations ({branches.length} / {maxBranches} branch{maxBranches === 1 ? '' : 'es'} used on <span className="font-semibold text-green-700 dark:text-green-400">{planName}</span> plan).
+                        Manage your restaurant locations ({branches.length} / {maxBranches} branch{maxBranches === 1 ? '' : 'es'} used on <span className="font-semibold text-blue-600 dark:text-blue-400">{planName}</span> plan).
                     </p>
                 </div>
                 <button 
                     onClick={() => handleOpenModal()}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm shadow-sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-sm shadow-blue-500/10 cursor-pointer"
                 >
                     <Plus size={18} /> Add Branch
                 </button>
@@ -161,14 +161,14 @@ const BranchesManagement = () => {
                         placeholder="Search branches..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                        className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                     />
                 </div>
                 <div className="flex gap-2">
                     <select 
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                        className="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
                     >
                         <option value="All Statuses">All Statuses</option>
                         <option value="Active">Active</option>
@@ -180,7 +180,7 @@ const BranchesManagement = () => {
             {/* Branch Grid */}
             {loading ? (
                 <div className="flex justify-center p-10">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
             ) : filteredBranches.length === 0 ? (
                 <div className="text-center py-10 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
@@ -193,12 +193,12 @@ const BranchesManagement = () => {
                             <div className="p-5 border-b border-gray-50 dark:border-slate-800">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${branch.isActive ? 'bg-green-100 dark:bg-green-950/60 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${branch.isActive ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
                                             <MapPin size={20} />
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-gray-900 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>{branch.name}</h3>
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${branch.isActive ? 'bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${branch.isActive ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
                                                 {branch.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
@@ -206,8 +206,8 @@ const BranchesManagement = () => {
                                 </div>
                                 
                                 <div className="space-y-2 mt-4 text-sm text-gray-500 dark:text-slate-400">
-                                    <p className="flex items-center gap-2"><MapPin size={14} className="text-gray-400 dark:text-slate-500" /> {branch.location?.address || 'No address'}</p>
-                                    <p className="flex items-center gap-2"><Phone size={14} className="text-gray-400 dark:text-slate-500" /> {branch.contact?.phone || 'No phone'}</p>
+                                    <p className="flex items-center gap-2"><MapPin size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> {branch.location?.address || 'No address'}</p>
+                                    <p className="flex items-center gap-2"><Phone size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> {branch.contact?.phone || 'No phone'}</p>
                                 </div>
                             </div>
                             
@@ -218,7 +218,7 @@ const BranchesManagement = () => {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-xs text-gray-400 dark:text-slate-500 font-medium mb-1">Monthly Rev</p>
-                                    <p className="text-sm font-bold text-green-600 dark:text-green-400" style={{ fontFamily: 'Manrope, sans-serif' }}>₹0</p>
+                                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400" style={{ fontFamily: 'Manrope, sans-serif' }}>₹0</p>
                                 </div>
                             </div>
 
@@ -226,13 +226,13 @@ const BranchesManagement = () => {
                             <div className="bg-white dark:bg-slate-900 px-5 py-3 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 opacity-100">
                                 <button 
                                     onClick={() => handleOpenModal(branch)}
-                                    className="text-sm flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+                                    className="text-sm flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-semibold cursor-pointer"
                                 >
                                     <Edit2 size={14} /> Edit
                                 </button>
                                 <button 
                                     onClick={() => handleDeleteClick(branch)}
-                                    className="text-sm flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors font-medium"
+                                    className="text-sm flex items-center gap-1.5 text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 transition-colors font-semibold cursor-pointer"
                                 >
                                     <Trash2 size={14} /> Delete
                                 </button>
@@ -315,7 +315,7 @@ const BranchesManagement = () => {
                                 </button>
                                 <button 
                                     type="submit" 
-                                    className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-sm shadow-green-600/20 transition-colors text-sm"
+                                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm shadow-blue-600/20 transition-colors text-sm cursor-pointer"
                                 >
                                     {editingBranch ? 'Save Changes' : 'Create Branch'}
                                 </button>

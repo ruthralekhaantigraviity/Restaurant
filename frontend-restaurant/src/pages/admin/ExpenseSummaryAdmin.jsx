@@ -323,8 +323,18 @@ const ExpenseSummaryAdmin = () => {
             toast.error('Please enter a valid payment amount');
             return;
         }
-        if (amt > selectedExpenseForPayment.balanceDue) {
-            toast.error(`Amount cannot exceed outstanding balance of ₹${selectedExpenseForPayment.balanceDue}`);
+
+        if (!paymentForm.paymentReference || !paymentForm.paymentReference.trim()) {
+            toast.error('Transaction Ref / Cheque # is required to record payment.');
+            return;
+        }
+
+        const isOverdue = selectedExpenseForPayment.dueDate && new Date(selectedExpenseForPayment.dueDate) < new Date() && selectedExpenseForPayment.balanceDue > 0;
+        const penaltyToApply = isOverdue ? Math.max(250, Math.round(selectedExpenseForPayment.balanceDue * 0.02)) : 0;
+        const effectiveMax = selectedExpenseForPayment.balanceDue + penaltyToApply;
+
+        if (amt > effectiveMax) {
+            toast.error(`Amount cannot exceed outstanding balance of ₹${effectiveMax}`);
             return;
         }
 
@@ -332,10 +342,13 @@ const ExpenseSummaryAdmin = () => {
             await api.post(`/expenses/${selectedExpenseForPayment._id}/pay`, {
                 amount: amt,
                 paymentMethod: paymentForm.paymentMethod,
-                paymentReference: paymentForm.paymentReference,
-                notes: paymentForm.notes
+                paymentReference: paymentForm.paymentReference.trim(),
+                reference: paymentForm.paymentReference.trim(),
+                notes: paymentForm.notes,
+                paidDate: new Date().toISOString(),
+                penaltyAmount: penaltyToApply
             });
-            toast.success(`Payment of ₹${amt} logged successfully!`);
+            toast.success(penaltyToApply > 0 ? `Payment of ₹${amt} logged (including ₹${penaltyToApply} late penalty)!` : `Payment of ₹${amt} logged successfully!`);
             setIsPaymentModalOpen(false);
             setSelectedExpenseForPayment(null);
             setPaymentForm({ amount: '', paymentMethod: 'Bank Transfer', paymentReference: '', notes: '' });
@@ -551,7 +564,7 @@ const ExpenseSummaryAdmin = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
                 <button
                     onClick={() => handleTabChange('expenses')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
@@ -735,17 +748,46 @@ const ExpenseSummaryAdmin = () => {
                                             <td className="py-4.5 px-6 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap align-middle font-medium min-w-[130px]">
                                                 {new Date(e.date).toLocaleDateString()}
                                             </td>
-                                            <td className="py-4.5 px-6 text-xs align-middle whitespace-nowrap min-w-[180px]">
-                                                {e.dueDate ? (
-                                                    <span className={new Date(e.dueDate) < new Date() && e.balanceDue > 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium'}>
-                                                        Due: {new Date(e.dueDate).toLocaleDateString()}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-slate-400 dark:text-slate-500">-</span>
-                                                )}
-                                                {e.billingPeriod && (
-                                                    <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{e.billingPeriod}</div>
-                                                )}
+                                            <td className="py-4.5 px-6 text-xs align-middle whitespace-nowrap min-w-[200px]">
+                                                {(() => {
+                                                    if (!e.dueDate) {
+                                                        return <span className="text-slate-400 dark:text-slate-500">-</span>;
+                                                    }
+                                                    const today = new Date();
+                                                    today.setHours(0, 0, 0, 0);
+                                                    const due = new Date(e.dueDate);
+                                                    due.setHours(0, 0, 0, 0);
+                                                    const diffDays = Math.round((due - today) / (1000 * 60 * 60 * 24));
+                                                    const isUnpaid = (e.balanceDue || 0) > 0;
+
+                                                    return (
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                                <span className={isUnpaid && diffDays < 0 ? 'text-red-600 dark:text-red-400 font-bold' : isUnpaid && diffDays <= 1 ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-500 dark:text-slate-400 font-medium'}>
+                                                                    Due: {new Date(e.dueDate).toLocaleDateString()}
+                                                                </span>
+                                                                {isUnpaid && diffDays < 0 && (
+                                                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800">
+                                                                        Overdue ({Math.abs(diffDays)}d) + Penalty
+                                                                    </span>
+                                                                )}
+                                                                {isUnpaid && diffDays === 0 && (
+                                                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 animate-pulse">
+                                                                        Due Today!
+                                                                    </span>
+                                                                )}
+                                                                {isUnpaid && diffDays === 1 && (
+                                                                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200">
+                                                                        Due in 1 day!
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {e.billingPeriod && (
+                                                                <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{e.billingPeriod}</div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="py-4.5 px-6 font-bold text-slate-900 dark:text-white whitespace-nowrap align-middle min-w-[130px]">
                                                 ₹{e.amount?.toLocaleString('en-IN')}
@@ -1062,18 +1104,66 @@ const ExpenseSummaryAdmin = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 text-xs space-y-1 mb-4">
-                            <div>Title: <strong>{selectedExpenseForPayment.title || selectedExpenseForPayment.category}</strong></div>
-                            <div>Category: <strong>{selectedExpenseForPayment.category}</strong></div>
-                            <div>Outstanding Balance Due: <strong>₹{selectedExpenseForPayment.balanceDue?.toLocaleString('en-IN')}</strong></div>
+                        <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 text-xs space-y-1.5 mb-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Title:</span>
+                                <strong className="text-slate-900 dark:text-white">{selectedExpenseForPayment.title || selectedExpenseForPayment.category}</strong>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Category:</span>
+                                <strong className="text-slate-900 dark:text-white">{selectedExpenseForPayment.category}</strong>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">Outstanding Balance Due:</span>
+                                <strong className="text-emerald-700 dark:text-emerald-400 font-black text-sm">₹{selectedExpenseForPayment.balanceDue?.toLocaleString('en-IN')}</strong>
+                            </div>
                         </div>
+
+                        {/* Due Date Alert / Overdue Penalty Notice */}
+                        {(() => {
+                            if (!selectedExpenseForPayment.dueDate) return null;
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const due = new Date(selectedExpenseForPayment.dueDate);
+                            due.setHours(0, 0, 0, 0);
+                            const diffDays = Math.round((due - today) / (1000 * 60 * 60 * 24));
+                            const isOverdue = diffDays < 0;
+                            const penaltyAmount = isOverdue ? Math.max(250, Math.round((selectedExpenseForPayment.balanceDue || 0) * 0.02)) : 0;
+
+                            if (isOverdue) {
+                                return (
+                                    <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 flex items-center justify-between gap-2">
+                                        <div>
+                                            <p className="font-black text-rose-900 dark:text-rose-200">🚨 Overdue by {Math.abs(diffDays)} Day(s) — Penalty Applied</p>
+                                            <p className="text-[11px] text-rose-700 dark:text-rose-400 mt-0.5">A late fee penalty of ₹{penaltyAmount} will be added upon payment.</p>
+                                        </div>
+                                        <span className="text-sm font-black text-rose-700 dark:text-rose-300 shrink-0 bg-rose-100 dark:bg-rose-900/60 px-2 py-1 rounded-lg">
+                                            +₹{penaltyAmount}
+                                        </span>
+                                    </div>
+                                );
+                            }
+
+                            if (diffDays === 0 || diffDays === 1) {
+                                return (
+                                    <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 font-bold flex items-center gap-2">
+                                        <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+                                        <span>
+                                            ⚠️ Notice: Bill is {diffDays === 0 ? 'Due Today' : 'Due in 1 day'}! Settle payment now to prevent overdue late penalties.
+                                        </span>
+                                    </div>
+                                );
+                            }
+
+                            return null;
+                        })()}
+
                         <form onSubmit={handleRecordPayment} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) *</label>
                                 <input 
                                     type="number"
                                     step="any"
-                                    max={selectedExpenseForPayment.balanceDue}
                                     required
                                     value={paymentForm.amount}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
@@ -1082,11 +1172,11 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method *</label>
                                 <select 
                                     value={paymentForm.paymentMethod}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
                                 >
                                     <option value="Bank Transfer">Bank Transfer / NEFT</option>
                                     <option value="UPI">UPI</option>
@@ -1097,13 +1187,16 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Transaction Ref / Cheque #</label>
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">
+                                    Transaction Ref / Cheque # <span className="text-red-500 font-black">*</span>
+                                </label>
                                 <input 
                                     type="text"
+                                    required
                                     value={paymentForm.paymentReference}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentReference: e.target.value })}
-                                    placeholder="e.g. UTR / Ref No."
-                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                                    placeholder="e.g. UTR / Ref No. / Cheque No. *"
+                                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:border-emerald-500 focus:outline-none"
                                 />
                             </div>
 

@@ -75,18 +75,18 @@ const ActivityLogs = () => {
     });
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Activity Audit Logs</h2>
-                    <p className="text-gray-500 text-sm mt-1">Audit trail of all actions performed by users in the system.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Activity Audit Logs</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Audit trail of all actions performed by users in the system.</p>
                 </div>
-                <button onClick={fetchLogs} className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm flex items-center gap-2">
+                <button onClick={fetchLogs} className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm flex items-center gap-2 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
                     <RefreshCcw size={16} /> Refresh Logs
                 </button>
             </div>
             
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center dark:bg-slate-900 dark:border-slate-800">
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 
@@ -94,14 +94,14 @@ const ActivityLogs = () => {
                         placeholder="Search by action or description..." 
                         value={searchQuery} 
                         onChange={(e) => setSearchQuery(e.target.value)} 
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all" 
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800" 
                     />
                 </div>
                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
                     <select 
                         value={moduleFilter}
                         onChange={(e) => setModuleFilter(e.target.value)}
-                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800"
                     >
                         <option value="All Modules">All Modules</option>
                         <option value="Order">Order</option>
@@ -111,7 +111,7 @@ const ActivityLogs = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -123,13 +123,13 @@ const ActivityLogs = () => {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left whitespace-nowrap">
-                            <thead className="bg-gray-50 border-b border-gray-100">
+                            <thead className="bg-gray-50 border-b border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                                 <tr>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action / Module</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">IP Address</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Action / Module</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">User</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Description</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Time</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">IP Address</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -141,23 +141,23 @@ const ActivityLogs = () => {
                                                     {getLogIcon(log.module)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-900 text-sm">{log.action}</p>
-                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{log.module}</span>
+                                                    <p className="font-bold text-gray-900 text-sm dark:text-white">{log.action}</p>
+                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide dark:text-slate-400">{log.module}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="font-medium text-gray-900 text-sm">{log.user}</p>
-                                            <p className="text-xs text-gray-500">{log.role}</p>
+                                            <p className="font-medium text-gray-900 text-sm dark:text-white">{log.user}</p>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400">{log.role}</p>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[300px]" title={log.desc}>
+                                        <td className="px-6 py-4 text-sm text-gray-600 truncate max-w-[300px] dark:text-slate-300" title={log.desc}>
                                             {log.desc}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-medium text-gray-900">{log.time}</p>
-                                            <p className="text-xs text-gray-500">{log.date}</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{log.time}</p>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400">{log.date}</p>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 font-mono">
+                                        <td className="px-6 py-4 text-sm text-gray-500 font-mono dark:text-slate-400">
                                             {log.ip}
                                         </td>
                                     </tr>

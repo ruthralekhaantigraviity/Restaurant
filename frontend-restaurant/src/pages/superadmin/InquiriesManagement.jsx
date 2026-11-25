@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { 
-    CalendarCheck, Search, Filter, Phone, Mail, MessageSquare, 
+import {
+    CalendarCheck, Search, Filter, Phone, Mail, MessageSquare,
     Trash2, Clock, CheckCircle2, AlertCircle, RefreshCw, Sparkles, Building2, ExternalLink
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -39,7 +39,7 @@ const InquiriesManagement = () => {
         const nextStatus = currentStatus === 'New' ? 'In Progress' : currentStatus === 'In Progress' ? 'Resolved' : 'New';
         try {
             await api.put(`/inquiries/admin/${id}`, { status: nextStatus });
-            setInquiries(inquiries.map(inq => 
+            setInquiries(inquiries.map(inq =>
                 inq._id === id ? { ...inq, status: nextStatus } : inq
             ));
             toast.success(`Lead status updated to ${nextStatus}!`);
@@ -66,7 +66,7 @@ const InquiriesManagement = () => {
 
     const filteredInquiries = useMemo(() => {
         return inquiries.filter(inq => {
-            const matchesSearch = 
+            const matchesSearch =
                 (inq.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (inq.restaurantName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (inq.phone || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,7 +88,7 @@ const InquiriesManagement = () => {
     }, [inquiries]);
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto pb-12">
+        <div className="space-y-6 max-w-[1800px] w-full mx-auto pb-12">
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm">
                 <div>
@@ -179,8 +179,8 @@ const InquiriesManagement = () => {
 
             {/* Leads Table */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[950px]">
                         <thead>
                             <tr className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 text-[11px] text-gray-400 uppercase tracking-wider font-bold">
                                 <th className="py-3.5 px-4 w-60">Lead / Contact Info</th>
@@ -207,7 +207,7 @@ const InquiriesManagement = () => {
                                                 </span>
                                                 {resolvedPhone ? (
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <a 
+                                                        <a
                                                             href={`tel:${resolvedPhone}`}
                                                             className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-md"
                                                             title="Click to call"
@@ -240,13 +240,12 @@ const InquiriesManagement = () => {
                                             </div>
                                         </td>
                                         <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-flex items-center gap-1 ${
-                                                inq.subject === 'Demo' 
+                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-flex items-center gap-1 ${inq.subject === 'Demo'
                                                 ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
                                                 : inq.subject === 'Sales'
-                                                ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
-                                                : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-gray-300'
-                                            }`}>
+                                                    ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
+                                                    : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-gray-300'
+                                                }`}>
                                                 {inq.subject === 'Demo' && <Sparkles size={12} />}
                                                 {inq.subject || 'Demo'}
                                             </span>
@@ -265,13 +264,12 @@ const InquiriesManagement = () => {
                                             }) : 'Recently'}
                                         </td>
                                         <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
-                                            <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
-                                                inq.status === 'Resolved' 
+                                            <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${inq.status === 'Resolved'
                                                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300'
-                                                : inq.status === 'In Progress' 
-                                                ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300'
-                                                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
-                                            }`}>
+                                                : inq.status === 'In Progress'
+                                                    ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300'
+                                                    : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
+                                                }`}>
                                                 {inq.status || 'New'}
                                             </span>
                                         </td>

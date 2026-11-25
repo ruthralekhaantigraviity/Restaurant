@@ -68,19 +68,19 @@ const Analytics = () => {
     };
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Analytics Dashboard</h2>
-                    <p className="text-gray-500 text-sm mt-1">Deep dive into sales trends, customer behavior, and menu performance.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Analytics Dashboard</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Deep dive into sales trends, customer behavior, and menu performance.</p>
                 </div>
                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <div className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2.5">
+                    <div className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2.5 dark:bg-slate-900 dark:border-slate-800">
                         <Calendar size={16} className="text-gray-400" />
                         <select 
                             value={timeframe} 
                             onChange={(e) => setTimeframe(Number(e.target.value))}
-                            className="bg-transparent text-sm text-gray-600 font-medium focus:outline-none cursor-pointer"
+                            className="bg-transparent text-sm text-gray-600 font-medium focus:outline-none cursor-pointer dark:text-slate-300"
                         >
                             <option value={7}>Last 7 Days</option>
                             <option value={30}>Last 30 Days</option>
@@ -112,10 +112,10 @@ const Analytics = () => {
                             { title: 'Avg Order Value', value: formatCurrency(data.overview.avgOrderValue), change: `${data.overview.avgChange > 0 ? '+' : ''}${data.overview.avgChange.toFixed(1)}%`, isUp: data.overview.avgChange >= 0 },
                             { title: 'Active Customers', value: formatNumber(data.overview.activeCustomers), change: `${data.overview.customersChange > 0 ? '+' : ''}${data.overview.customersChange.toFixed(1)}%`, isUp: data.overview.customersChange >= 0 },
                         ].map((kpi, idx) => (
-                            <div key={idx} className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-w-0 overflow-hidden">
-                                <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">{kpi.title}</p>
+                            <div key={idx} className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow min-w-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+                                <p className="text-xs sm:text-sm font-medium text-gray-500 truncate dark:text-slate-400">{kpi.title}</p>
                                 <div className="flex flex-wrap items-baseline justify-between gap-1.5 mt-3 min-w-0">
-                                    <h3 className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-gray-900 truncate" style={{ fontFamily: 'Manrope, sans-serif' }}>{kpi.value}</h3>
+                                    <h3 className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-gray-900 truncate dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>{kpi.value}</h3>
                                     <div className={`flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded-md shrink-0 ${kpi.isUp ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'}`}>
                                         {kpi.isUp ? <ArrowUpRight size={13} /> : <ArrowDownRight size={13} />}
                                         {kpi.change}
@@ -128,9 +128,9 @@ const Analytics = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
                         {/* Revenue Chart */}
-                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 min-w-0 overflow-hidden">
+                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 min-w-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                                <h3 className="font-bold text-gray-900 text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>Revenue Overview</h3>
+                                <h3 className="font-bold text-gray-900 text-lg dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Revenue Overview</h3>
                                 <button className="text-gray-400 hover:text-gray-600"><TrendingUp size={20}/></button>
                             </div>
                             <div className="h-[300px] w-full">
@@ -161,8 +161,8 @@ const Analytics = () => {
                         </div>
 
                         {/* Category Pie Chart */}
-                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-w-0 overflow-hidden">
-                            <h3 className="font-bold text-gray-900 text-lg mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>Sales by Category</h3>
+                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-w-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg mb-2 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Sales by Category</h3>
                             <div className="flex-1 min-h-[250px]">
                                 {data.categoryData.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
@@ -189,15 +189,15 @@ const Analytics = () => {
                                 {data.categoryData.map((entry, index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">
                                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                                        <span className="text-gray-600 font-medium">{entry.name}</span>
+                                        <span className="text-gray-600 font-medium dark:text-slate-300">{entry.name}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Orders Bar Chart */}
-                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-3 min-w-0 overflow-hidden">
-                            <h3 className="font-bold text-gray-900 text-lg mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>Daily Order Volume</h3>
+                        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-3 min-w-0 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg mb-6 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Daily Order Volume</h3>
                             <div className="h-[250px] w-full">
                                 {data.revenueTrend.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>

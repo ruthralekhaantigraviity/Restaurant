@@ -8,8 +8,8 @@ const getIcon = (type) => {
         case 'Alert': return <AlertCircle size={20} className="text-red-500" />;
         case 'Info': return <Info size={20} className="text-blue-500" />;
         case 'Broadcast': return <Megaphone size={20} className="text-purple-500" />;
-        case 'System': return <Info size={20} className="text-gray-500" />;
-        default: return <Bell size={20} className="text-gray-500" />;
+        case 'System': return <Info size={20} className="text-gray-500 dark:text-slate-400" />;
+        default: return <Bell size={20} className="text-gray-500 dark:text-slate-400" />;
     }
 };
 
@@ -466,12 +466,12 @@ const NotificationCenter = () => {
                                     )}
                                     {selectedNoteForView.metadata?.items && Array.isArray(selectedNoteForView.metadata.items) && (
                                         <div className="pt-1.5 space-y-1">
-                                            <span className="text-[10px] font-bold text-gray-500 uppercase">Ordered Dishes:</span>
+                                            <span className="text-[10px] font-bold text-gray-500 uppercase dark:text-slate-400">Ordered Dishes:</span>
                                             <div className="space-y-1 max-h-32 overflow-y-auto">
                                                 {selectedNoteForView.metadata.items.map((it, idx) => (
                                                     <div key={idx} className="flex justify-between text-xs font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-orange-100 dark:border-orange-950">
                                                         <span>{it.qty}x {it.name}</span>
-                                                        <span className="font-mono text-gray-500">₹{it.price}</span>
+                                                        <span className="font-mono text-gray-500 dark:text-slate-400">₹{it.price}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -662,9 +662,9 @@ const NotificationCenter = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900 text-lg">Send New Broadcast</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden flex flex-col dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">Send New Broadcast</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
@@ -673,35 +673,35 @@ const NotificationCenter = () => {
                         <div className="p-6">
                             <form onSubmit={handleBroadcastSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Broadcast Title *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Broadcast Title *</label>
                                     <input 
                                         type="text" 
                                         required
                                         value={formData.title}
                                         onChange={(e) => setFormData({...formData, title: e.target.value})}
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. System Maintenance Tonight"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Message Content *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Message Content *</label>
                                     <textarea 
                                         required
                                         rows="4"
                                         value={formData.desc}
                                         onChange={(e) => setFormData({...formData, desc: e.target.value})}
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium resize-none"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium resize-none dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="Type your message here..."
                                     ></textarea>
-                                    <p className="text-xs text-gray-500 mt-1">This will be sent to all staff members immediately.</p>
+                                    <p className="text-xs text-gray-500 mt-1 dark:text-slate-400">This will be sent to all staff members immediately.</p>
                                 </div>
 
                                 <div className="flex gap-3 mt-8">
                                     <button 
                                         type="button" 
                                         onClick={() => setIsModalOpen(false)}
-                                        className="flex-1 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                        className="flex-1 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                                     >
                                         Cancel
                                     </button>

@@ -94,44 +94,44 @@ const PaymentManagement = () => {
         .reduce((sum, t) => sum + t.amount, 0);
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Payment Management</h2>
-                    <p className="text-gray-500 text-sm mt-1">Track transactions, refunds, and payment gateways.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Payment Management</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Track transactions, refunds, and payment gateways.</p>
                 </div>
-                <button onClick={fetchTransactions} className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm flex items-center gap-2">
+                <button onClick={fetchTransactions} className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm flex items-center gap-2 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
                     <Download size={16} /> Refresh
                 </button>
             </div>
 
             {/* Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue (Today)</p>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-slate-900 dark:border-slate-800">
+                    <p className="text-sm font-medium text-gray-500 mb-1 dark:text-slate-400">Total Revenue (Today)</p>
                     <div className="flex items-end gap-2">
-                        <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{todayRevenue.toFixed(2)}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{todayRevenue.toFixed(2)}</h3>
                         <span className="flex items-center text-xs font-bold text-green-600 mb-1"><ArrowUpRight size={14} /> Live</span>
                     </div>
                 </div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Total Transactions</p>
-                    <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>{transactions.length}</h3>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-slate-900 dark:border-slate-800">
+                    <p className="text-sm font-medium text-gray-500 mb-1 dark:text-slate-400">Total Transactions</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>{transactions.length}</h3>
                 </div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Refunds Processed</p>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-slate-900 dark:border-slate-800">
+                    <p className="text-sm font-medium text-gray-500 mb-1 dark:text-slate-400">Refunds Processed</p>
                     <div className="flex items-end gap-2">
-                        <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{refundedAmount.toFixed(2)}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{refundedAmount.toFixed(2)}</h3>
                         <span className="flex items-center text-xs font-bold text-red-600 mb-1"><ArrowDownRight size={14} /> Total</span>
                     </div>
                 </div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Pending Settlements</p>
-                    <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{pendingSettlements.toFixed(2)}</h3>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-slate-900 dark:border-slate-800">
+                    <p className="text-sm font-medium text-gray-500 mb-1 dark:text-slate-400">Pending Settlements</p>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{pendingSettlements.toFixed(2)}</h3>
                 </div>
             </div>
             
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center">
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 justify-between items-center dark:bg-slate-900 dark:border-slate-800">
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 
@@ -139,14 +139,14 @@ const PaymentManagement = () => {
                         placeholder="Search transaction ID or customer..." 
                         value={searchQuery} 
                         onChange={(e) => setSearchQuery(e.target.value)} 
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all" 
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800" 
                     />
                 </div>
                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
                     <select 
                         value={methodFilter}
                         onChange={(e) => setMethodFilter(e.target.value)}
-                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800"
                     >
                         <option value="All Methods">All Methods</option>
                         <option value="Card">Card</option>
@@ -156,7 +156,7 @@ const PaymentManagement = () => {
                     <select 
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500"
+                        className="bg-gray-50 border border-gray-200 text-gray-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800"
                     >
                         <option value="All Statuses">All Statuses</option>
                         <option value="Completed">Completed</option>
@@ -167,7 +167,7 @@ const PaymentManagement = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -177,30 +177,30 @@ const PaymentManagement = () => {
                         No transactions found matching your filters.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto custom-scrollbar">
                         <table className="w-full text-left whitespace-nowrap">
-                            <thead className="bg-gray-50 border-b border-gray-100">
+                            <thead className="bg-gray-50 border-b border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                                 <tr>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Transaction ID</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order Info</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Transaction ID</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Date & Time</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Order Info</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Method</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Amount</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Status</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {filteredTransactions.map((txn, idx) => (
                                     <tr key={idx} className="hover:bg-gray-50/50 transition-colors group">
-                                        <td className="px-6 py-4 font-medium text-gray-900">{txn.id}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500">{txn.date}</td>
+                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{txn.id}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">{txn.date}</td>
                                         <td className="px-6 py-4">
-                                            <p className="text-sm font-bold text-gray-900">{txn.orderId}</p>
-                                            <p className="text-xs text-gray-500">{txn.customer}</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{txn.orderId}</p>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400">{txn.customer}</p>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{txn.method}</td>
-                                        <td className="px-6 py-4 font-bold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{txn.amount.toFixed(2)}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-slate-300">{txn.method}</td>
+                                        <td className="px-6 py-4 font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{txn.amount.toFixed(2)}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-block px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide border ${getStatusStyle(txn.status)}`}>
                                                 {txn.status}

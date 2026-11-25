@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { 
-    CalendarCheck, Search, Filter, Phone, Mail, MessageSquare, 
-    Trash2, Clock, CheckCircle2, AlertCircle, RefreshCw, Sparkles, 
-    Building2, ExternalLink, Sliders, Eye, EyeOff, Check, X, ShieldCheck, 
-    Store, Receipt, Utensils, QrCode, Package, Users, BarChart3, 
-    Percent, DollarSign, CreditCard, Tag, ArrowRight, FileText, 
+import {
+    CalendarCheck, Search, Filter, Phone, Mail, MessageSquare,
+    Trash2, Clock, CheckCircle2, AlertCircle, RefreshCw, Sparkles,
+    Building2, ExternalLink, Sliders, Eye, EyeOff, Check, X, ShieldCheck,
+    Store, Receipt, Utensils, QrCode, Package, Users, BarChart3,
+    Percent, DollarSign, CreditCard, Tag, ArrowRight, FileText,
     ChevronRight, ChevronDown, CheckSquare, Square, Flame, Zap, Award,
     KeyRound, Copy
 } from 'lucide-react';
@@ -105,7 +105,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
     const [inquiryStatusFilter, setInquiryStatusFilter] = useState('ALL');
     const [inquirySubjectFilter, setInquirySubjectFilter] = useState('ALL');
     const [deleteConfirmInquiry, setDeleteConfirmInquiry] = useState(null);
-    
+
     // Filters & Search
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
@@ -408,7 +408,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
     const filteredRequests = useMemo(() => {
         return requests.filter(req => {
             const query = searchQuery.toLowerCase().trim();
-            const matchesSearch = 
+            const matchesSearch =
                 !query ||
                 (req.fullName || '').toLowerCase().includes(query) ||
                 (req.phoneNumber || '').toLowerCase().includes(query) ||
@@ -441,7 +441,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans">
+        <div className="space-y-6 max-w-[1800px] w-full mx-auto pb-16 font-sans">
             {/* Header with Title, Section Switcher, and Refresh */}
             <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-5">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -473,17 +473,15 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                     <button
                         type="button"
                         onClick={() => switchSectionTab('demos')}
-                        className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
-                            activeSection === 'demos'
-                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
-                        }`}
+                        className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${activeSection === 'demos'
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                            }`}
                     >
                         <Receipt size={15} />
                         <span>Outlet Format &amp; Billing Demos</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            activeSection === 'demos' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeSection === 'demos' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300'
+                            }`}>
                             {requests.length}
                         </span>
                     </button>
@@ -491,17 +489,15 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                     <button
                         type="button"
                         onClick={() => switchSectionTab('leads')}
-                        className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
-                            activeSection === 'leads'
-                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
-                        }`}
+                        className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${activeSection === 'leads'
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                            }`}
                     >
                         <CalendarCheck size={15} />
                         <span>General Walkthrough Leads</span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            activeSection === 'leads' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeSection === 'leads' ? 'bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300'
+                            }`}>
                             {inquiries.length}
                         </span>
                     </button>
@@ -509,288 +505,288 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
             </div>
 
             {activeSection === 'demos' && (
-            <>
-            {/* Quick Status KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Total Bookings</span>
-                    <span className="text-2xl font-black text-gray-900 dark:text-white mt-1 block">{counts.total || requests.length}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider block">Pending Review</span>
-                    <span className="text-2xl font-black text-amber-800 dark:text-amber-300 mt-1 block">{counts.pending || 0}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/60 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-purple-700 dark:text-purple-400 tracking-wider block">Demo Scheduled</span>
-                    <span className="text-2xl font-black text-purple-800 dark:text-purple-300 mt-1 block">{counts.scheduled || 0}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-blue-700 dark:text-blue-400 tracking-wider block">Demo Completed</span>
-                    <span className="text-2xl font-black text-blue-800 dark:text-blue-300 mt-1 block">{counts.completed || 0}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 tracking-wider block">Activated POS</span>
-                    <span className="text-2xl font-black text-emerald-800 dark:text-emerald-300 mt-1 block">{counts.activated || 0}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/60 shadow-xs">
-                    <span className="text-[10px] font-black uppercase text-rose-700 dark:text-rose-400 tracking-wider block">Rejected / Inactive</span>
-                    <span className="text-2xl font-black text-rose-800 dark:text-rose-300 mt-1 block">{counts.rejected || 0}</span>
-                </div>
-            </div>
-
-            {/* Search and Filters Bar */}
-            <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-                <div className="relative w-full sm:w-80">
-                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search restaurant, name, phone, city..."
-                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-rose-500 dark:text-white"
-                    />
-                </div>
-
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
-                        <Filter size={14} />
-                        <span>Status:</span>
-                    </div>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-slate-200 focus:outline-none"
-                    >
-                        <option value="ALL">All Statuses ({requests.length})</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Contacted">Contacted</option>
-                        <option value="Demo Scheduled">Demo Scheduled</option>
-                        <option value="Demo Completed">Demo Completed</option>
-                        <option value="Activated">Activated</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
-
-                    <select
-                        value={outletFilter}
-                        onChange={(e) => setOutletFilter(e.target.value)}
-                        className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-slate-200 focus:outline-none"
-                    >
-                        <option value="ALL">All Outlets</option>
-                        <option value="Fine Dine & Resto-Bar">Fine Dine &amp; Resto-Bar</option>
-                        <option value="Quick Service (QSR)">Quick Service (QSR)</option>
-                        <option value="Cafe & Bakery">Cafe &amp; Bakery</option>
-                        <option value="Cloud Kitchen">Cloud Kitchen</option>
-                        <option value="Pub & Brewery">Pub &amp; Brewery</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Requests Table */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                {loading ? (
-                    <div className="p-16 text-center space-y-3">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
-                        <p className="text-xs text-gray-400 font-medium">Loading billing demo walkthrough requests...</p>
-                    </div>
-                ) : filteredRequests.length === 0 ? (
-                    <div className="p-16 text-center space-y-3">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 text-gray-400 flex items-center justify-center mx-auto">
-                            <Receipt size={24} />
+                <>
+                    {/* Quick Status KPI Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider block">Total Bookings</span>
+                            <span className="text-2xl font-black text-gray-900 dark:text-white mt-1 block">{counts.total || requests.length}</span>
                         </div>
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">No demo requests found</h4>
-                        <p className="text-xs text-gray-400 max-w-sm mx-auto">
-                            {searchQuery || statusFilter !== 'ALL' || outletFilter !== 'ALL'
-                                ? 'No requests match your current search and filters. Try clearing them.'
-                                : 'Walkthrough demo bookings submitted from the landing page form will appear here automatically.'}
-                        </p>
+                        <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider block">Pending Review</span>
+                            <span className="text-2xl font-black text-amber-800 dark:text-amber-300 mt-1 block">{counts.pending || 0}</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/60 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-purple-700 dark:text-purple-400 tracking-wider block">Demo Scheduled</span>
+                            <span className="text-2xl font-black text-purple-800 dark:text-purple-300 mt-1 block">{counts.scheduled || 0}</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-blue-700 dark:text-blue-400 tracking-wider block">Demo Completed</span>
+                            <span className="text-2xl font-black text-blue-800 dark:text-blue-300 mt-1 block">{counts.completed || 0}</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 tracking-wider block">Activated POS</span>
+                            <span className="text-2xl font-black text-emerald-800 dark:text-emerald-300 mt-1 block">{counts.activated || 0}</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/60 shadow-xs">
+                            <span className="text-[10px] font-black uppercase text-rose-700 dark:text-rose-400 tracking-wider block">Rejected / Inactive</span>
+                            <span className="text-2xl font-black text-rose-800 dark:text-rose-300 mt-1 block">{counts.rejected || 0}</span>
+                        </div>
                     </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 text-[11px] font-black uppercase tracking-wider text-gray-400">
-                                    <th className="py-4 px-5">Restaurant &amp; Region</th>
-                                    <th className="py-4 px-5">Contact Details</th>
-                                    <th className="py-4 px-4">Outlet Format</th>
-                                    <th className="py-4 px-4">Request Status</th>
-                                    <th className="py-4 px-4">Submission Date</th>
-                                    <th className="py-4 px-5 text-right">Actions &amp; Billing Setup</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-xs">
-                                {filteredRequests.map((req) => {
-                                    const isActivated = req.status === 'Activated';
-                                    const activeModuleCount = Object.values(req.customBillingConfig?.modules || {}).filter(Boolean).length;
-                                    
-                                    return (
-                                        <tr key={req._id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                                            {/* Restaurant Name & City */}
-                                            <td className="py-4 px-5">
-                                                <div className="font-bold text-gray-900 dark:text-white text-sm">
-                                                    {req.restaurantName}
-                                                </div>
-                                                <div className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
-                                                    <Building2 size={11} />
-                                                    <span>{req.city || 'Location N/A'}</span>
-                                                </div>
-                                                {req.restaurantId && (
-                                                    <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-md mt-1">
-                                                        <ShieldCheck size={10} /> Linked Store
-                                                    </span>
-                                                )}
-                                                {req.ownerCredentials?.email && (
-                                                    <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold mt-1 truncate max-w-[180px]" title={req.ownerCredentials.email}>
-                                                        Login: {req.ownerCredentials.email}
-                                                    </div>
-                                                )}
-                                            </td>
 
-                                            {/* Contact Details */}
-                                            <td className="py-4 px-5">
-                                                <div className="font-bold text-gray-800 dark:text-slate-200">
-                                                    {req.fullName}
-                                                </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <a 
-                                                        href={`tel:${req.phoneNumber}`}
-                                                        className="text-[11px] text-gray-500 hover:text-blue-600 font-mono flex items-center gap-1"
-                                                    >
-                                                        <Phone size={10} />
-                                                        <span>{req.phoneNumber}</span>
-                                                    </a>
-                                                    <a 
-                                                        href={`https://wa.me/${req.phoneNumber.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(req.fullName)},%20reaching%20out%20from%20FoodNest%20regarding%20your%20walkthrough%20for%20${encodeURIComponent(req.restaurantName)}.`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-[10px] font-bold text-emerald-600 hover:underline inline-flex items-center gap-0.5 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded"
-                                                        title="Message on WhatsApp"
-                                                    >
-                                                        WhatsApp
-                                                    </a>
-                                                </div>
-                                            </td>
+                    {/* Search and Filters Bar */}
+                    <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+                        <div className="relative w-full sm:w-80">
+                            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search restaurant, name, phone, city..."
+                                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-rose-500 dark:text-white"
+                            />
+                        </div>
 
-                                            {/* Outlet Format */}
-                                            <td className="py-4 px-4">
-                                                <span className="font-semibold text-gray-700 dark:text-slate-300 block">
-                                                    {req.outletFormat || 'Dine-In Restaurant'}
-                                                </span>
-                                                <span className="text-[10px] text-rose-500 font-bold block mt-0.5">
-                                                    {activeModuleCount} modules configured
-                                                </span>
-                                            </td>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
+                                <Filter size={14} />
+                                <span>Status:</span>
+                            </div>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-slate-200 focus:outline-none"
+                            >
+                                <option value="ALL">All Statuses ({requests.length})</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Demo Scheduled">Demo Scheduled</option>
+                                <option value="Demo Completed">Demo Completed</option>
+                                <option value="Activated">Activated</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
 
-                                            {/* Status Badge & Quick Change */}
-                                            <td className="py-4 px-4">
-                                                <select
-                                                    value={req.status}
-                                                    onChange={(e) => handleUpdateStatus(req._id, e.target.value)}
-                                                    className={`px-2.5 py-1 rounded-full text-[11px] font-black uppercase border tracking-wider focus:outline-none cursor-pointer ${getStatusStyle(req.status)}`}
-                                                >
-                                                    <option value="Pending">Pending</option>
-                                                    <option value="Contacted">Contacted</option>
-                                                    <option value="Demo Scheduled">Demo Scheduled</option>
-                                                    <option value="Demo Completed">Demo Completed</option>
-                                                    <option value="Activated">Activated</option>
-                                                    <option value="Rejected">Rejected</option>
-                                                </select>
-                                            </td>
+                            <select
+                                value={outletFilter}
+                                onChange={(e) => setOutletFilter(e.target.value)}
+                                className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-700 dark:text-slate-200 focus:outline-none"
+                            >
+                                <option value="ALL">All Outlets</option>
+                                <option value="Fine Dine & Resto-Bar">Fine Dine &amp; Resto-Bar</option>
+                                <option value="Quick Service (QSR)">Quick Service (QSR)</option>
+                                <option value="Cafe & Bakery">Cafe &amp; Bakery</option>
+                                <option value="Cloud Kitchen">Cloud Kitchen</option>
+                                <option value="Pub & Brewery">Pub &amp; Brewery</option>
+                            </select>
+                        </div>
+                    </div>
 
-                                            {/* Submission Date */}
-                                            <td className="py-4 px-4 text-gray-400 text-[11px] font-mono">
-                                                {new Date(req.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                                <span className="block text-[10px]">
-                                                    {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </td>
-
-                                            {/* Actions */}
-                                            <td className="py-4 px-5 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
-                                                    {/* View Details */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setViewingRequest(req)}
-                                                        className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
-                                                        title="View Complete Details"
-                                                    >
-                                                        <Eye size={15} />
-                                                    </button>
-
-                                                    {/* Configure Modules */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleOpenConfigModal(req)}
-                                                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
-                                                        title="Configure Billing Features"
-                                                    >
-                                                        <Sliders size={13} className="text-rose-500" />
-                                                        <span>Configure</span>
-                                                    </button>
-
-                                                    {/* Manage Login Credentials */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleOpenCredentialsModal(req)}
-                                                        className="px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 border border-amber-200 dark:border-amber-800 font-bold text-xs flex items-center gap-1 transition cursor-pointer"
-                                                        title="Set or Update Customer Login Credentials"
-                                                    >
-                                                        <KeyRound size={12} />
-                                                        <span>Credentials</span>
-                                                    </button>
-
-                                                    {/* Preview Dashboard */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setPreviewModalRequest(req)}
-                                                        className="px-2.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 font-bold text-xs flex items-center gap-1 transition cursor-pointer"
-                                                        title="Preview Restaurant Custom Dashboard"
-                                                    >
-                                                        <span>Preview</span>
-                                                    </button>
-
-                                                    {/* Activate Button */}
-                                                    {!isActivated ? (
-                                                        <button
-                                                            type="button"
-                                                            disabled={activatingId === req._id}
-                                                            onClick={() => handleActivateConfiguration(req)}
-                                                            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-70"
-                                                            title="Activate Approved Configuration"
-                                                        >
-                                                            {activatingId === req._id ? (
-                                                                <RefreshCw size={12} className="animate-spin" />
-                                                            ) : (
-                                                                <CheckCircle2 size={13} />
-                                                            )}
-                                                            <span>Activate</span>
-                                                        </button>
-                                                    ) : (
-                                                        <span className="px-2 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 font-bold text-[10px] inline-flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
-                                                            <CheckCircle2 size={11} /> Live
-                                                        </span>
-                                                    )}
-
-                                                    {/* Delete */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDeleteRequest(req._id, req.restaurantName)}
-                                                        className="p-2 rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition"
-                                                        title="Delete Lead"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                </div>
-                                            </td>
+                    {/* Requests Table */}
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                        {loading ? (
+                            <div className="p-16 text-center space-y-3">
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+                                <p className="text-xs text-gray-400 font-medium">Loading billing demo walkthrough requests...</p>
+                            </div>
+                        ) : filteredRequests.length === 0 ? (
+                            <div className="p-16 text-center space-y-3">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-800 text-gray-400 flex items-center justify-center mx-auto">
+                                    <Receipt size={24} />
+                                </div>
+                                <h4 className="text-sm font-bold text-gray-900 dark:text-white">No demo requests found</h4>
+                                <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                                    {searchQuery || statusFilter !== 'ALL' || outletFilter !== 'ALL'
+                                        ? 'No requests match your current search and filters. Try clearing them.'
+                                        : 'Walkthrough demo bookings submitted from the landing page form will appear here automatically.'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-gray-50/70 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 text-[11px] font-black uppercase tracking-wider text-gray-400">
+                                            <th className="py-4 px-5">Restaurant &amp; Region</th>
+                                            <th className="py-4 px-5">Contact Details</th>
+                                            <th className="py-4 px-4">Outlet Format</th>
+                                            <th className="py-4 px-4">Request Status</th>
+                                            <th className="py-4 px-4">Submission Date</th>
+                                            <th className="py-4 px-5 text-right">Actions &amp; Billing Setup</th>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-xs">
+                                        {filteredRequests.map((req) => {
+                                            const isActivated = req.status === 'Activated';
+                                            const activeModuleCount = Object.values(req.customBillingConfig?.modules || {}).filter(Boolean).length;
+
+                                            return (
+                                                <tr key={req._id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                                                    {/* Restaurant Name & City */}
+                                                    <td className="py-4 px-5">
+                                                        <div className="font-bold text-gray-900 dark:text-white text-sm">
+                                                            {req.restaurantName}
+                                                        </div>
+                                                        <div className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                                                            <Building2 size={11} />
+                                                            <span>{req.city || 'Location N/A'}</span>
+                                                        </div>
+                                                        {req.restaurantId && (
+                                                            <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded-md mt-1">
+                                                                <ShieldCheck size={10} /> Linked Store
+                                                            </span>
+                                                        )}
+                                                        {req.ownerCredentials?.email && (
+                                                            <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold mt-1 truncate max-w-[180px]" title={req.ownerCredentials.email}>
+                                                                Login: {req.ownerCredentials.email}
+                                                            </div>
+                                                        )}
+                                                    </td>
+
+                                                    {/* Contact Details */}
+                                                    <td className="py-4 px-5">
+                                                        <div className="font-bold text-gray-800 dark:text-slate-200">
+                                                            {req.fullName}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <a
+                                                                href={`tel:${req.phoneNumber}`}
+                                                                className="text-[11px] text-gray-500 hover:text-blue-600 font-mono flex items-center gap-1"
+                                                            >
+                                                                <Phone size={10} />
+                                                                <span>{req.phoneNumber}</span>
+                                                            </a>
+                                                            <a
+                                                                href={`https://wa.me/${req.phoneNumber.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(req.fullName)},%20reaching%20out%20from%20FoodNest%20regarding%20your%20walkthrough%20for%20${encodeURIComponent(req.restaurantName)}.`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-[10px] font-bold text-emerald-600 hover:underline inline-flex items-center gap-0.5 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded"
+                                                                title="Message on WhatsApp"
+                                                            >
+                                                                WhatsApp
+                                                            </a>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Outlet Format */}
+                                                    <td className="py-4 px-4">
+                                                        <span className="font-semibold text-gray-700 dark:text-slate-300 block">
+                                                            {req.outletFormat || 'Dine-In Restaurant'}
+                                                        </span>
+                                                        <span className="text-[10px] text-rose-500 font-bold block mt-0.5">
+                                                            {activeModuleCount} modules configured
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Status Badge & Quick Change */}
+                                                    <td className="py-4 px-4">
+                                                        <select
+                                                            value={req.status}
+                                                            onChange={(e) => handleUpdateStatus(req._id, e.target.value)}
+                                                            className={`px-2.5 py-1 rounded-full text-[11px] font-black uppercase border tracking-wider focus:outline-none cursor-pointer ${getStatusStyle(req.status)}`}
+                                                        >
+                                                            <option value="Pending">Pending</option>
+                                                            <option value="Contacted">Contacted</option>
+                                                            <option value="Demo Scheduled">Demo Scheduled</option>
+                                                            <option value="Demo Completed">Demo Completed</option>
+                                                            <option value="Activated">Activated</option>
+                                                            <option value="Rejected">Rejected</option>
+                                                        </select>
+                                                    </td>
+
+                                                    {/* Submission Date */}
+                                                    <td className="py-4 px-4 text-gray-400 text-[11px] font-mono">
+                                                        {new Date(req.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                        <span className="block text-[10px]">
+                                                            {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Actions */}
+                                                    <td className="py-4 px-5 text-right">
+                                                        <div className="flex items-center justify-end gap-1.5">
+                                                            {/* View Details */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setViewingRequest(req)}
+                                                                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
+                                                                title="View Complete Details"
+                                                            >
+                                                                <Eye size={15} />
+                                                            </button>
+
+                                                            {/* Configure Modules */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleOpenConfigModal(req)}
+                                                                className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                                                                title="Configure Billing Features"
+                                                            >
+                                                                <Sliders size={13} className="text-rose-500" />
+                                                                <span>Configure</span>
+                                                            </button>
+
+                                                            {/* Manage Login Credentials */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleOpenCredentialsModal(req)}
+                                                                className="px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 border border-amber-200 dark:border-amber-800 font-bold text-xs flex items-center gap-1 transition cursor-pointer"
+                                                                title="Set or Update Customer Login Credentials"
+                                                            >
+                                                                <KeyRound size={12} />
+                                                                <span>Credentials</span>
+                                                            </button>
+
+                                                            {/* Preview Dashboard */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setPreviewModalRequest(req)}
+                                                                className="px-2.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 font-bold text-xs flex items-center gap-1 transition cursor-pointer"
+                                                                title="Preview Restaurant Custom Dashboard"
+                                                            >
+                                                                <span>Preview</span>
+                                                            </button>
+
+                                                            {/* Activate Button */}
+                                                            {!isActivated ? (
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={activatingId === req._id}
+                                                                    onClick={() => handleActivateConfiguration(req)}
+                                                                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer disabled:opacity-70"
+                                                                    title="Activate Approved Configuration"
+                                                                >
+                                                                    {activatingId === req._id ? (
+                                                                        <RefreshCw size={12} className="animate-spin" />
+                                                                    ) : (
+                                                                        <CheckCircle2 size={13} />
+                                                                    )}
+                                                                    <span>Activate</span>
+                                                                </button>
+                                                            ) : (
+                                                                <span className="px-2 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 font-bold text-[10px] inline-flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
+                                                                    <CheckCircle2 size={11} /> Live
+                                                                </span>
+                                                            )}
+
+                                                            {/* Delete */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDeleteRequest(req._id, req.restaurantName)}
+                                                                className="p-2 rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition"
+                                                                title="Delete Lead"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
-            </>
+                </>
             )}
 
             {activeSection === 'leads' && (
@@ -919,13 +915,12 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                     </div>
                                                 </td>
                                                 <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-flex items-center gap-1 ${
-                                                        inq.subject === 'Demo'
-                                                            ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
-                                                            : inq.subject === 'Sales'
+                                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-flex items-center gap-1 ${inq.subject === 'Demo'
+                                                        ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
+                                                        : inq.subject === 'Sales'
                                                             ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
                                                             : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-gray-300'
-                                                    }`}>
+                                                        }`}>
                                                         {inq.subject === 'Demo' && <Sparkles size={12} />}
                                                         {inq.subject || 'Demo'}
                                                     </span>
@@ -944,13 +939,12 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                     }) : 'Recently'}
                                                 </td>
                                                 <td className="py-3.5 px-4 align-middle text-center whitespace-nowrap">
-                                                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
-                                                        inq.status === 'Resolved'
-                                                            ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300'
-                                                            : inq.status === 'In Progress'
+                                                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${inq.status === 'Resolved'
+                                                        ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300'
+                                                        : inq.status === 'In Progress'
                                                             ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300'
                                                             : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
-                                                    }`}>
+                                                        }`}>
                                                         {inq.status || 'New'}
                                                     </span>
                                                 </td>
@@ -1148,15 +1142,13 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                         <div
                                             key={mod.key}
                                             onClick={() => handleToggleModule(mod.key)}
-                                            className={`p-3.5 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer select-none ${
-                                                isEnabled
-                                                    ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-300 dark:border-rose-700 shadow-xs'
-                                                    : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-800 opacity-60 hover:opacity-100'
-                                            }`}
+                                            className={`p-3.5 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer select-none ${isEnabled
+                                                ? 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-300 dark:border-rose-700 shadow-xs'
+                                                : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-800 opacity-60 hover:opacity-100'
+                                                }`}
                                         >
-                                            <div className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                                isEnabled ? 'bg-rose-600 text-white' : 'bg-gray-100 text-gray-400'
-                                            }`}>
+                                            <div className={`mt-0.5 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isEnabled ? 'bg-rose-600 text-white' : 'bg-gray-100 text-gray-400'
+                                                }`}>
                                                 <IconComponent size={15} />
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -1165,7 +1157,7 @@ const BillingDemoRequestsManagement = ({ defaultTab = 'demos' }) => {
                                                     <input
                                                         type="checkbox"
                                                         checked={isEnabled}
-                                                        onChange={() => {}} // Controlled via parent div click
+                                                        onChange={() => { }} // Controlled via parent div click
                                                         className="h-4 w-4 rounded text-rose-600 focus:ring-rose-500 accent-rose-600 pointer-events-none"
                                                     />
                                                 </div>

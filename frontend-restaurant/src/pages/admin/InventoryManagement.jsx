@@ -27,7 +27,7 @@ const getPaymentBadge = (status) => {
         case 'Pending':
             return <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold">Pending</span>;
         default:
-            return <span className="bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full text-xs font-bold">{status}</span>;
+            return <span className="bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full text-xs font-bold dark:text-slate-100">{status}</span>;
     }
 };
 
@@ -470,10 +470,10 @@ const InventoryManagement = () => {
             />
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">
-                        <Package size={14} /> Material & Inventory Management
+                        <Package size={14} /> Material &amp; Inventory Management
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         Material Management
@@ -482,7 +482,7 @@ const InventoryManagement = () => {
                         Track raw materials, supplier purchases, stock movements, wastage, and weighted-average inventory valuation.
                     </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">
                     <button 
                         onClick={() => {
                             setEditingItem(null);
@@ -497,7 +497,7 @@ const InventoryManagement = () => {
                             });
                             setIsItemModalOpen(true);
                         }}
-                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs"
+                        className="h-10 px-4 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-bold transition-all inline-flex items-center justify-center gap-2 shadow-xs cursor-pointer whitespace-nowrap shrink-0 active:scale-98"
                     >
                         <Plus size={16} /> Add Material
                     </button>
@@ -517,7 +517,7 @@ const InventoryManagement = () => {
                             });
                             setIsPurchaseModalOpen(true);
                         }}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-md shadow-emerald-900/10"
+                        className="h-10 px-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all inline-flex items-center justify-center gap-2 shadow-md shadow-emerald-900/10 cursor-pointer whitespace-nowrap shrink-0 active:scale-98"
                     >
                         <ShoppingCart size={16} /> Record Purchase
                     </button>
@@ -572,46 +572,46 @@ const InventoryManagement = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto">
+            <div className="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto scrollbar-none flex-nowrap shrink-0">
                 <button
                     onClick={() => setActiveTab('materials')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+                    className={`h-9 px-3.5 sm:px-4 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                         activeTab === 'materials'
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                 >
-                    <Package size={16} /> Raw Materials & Stock ({inventory.length})
+                    <Package size={15} /> Raw Materials ({inventory.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('purchases')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+                    className={`h-9 px-3.5 sm:px-4 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                         activeTab === 'purchases'
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                 >
-                    <ShoppingCart size={16} /> Material Purchases & Invoices ({purchases.length})
+                    <ShoppingCart size={15} /> Purchases &amp; Invoices ({purchases.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('movements')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+                    className={`h-9 px-3.5 sm:px-4 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                         activeTab === 'movements'
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                 >
-                    <History size={16} /> Stock Movements & Audit ({movements.length})
+                    <History size={15} /> Stock Movements ({movements.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('valuation')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+                    className={`h-9 px-3.5 sm:px-4 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 sm:gap-2 transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                         activeTab === 'valuation'
                             ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                             : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                 >
-                    <DollarSign size={16} /> Valuation & Alerts
+                    <DollarSign size={15} /> Valuation &amp; Alerts
                 </button>
             </div>
 

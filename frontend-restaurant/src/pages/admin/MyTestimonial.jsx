@@ -192,7 +192,7 @@ const MyTestimonial = () => {
                 );
             default:
                 return (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold dark:border-slate-800">
                         <span>Not Submitted Yet</span>
                     </div>
                 );
@@ -475,7 +475,7 @@ const MyTestimonial = () => {
                         </h3>
 
                         {/* Exact Landing Page Card Representation */}
-                        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-sm text-left flex flex-col justify-between space-y-4">
+                        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-sm text-left flex flex-col justify-between space-y-4 dark:bg-slate-900">
                             <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed italic">
                                 "{quote.trim() || 'Your testimonial experience will appear here. FoodNest has helped thousands of restaurants scale seamlessly.'}"
                             </p>
@@ -486,7 +486,7 @@ const MyTestimonial = () => {
                                         <img
                                             src={avatarPreview}
                                             alt={ownerName || "Owner"}
-                                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                                            className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-800"
                                         />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-orange-100 text-[#FF5A1F] flex items-center justify-center font-bold text-sm border border-orange-200">
@@ -542,7 +542,7 @@ const MyTestimonial = () => {
                         </div>
 
                         {/* Testimonial Card */}
-                        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-sm text-left flex flex-col justify-between space-y-4">
+                        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/90 shadow-sm text-left flex flex-col justify-between space-y-4 dark:bg-slate-900">
                             <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed italic">
                                 "{quote.trim() || 'No quote written yet.'}"
                             </p>
@@ -553,7 +553,7 @@ const MyTestimonial = () => {
                                         <img
                                             src={avatarPreview}
                                             alt={ownerName}
-                                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                                            className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-800"
                                         />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-orange-100 text-[#FF5A1F] flex items-center justify-center font-bold text-sm border border-orange-200">

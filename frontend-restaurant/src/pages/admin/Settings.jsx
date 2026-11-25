@@ -481,7 +481,7 @@ const Settings = () => {
     const displayLogo = logoPreview || currentLogo;
 
     return (
-        <div className="max-w-6xl w-full md:h-[calc(100vh-8.5rem)] md:flex md:flex-col">
+        <div className="max-w-[1600px] w-full min-h-[calc(100vh-8.5rem)] md:flex md:flex-col">
             {/* Header */}
             <div className="mb-5 shrink-0">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>System Settings</h2>
@@ -490,53 +490,59 @@ const Settings = () => {
 
             <div className="flex flex-col md:flex-row gap-6 md:flex-1 md:min-h-0">
                 {/* Settings Navigation */}
-                <div className="w-full md:w-64 shrink-0 md:overflow-y-auto custom-scrollbar">
+                <div className="w-full md:w-72 lg:w-76 shrink-0 md:overflow-y-auto custom-scrollbar">
                     <nav className="flex flex-col gap-1.5">
                         <button
                             type="button"
                             onClick={() => setActiveTab('operations')}
-                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'operations' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`w-full h-12 px-3.5 rounded-xl transition-all text-sm cursor-pointer flex items-center justify-between ${activeTab === 'operations' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/60 border border-transparent'}`}
                         >
-                            <div className="flex items-center gap-3">
-                                <Sparkles size={18} className={activeTab === 'operations' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
-                                <span>Restaurant Settings</span>
+                            <div className="flex items-center gap-3 min-w-0">
+                                <Sparkles size={18} className={`shrink-0 ${activeTab === 'operations' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'}`} />
+                                <span className="truncate whitespace-nowrap">Restaurant Settings</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white tracking-wider">Operations</span>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-600 dark:bg-emerald-500 text-white tracking-wider shrink-0 ml-2">Operations</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('profile')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`w-full h-12 px-3.5 rounded-xl transition-all text-sm cursor-pointer flex items-center justify-between ${activeTab === 'profile' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/60 border border-transparent'}`}
                         >
-                            <User size={18} className={activeTab === 'profile' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
-                            <span>Profile</span>
+                            <div className="flex items-center gap-3 min-w-0">
+                                <User size={18} className={`shrink-0 ${activeTab === 'profile' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'}`} />
+                                <span className="truncate whitespace-nowrap">Profile</span>
+                            </div>
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('pos-customization')}
-                            className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all text-sm cursor-pointer ${activeTab === 'pos-customization' ? 'bg-rose-50 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`w-full h-12 px-3.5 rounded-xl transition-all text-sm cursor-pointer flex items-center justify-between ${activeTab === 'pos-customization' ? 'bg-rose-50 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/60 border border-transparent'}`}
                         >
-                            <div className="flex items-center gap-3">
-                                <Sliders size={18} className={activeTab === 'pos-customization' ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-slate-400'} />
-                                <span>POS &amp; Outlet Customizer</span>
+                            <div className="flex items-center gap-3 min-w-0">
+                                <Sliders size={18} className={`shrink-0 ${activeTab === 'pos-customization' ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-slate-400'}`} />
+                                <span className="truncate whitespace-nowrap">POS &amp; Customizer</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500 text-white tracking-wider">Customizer</span>
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-500 text-white tracking-wider shrink-0 ml-2">Customizer</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('appearance')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'appearance' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`w-full h-12 px-3.5 rounded-xl transition-all text-sm cursor-pointer flex items-center justify-between ${activeTab === 'appearance' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/60 border border-transparent'}`}
                         >
-                            <Sun size={18} className={activeTab === 'appearance' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
-                            <span>Appearance & Theme</span>
+                            <div className="flex items-center gap-3 min-w-0">
+                                <Sun size={18} className={`shrink-0 ${activeTab === 'appearance' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'}`} />
+                                <span className="truncate whitespace-nowrap">Appearance &amp; Theme</span>
+                            </div>
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('security')}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors text-sm cursor-pointer ${activeTab === 'security' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+                            className={`w-full h-12 px-3.5 rounded-xl transition-all text-sm cursor-pointer flex items-center justify-between ${activeTab === 'security' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-500/30 shadow-xs' : 'text-gray-600 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/60 border border-transparent'}`}
                         >
-                            <Lock size={18} className={activeTab === 'security' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'} />
-                            <span>Security & Password</span>
+                            <div className="flex items-center gap-3 min-w-0">
+                                <Lock size={18} className={`shrink-0 ${activeTab === 'security' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-slate-400'}`} />
+                                <span className="truncate whitespace-nowrap">Security &amp; Password</span>
+                            </div>
                         </button>
                     </nav>
                 </div>
@@ -618,7 +624,7 @@ const Settings = () => {
                                         </p>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                                         {/* KDS Option */}
                                         <div
                                             onClick={() => {
@@ -637,24 +643,24 @@ const Settings = () => {
                                                     }
                                                 }));
                                             }}
-                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${(restConfig.orderKitchen?.kitchenMode !== 'KOT_ONLY' && restConfig.kitchenMode !== 'KOT_ONLY' && restConfig.orderKitchen?.kdsEnabled !== false)
+                                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 min-h-[140px] ${(restConfig.orderKitchen?.kitchenMode !== 'KOT_ONLY' && restConfig.kitchenMode !== 'KOT_ONLY' && restConfig.orderKitchen?.kdsEnabled !== false)
                                                 ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/30'
                                                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-2">
-                                                    <MonitorDot size={18} className="text-blue-600" />
+                                                    <MonitorDot size={18} className="text-blue-600 shrink-0" />
                                                     <span className="font-extrabold text-sm text-gray-900 dark:text-white">Kitchen Display System (KDS)</span>
                                                 </div>
                                                 {(restConfig.orderKitchen?.kitchenMode !== 'KOT_ONLY' && restConfig.kitchenMode !== 'KOT_ONLY' && restConfig.orderKitchen?.kdsEnabled !== false) && (
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0 mt-1"></span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-slate-400">
+                                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
                                                 Digital kitchen screen for chefs. Kitchen staff track active orders, timers, and advance cooking stages on display.
                                             </p>
-                                            <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">
+                                            <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mt-auto pt-1">
                                                 Digital Kitchen Screen Active
                                             </span>
                                         </div>
@@ -674,43 +680,44 @@ const Settings = () => {
                                                     }
                                                 }));
                                             }}
-                                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${(restConfig.orderKitchen?.kitchenMode === 'KOT_ONLY' || restConfig.kitchenMode === 'KOT_ONLY' || restConfig.orderKitchen?.kdsEnabled === false)
+                                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 min-h-[140px] ${(restConfig.orderKitchen?.kitchenMode === 'KOT_ONLY' || restConfig.kitchenMode === 'KOT_ONLY' || restConfig.orderKitchen?.kdsEnabled === false)
                                                 ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/30'
                                                 : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex items-center gap-2">
-                                                    <Printer size={18} className="text-orange-600" />
+                                                    <Printer size={18} className="text-orange-600 shrink-0" />
                                                     <span className="font-extrabold text-sm text-gray-900 dark:text-white">KOT Printing Only</span>
                                                 </div>
                                                 {(restConfig.orderKitchen?.kitchenMode === 'KOT_ONLY' || restConfig.kitchenMode === 'KOT_ONLY' || restConfig.orderKitchen?.kdsEnabled === false) && (
-                                                    <span className="w-2.5 h-2.5 rounded-full bg-orange-600"></span>
+                                                    <span className="w-2.5 h-2.5 rounded-full bg-orange-600 shrink-0 mt-1"></span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-slate-400">
+                                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
                                                 Physical printed Kitchen Order Tickets without kitchen screens. Waiters or managers update order statuses from the floor.
                                             </p>
-                                            <span className="text-[10px] font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wider">
+                                            <span className="text-[10px] font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wider mt-auto pt-1">
                                                 Floor Waiter Controls Active
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                                     {/* KOT Toggle */}
-                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 min-h-[140px]">
                                         <div className="flex items-start justify-between gap-3">
-                                            <div>
+                                            <div className="min-w-0 flex-1 pr-1">
                                                 <h5 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <Receipt size={16} className="text-orange-500" /> KOT System
+                                                    <Receipt size={16} className="text-orange-500 shrink-0" />
+                                                    <span className="truncate">KOT System</span>
                                                 </h5>
-                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                                                     Generates sequential kitchen order tickets (e.g. KOT-001) for food preparation.
                                                 </p>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                                                 <input
                                                     type="checkbox"
                                                     checked={restConfig.orderKitchen?.kotEnabled !== false}
@@ -720,26 +727,29 @@ const Settings = () => {
                                                     }))}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600 shrink-0"></div>
                                             </label>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.kotEnabled !== false ? 'bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
-                                            {restConfig.orderKitchen?.kotEnabled !== false ? 'Enabled' : 'Disabled (Hidden from Chef)'}
-                                        </span>
+                                        <div className="pt-1 mt-auto">
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.kotEnabled !== false ? 'bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                                {restConfig.orderKitchen?.kotEnabled !== false ? 'Enabled' : 'Disabled (Hidden from Chef)'}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* KDS Toggle */}
-                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 min-h-[140px]">
                                         <div className="flex items-start justify-between gap-3">
-                                            <div>
+                                            <div className="min-w-0 flex-1 pr-1">
                                                 <h5 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <MonitorDot size={16} className="text-blue-500" /> Digital KDS
+                                                    <MonitorDot size={16} className="text-blue-500 shrink-0" />
+                                                    <span className="truncate">Digital KDS</span>
                                                 </h5>
-                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                                                     Live interactive kitchen display screens with timers and cooking stations.
                                                 </p>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                                                 <input
                                                     type="checkbox"
                                                     checked={restConfig.orderKitchen?.kdsEnabled !== false}
@@ -756,10 +766,10 @@ const Settings = () => {
                                                     }}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shrink-0"></div>
                                             </label>
                                         </div>
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center justify-between pt-1 mt-auto">
                                             <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.kdsEnabled !== false ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
                                                 {restConfig.orderKitchen?.kdsEnabled !== false ? 'Enabled' : 'Disabled (Hidden from Chef)'}
                                             </span>
@@ -770,17 +780,18 @@ const Settings = () => {
                                     </div>
 
                                     {/* KOT Printing Toggle */}
-                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 min-h-[140px]">
                                         <div className="flex items-start justify-between gap-3">
-                                            <div>
+                                            <div className="min-w-0 flex-1 pr-1">
                                                 <h5 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <Printer size={16} className="text-emerald-500" /> KOT Thermal Print
+                                                    <Printer size={16} className="text-emerald-500 shrink-0" />
+                                                    <span className="truncate">KOT Thermal Print</span>
                                                 </h5>
-                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                                                     Instant 80mm ESC/POS kitchen thermal printing on order submission.
                                                 </p>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                                                 <input
                                                     type="checkbox"
                                                     checked={restConfig.orderKitchen?.kotPrintEnabled !== false}
@@ -790,26 +801,29 @@ const Settings = () => {
                                                     }))}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600 shrink-0"></div>
                                             </label>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.kotPrintEnabled !== false ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
-                                            {restConfig.orderKitchen?.kotPrintEnabled !== false ? 'Printing Active' : 'Digital Only'}
-                                        </span>
+                                        <div className="pt-1 mt-auto">
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.kotPrintEnabled !== false ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                                {restConfig.orderKitchen?.kotPrintEnabled !== false ? 'Printing Active' : 'Digital Only'}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Home Delivery Toggle */}
-                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 min-h-[140px]">
                                         <div className="flex items-start justify-between gap-3">
-                                            <div>
+                                            <div className="min-w-0 flex-1 pr-1">
                                                 <h5 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <Truck size={16} className="text-teal-500" /> Home Delivery
+                                                    <Truck size={16} className="text-teal-500 shrink-0" />
+                                                    <span className="truncate">Home Delivery</span>
                                                 </h5>
-                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                                                     Allow online customers to order for home address delivery within radius.
                                                 </p>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                                                 <input
                                                     type="checkbox"
                                                     checked={restConfig.orderKitchen?.homeDelivery !== false}
@@ -819,26 +833,29 @@ const Settings = () => {
                                                     }))}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600 shrink-0"></div>
                                             </label>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.homeDelivery !== false ? 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
-                                            {restConfig.orderKitchen?.homeDelivery !== false ? 'Delivery Active' : 'Delivery Disabled'}
-                                        </span>
+                                        <div className="pt-1 mt-auto">
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.homeDelivery !== false ? 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                                {restConfig.orderKitchen?.homeDelivery !== false ? 'Delivery Active' : 'Delivery Disabled'}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Self-Pickup Toggle */}
-                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                                    <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 min-h-[140px]">
                                         <div className="flex items-start justify-between gap-3">
-                                            <div>
+                                            <div className="min-w-0 flex-1 pr-1">
                                                 <h5 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <ShoppingBag size={16} className="text-amber-500" /> Self-Pickup (Takeaway)
+                                                    <ShoppingBag size={16} className="text-amber-500 shrink-0" />
+                                                    <span className="truncate">Self-Pickup (Takeaway)</span>
                                                 </h5>
-                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                                                     Allow customers to order online and collect their food directly at the counter.
                                                 </p>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                                            <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                                                 <input
                                                     type="checkbox"
                                                     checked={restConfig.orderKitchen?.selfPickup !== false}
@@ -848,12 +865,14 @@ const Settings = () => {
                                                     }))}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600 shrink-0"></div>
                                             </label>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.selfPickup !== false ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
-                                            {restConfig.orderKitchen?.selfPickup !== false ? 'Pickup Active' : 'Pickup Disabled'}
-                                        </span>
+                                        <div className="pt-1 mt-auto">
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md inline-block ${restConfig.orderKitchen?.selfPickup !== false ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                                                {restConfig.orderKitchen?.selfPickup !== false ? 'Pickup Active' : 'Pickup Disabled'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -938,7 +957,7 @@ const Settings = () => {
                                             </label>
                                         </div>
                                         <div className="flex items-center gap-2 pt-1">
-                                            <span className="text-[11px] text-gray-500 font-bold">Preset Chips:</span>
+                                            <span className="text-[11px] text-gray-500 font-bold dark:text-slate-400">Preset Chips:</span>
                                             {[5, 10, 15, 20].map(pct => (
                                                 <span key={pct} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-black text-slate-700 dark:text-slate-300">
                                                     {pct}%
@@ -1270,7 +1289,7 @@ const Settings = () => {
                                             <Store size={18} className="text-rose-500" />
                                             Select Outlet Format Preset (From Walkthrough)
                                         </h4>
-                                        <p className="text-xs text-gray-500 mt-0.5">
+                                        <p className="text-xs text-gray-500 mt-0.5 dark:text-slate-400">
                                             Click any card to auto-configure all 8 operational topics to industry-standard benchmarks in 1 click.
                                         </p>
                                     </div>
@@ -1303,7 +1322,7 @@ const Settings = () => {
                                                         <h5 className="font-bold text-gray-900 dark:text-white text-sm">
                                                             {preset.title}
                                                         </h5>
-                                                        <p className="text-[11px] text-gray-500 font-medium">
+                                                        <p className="text-[11px] text-gray-500 font-medium dark:text-slate-400">
                                                             {preset.subtitle}
                                                         </p>
                                                     </div>
@@ -1347,7 +1366,7 @@ const Settings = () => {
                                         <Sliders size={18} className="text-rose-500" />
                                         Granular Topic Customizations
                                     </h4>
-                                    <p className="text-xs text-gray-500 mt-0.5">
+                                    <p className="text-xs text-gray-500 mt-0.5 dark:text-slate-400">
                                         Fine-tune individual features across Billing, Floor Management, Kitchen KDS, Inventory, and Delivery to fit your exact store needs.
                                     </p>
                                 </div>
@@ -1361,7 +1380,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 1: Floor &amp; Table Management</h5>
-                                                <p className="text-[11px] text-gray-500">Seating maps, floor zones, table merges &amp; QR dine-in</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Seating maps, floor zones, table merges &amp; QR dine-in</p>
                                             </div>
                                         </div>
 
@@ -1402,7 +1421,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 2: Billing &amp; Counter Speed Mode</h5>
-                                                <p className="text-[11px] text-gray-500">2-click rapid counter punch, service charges &amp; barcode support</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">2-click rapid counter punch, service charges &amp; barcode support</p>
                                             </div>
                                         </div>
 
@@ -1456,7 +1475,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 3: Kitchen Display System (KDS)</h5>
-                                                <p className="text-[11px] text-gray-500">Live KOT tickets, prep timers &amp; station routing</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Live KOT tickets, prep timers &amp; station routing</p>
                                             </div>
                                         </div>
 
@@ -1484,7 +1503,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 4: Inventory &amp; Recipe BOM</h5>
-                                                <p className="text-[11px] text-gray-500">Auto ingredient deduction, stock-out prevention &amp; POs</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Auto ingredient deduction, stock-out prevention &amp; POs</p>
                                             </div>
                                         </div>
 
@@ -1512,7 +1531,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 5: Direct Delivery &amp; Fleet Dispatch</h5>
-                                                <p className="text-[11px] text-gray-500">In-house rider assignment, radius fees &amp; map dispatch</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">In-house rider assignment, radius fees &amp; map dispatch</p>
                                             </div>
                                         </div>
 
@@ -1540,7 +1559,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 6: Customer Loyalty &amp; CRM</h5>
-                                                <p className="text-[11px] text-gray-500">Spend-to-coins rewards, tiers &amp; repeat guest perks</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Spend-to-coins rewards, tiers &amp; repeat guest perks</p>
                                             </div>
                                         </div>
 
@@ -1568,7 +1587,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 7: WhatsApp Automated Owner Alerts</h5>
-                                                <p className="text-[11px] text-gray-500">Real-time KOT alerts, void warnings &amp; 11 PM P&amp;L summary</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Real-time KOT alerts, void warnings &amp; 11 PM P&amp;L summary</p>
                                             </div>
                                         </div>
 
@@ -1596,7 +1615,7 @@ const Settings = () => {
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-gray-900 dark:text-white text-sm">Topic 8: Dynamic Pricing &amp; Happy Hours</h5>
-                                                <p className="text-[11px] text-gray-500">Automated discounts for happy hour drinks &amp; weekday specials</p>
+                                                <p className="text-[11px] text-gray-500 dark:text-slate-400">Automated discounts for happy hour drinks &amp; weekday specials</p>
                                             </div>
                                         </div>
 
@@ -1741,8 +1760,8 @@ const Settings = () => {
                         <form onSubmit={handleSubmit} className="space-y-8 min-w-0 w-full">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>My Account Profile</h3>
-                                <p className="text-gray-500 dark:text-slate-400 text-xs mb-4">View registered account credentials, role permissions and restaurant ownership.</p>
-                                <div className="bg-gray-50/70 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 space-y-4">
+                                <p className="text-gray-500 dark:text-slate-400 text-xs mb-4 break-words leading-relaxed">View registered account credentials, role permissions and restaurant ownership.</p>
+                                <div className="bg-gray-50/70 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 sm:p-5 space-y-4">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <div className="p-3.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800">
                                             <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Full Name</span>

@@ -34,15 +34,92 @@ const ReservationManagement = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [searchQuery, setSearchQuery] = useState('');
 
+    const getDynamicTimings = (bookingDate) => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isToday = bookingDate === todayStr;
+
+        if (isToday) {
+            const now = new Date();
+            let h = now.getHours();
+            let m = now.getMinutes();
+            if (m < 30) {
+                m = 30;
+            } else {
+                h += 1;
+                m = 0;
+            }
+            if (h < 11) {
+                h = 12;
+                m = 0;
+            } else if (h >= 22) {
+                h = 21;
+                m = 0;
+            }
+            const inH = String(h).padStart(2, '0');
+            const inM = String(m).padStart(2, '0');
+            const outH = String(Math.min(23, h + 2)).padStart(2, '0');
+            return {
+                checkIn: `${inH}:${inM}`,
+                checkOut: `${outH}:${inM}`
+            };
+        }
+
+        // Standard dynamic restaurant & hotel dining service hours:
+        return {
+            checkIn: '12:30',
+            checkOut: '14:30'
+        };
+    };
+
+    const initialTimes = getDynamicTimings(new Date().toISOString().split('T')[0]);
+
     const [formData, setFormData] = useState({
         guestName: '',
         guestPhone: '',
         date: date,
-        timeSlot: '18:00',
+        checkInTime: initialTimes.checkIn,
+        checkOutTime: initialTimes.checkOut,
+        timeSlot: `${initialTimes.checkIn} - ${initialTimes.checkOut}`,
         guestCount: 2,
         branch: '',
         table: ''
     });
+
+    const handleBookingDateChange = (newDate) => {
+        const times = getDynamicTimings(newDate);
+        setFormData(prev => ({
+            ...prev,
+            date: newDate,
+            checkInTime: times.checkIn,
+            checkOutTime: times.checkOut,
+            timeSlot: `${times.checkIn} - ${times.checkOut}`
+        }));
+    };
+
+    const handleCheckInChange = (newCheckIn) => {
+        if (!newCheckIn) {
+            setFormData(prev => ({ ...prev, checkInTime: '', timeSlot: '' }));
+            return;
+        }
+        const [h, m] = newCheckIn.split(':').map(Number);
+        const outH = String(Math.min(23, (h + 2) % 24)).padStart(2, '0');
+        const outM = String(m).padStart(2, '0');
+        const newOut = `${outH}:${outM}`;
+        setFormData(prev => ({
+            ...prev,
+            checkInTime: newCheckIn,
+            checkOutTime: newOut,
+            timeSlot: `${newCheckIn} - ${newOut}`
+        }));
+    };
+
+    const handleCheckOutChange = (newCheckOut) => {
+        setFormData(prev => ({
+            ...prev,
+            checkOutTime: newCheckOut,
+            timeSlot: `${prev.checkInTime || '12:00'} - ${newCheckOut}`
+        }));
+    };
 
     const fetchData = async () => {
         let capTimer = setTimeout(() => setLoading(false), 1200);
@@ -87,14 +164,23 @@ const ReservationManagement = () => {
             return;
         }
         try {
-            await api.post('/reservations', formData);
+            const finalData = {
+                ...formData,
+                timeSlot: formData.checkInTime && formData.checkOutTime 
+                    ? `${formData.checkInTime} - ${formData.checkOutTime}` 
+                    : (formData.checkInTime || formData.timeSlot || '12:00')
+            };
+            await api.post('/reservations', finalData);
             fetchData();
             setIsModalOpen(false);
+            const defaultTimes = getDynamicTimings(date);
             setFormData({
                 guestName: '',
                 guestPhone: '',
                 date: date,
-                timeSlot: '18:00',
+                checkInTime: defaultTimes.checkIn,
+                checkOutTime: defaultTimes.checkOut,
+                timeSlot: `${defaultTimes.checkIn} - ${defaultTimes.checkOut}`,
                 guestCount: 2,
                 branch: branches[0]?._id || '',
                 table: ''
@@ -134,16 +220,26 @@ const ReservationManagement = () => {
     });
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 relative">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-6 relative">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Reservations</h2>
-                    <p className="text-gray-500 text-sm mt-1">Manage table bookings and capacity planning.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Reservations</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Manage table bookings and capacity planning.</p>
                 </div>
                 <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors flex items-center gap-2 text-sm shadow-md shadow-green-900/10" 
+                    onClick={() => {
+                        const curTimes = getDynamicTimings(date);
+                        setFormData(prev => ({
+                            ...prev,
+                            date: date,
+                            checkInTime: curTimes.checkIn,
+                            checkOutTime: curTimes.checkOut,
+                            timeSlot: `${curTimes.checkIn} - ${curTimes.checkOut}`
+                        }));
+                        setIsModalOpen(true);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors flex items-center gap-2 text-sm shadow-md shadow-green-900/10 cursor-pointer" 
                     style={{ fontFamily: 'Outfit, sans-serif' }}
                 >
                     <Plus size={18} /> New Booking
@@ -182,9 +278,9 @@ const ReservationManagement = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
                     {/* Reservation List */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col min-h-[600px]">
-                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-800" style={{ fontFamily: 'Poppins, sans-serif' }}>Booking Schedule</h3>
+                    <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col min-h-[600px] dark:bg-slate-900 dark:border-slate-800">
+                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-800 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>Booking Schedule</h3>
                             <div className="flex gap-2 text-sm">
                                 <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Confirmed</span>
                                 <span className="flex items-center gap-1.5 ml-3"><div className="w-2 h-2 rounded-full bg-green-500"></div> Seated</span>
@@ -193,18 +289,23 @@ const ReservationManagement = () => {
                         
                         <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
                             {filteredReservations.length === 0 ? (
-                                <div className="p-8 text-center text-gray-500">No reservations for this date.</div>
+                                <div className="p-8 text-center text-gray-500 dark:text-slate-400">No reservations for this date.</div>
                             ) : (
                                 filteredReservations.map((res) => (
                                     <div key={res._id} className="p-4 hover:bg-green-50/30 transition-colors flex items-center gap-4 group">
-                                        <div className="text-center w-16 shrink-0 border-r border-gray-100 pr-4">
-                                            <p className="font-bold text-gray-900 text-lg">{res.timeSlot}</p>
+                                        <div className="text-center min-w-[80px] shrink-0 border-r border-gray-100 pr-3 dark:border-slate-800">
+                                            <p className="font-bold text-gray-900 text-base leading-tight dark:text-white">
+                                                {res.checkInTime || (res.timeSlot?.includes(' - ') ? res.timeSlot.split(' - ')[0] : res.timeSlot)}
+                                            </p>
+                                            <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
+                                                Out: {res.checkOutTime || (res.timeSlot?.includes(' - ') ? res.timeSlot.split(' - ')[1] : 'Flexible')}
+                                            </p>
                                         </div>
                                         
                                         <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                             <div>
-                                                <h4 className="font-bold text-gray-800 text-base">{res.guestName}</h4>
-                                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-500 font-medium">
+                                                <h4 className="font-bold text-gray-800 text-base dark:text-slate-100">{res.guestName}</h4>
+                                                <div className="flex items-center gap-4 mt-1 text-sm text-gray-500 font-medium dark:text-slate-400">
                                                     <span className="flex items-center gap-1"><Users size={14} className="text-gray-400" /> {res.guestCount} guests</span>
                                                     <span className="flex items-center gap-1">{res.guestPhone}</span>
                                                 </div>
@@ -215,7 +316,7 @@ const ReservationManagement = () => {
                                                     <span className={`inline-block px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wide border ${getStatusStyle(res.status)}`}>
                                                         {res.status}
                                                     </span>
-                                                    <p className="text-sm font-bold text-gray-700 mt-1">
+                                                    <p className="text-sm font-bold text-gray-700 mt-1 dark:text-slate-200">
                                                         {res.table ? `Table ${res.table.tableNumber || res.table.number || ''}` : 'Unassigned'}
                                                     </p>
                                                 </div>
@@ -269,26 +370,26 @@ const ReservationManagement = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900 text-lg">New Reservation</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">New Reservation</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Guest Name</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Guest Name</label>
                                 <input 
                                     type="text" 
                                     required
                                     value={formData.guestName}
                                     onChange={(e) => setFormData({...formData, guestName: e.target.value})}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Phone Number</label>
                                 <input 
                                     type="tel" 
                                     required
@@ -300,49 +401,68 @@ const ReservationManagement = () => {
                                         if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
                                         setFormData({...formData, guestPhone: clean});
                                     }}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-mono"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-mono dark:bg-slate-950 dark:border-slate-800"
                                 />
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Party Size</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Reservation Date</label>
                                     <input 
-                                        type="number" 
-                                        min="1"
+                                        type="date" 
                                         required
-                                        value={formData.guestCount}
-                                        onChange={(e) => setFormData({...formData, guestCount: Number(e.target.value)})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        value={formData.date}
+                                        onChange={(e) => handleBookingDateChange(e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium dark:bg-slate-950 dark:border-slate-800"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Slot</label>
-                                    <select 
-                                        value={formData.timeSlot}
-                                        onChange={(e) => setFormData({...formData, timeSlot: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
-                                    >
-                                        <option value="17:00">17:00</option>
-                                        <option value="17:30">17:30</option>
-                                        <option value="18:00">18:00</option>
-                                        <option value="18:30">18:30</option>
-                                        <option value="19:00">19:00</option>
-                                        <option value="19:30">19:30</option>
-                                        <option value="20:00">20:00</option>
-                                        <option value="20:30">20:30</option>
-                                        <option value="21:00">21:00</option>
-                                    </select>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Party Size</label>
+                                    <input 
+                                        type="number" 
+                                        min="1" 
+                                        required
+                                        value={formData.guestCount}
+                                        onChange={(e) => setFormData({...formData, guestCount: Number(e.target.value)})}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
+                                    />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">
+                                        Check-In Time <span className="text-[10px] text-green-600 font-semibold">(Dynamic)</span>
+                                    </label>
+                                    <input 
+                                        type="time" 
+                                        required
+                                        value={formData.checkInTime}
+                                        onChange={(e) => handleCheckInChange(e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-mono font-bold dark:bg-slate-950 dark:border-slate-800"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">
+                                        Check-Out Time <span className="text-[10px] text-gray-500 dark:text-slate-400">(Customizable)</span>
+                                    </label>
+                                    <input 
+                                        type="time" 
+                                        required
+                                        value={formData.checkOutTime}
+                                        onChange={(e) => handleCheckOutChange(e.target.value)}
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-mono font-bold dark:bg-slate-950 dark:border-slate-800"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Branch</label>
                                     <select 
                                         value={formData.branch}
                                         onChange={(e) => setFormData({...formData, branch: e.target.value, table: ''})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         required
                                     >
                                         <option value="">Select Branch</option>
@@ -352,11 +472,11 @@ const ReservationManagement = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Table (Optional)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Table (Optional)</label>
                                     <select 
                                         value={formData.table}
                                         onChange={(e) => setFormData({...formData, table: e.target.value})}
-                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                         disabled={!formData.branch}
                                     >
                                         <option value="">Unassigned</option>
@@ -371,7 +491,7 @@ const ReservationManagement = () => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm"
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm dark:text-slate-200"
                                 >
                                     Cancel
                                 </button>

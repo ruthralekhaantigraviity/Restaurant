@@ -123,8 +123,8 @@ const TaxManagement = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Tax Configuration</h2>
-                    <p className="text-gray-500 text-sm mt-1">Manage tax brackets, GST, VAT, and dynamic surcharges.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Tax Configuration</h2>
+                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">Manage tax brackets, GST, VAT, and dynamic surcharges.</p>
                 </div>
                 <button 
                     onClick={handleAddClick}
@@ -146,17 +146,17 @@ const TaxManagement = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                        <thead className="bg-gray-50 border-b border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                             <tr>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Tax/Charge Name</th>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Rate</th>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider">Applies To</th>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
-                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Tax/Charge Name</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Rate</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Type</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-slate-400">Applies To</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-center dark:text-slate-400">Status</th>
+                                <th className="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -170,23 +170,23 @@ const TaxManagement = () => {
                                 </tr>
                             ) : taxes.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-10 text-gray-500">No tax rules found.</td>
+                                    <td colSpan="6" className="text-center py-10 text-gray-500 dark:text-slate-400">No tax rules found.</td>
                                 </tr>
                             ) : taxes.map(tax => (
                                 <tr key={tax._id} className="hover:bg-gray-50/50 transition-colors group">
                                     <td className="px-6 py-5">
-                                        <span className="font-bold text-gray-900 text-sm">{tax.name}</span>
+                                        <span className="font-bold text-gray-900 text-sm dark:text-white">{tax.name}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="font-bold text-gray-900 text-sm">
+                                        <span className="font-bold text-gray-900 text-sm dark:text-white">
                                             {tax.type === 'Percentage' ? `${tax.rate}%` : `₹${tax.rate.toFixed(2)}`}
                                         </span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="text-sm font-medium text-gray-500">{tax.type}</span>
+                                        <span className="text-sm font-medium text-gray-500 dark:text-slate-400">{tax.type}</span>
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-md text-xs font-bold tracking-wide">
+                                        <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-md text-xs font-bold tracking-wide dark:text-slate-300">
                                             {tax.appliesTo}
                                         </span>
                                     </td>
@@ -230,9 +230,9 @@ const TaxManagement = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                            <h3 className="font-bold text-gray-900 text-lg">{editingTax ? 'Edit Tax Rule' : 'New Tax Rule'}</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] dark:bg-slate-900">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-lg dark:text-white">{editingTax ? 'Edit Tax Rule' : 'New Tax Rule'}</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <X size={20} />
                             </button>
@@ -241,31 +241,31 @@ const TaxManagement = () => {
                         <div className="p-6 overflow-y-auto">
                             <form id="tax-form" onSubmit={handleSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Tax/Charge Name *</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Tax/Charge Name *</label>
                                     <input 
                                         type="text" 
                                         required
                                         value={formData.name}
                                         onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium dark:bg-slate-950 dark:border-slate-800"
                                         placeholder="e.g. State Sales Tax (GST)"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1.5">Type</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Type</label>
                                         <select 
                                             value={formData.type}
                                             onChange={(e) => setFormData({...formData, type: e.target.value})}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium dark:bg-slate-950 dark:border-slate-800"
                                         >
                                             <option value="Percentage">Percentage (%)</option>
                                             <option value="Fixed Amount">Fixed Amount ($)</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-1.5">Rate *</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Rate *</label>
                                         <div className="relative">
                                             {formData.type === 'Fixed Amount' && <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />}
                                             <input 
@@ -284,11 +284,11 @@ const TaxManagement = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Applies To</label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 dark:text-slate-200">Applies To</label>
                                     <select 
                                         value={formData.appliesTo}
                                         onChange={(e) => setFormData({...formData, appliesTo: e.target.value})}
-                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium dark:bg-slate-950 dark:border-slate-800"
                                     >
                                         <option value="All Items">All Items</option>
                                         <option value="Dine-In Only">Dine-In Only</option>
@@ -298,7 +298,7 @@ const TaxManagement = () => {
                                         <option value="Food Category">Food Category</option>
                                         <option value="Alcohol">Alcohol</option>
                                     </select>
-                                    <p className="text-xs text-gray-500 mt-1">Specify which items or order types this charge applies to.</p>
+                                    <p className="text-xs text-gray-500 mt-1 dark:text-slate-400">Specify which items or order types this charge applies to.</p>
                                 </div>
                                 
                                 <div className="flex items-center gap-3 pt-2">
@@ -312,16 +312,16 @@ const TaxManagement = () => {
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
                                     </label>
-                                    <label htmlFor="isActive" className="text-sm font-bold text-gray-700 cursor-pointer">
+                                    <label htmlFor="isActive" className="text-sm font-bold text-gray-700 cursor-pointer dark:text-slate-200">
                                         Tax Rule is Active
                                     </label>
                                 </div>
                                 
-                                <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 mt-8 -mx-6 -mb-6">
+                                <div className="px-6 py-4 border-t border-gray-100 flex gap-3 bg-gray-50/50 shrink-0 mt-8 -mx-6 -mb-6 dark:border-slate-800">
                                     <button 
                                         type="button" 
                                         onClick={() => setIsModalOpen(false)}
-                                        className="flex-1 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                        className="flex-1 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-sm shadow-sm dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                                     >
                                         Cancel
                                     </button>

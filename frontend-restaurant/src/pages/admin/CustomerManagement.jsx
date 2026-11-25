@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { filterIndianMobile } from '../../utils/phoneValidator';
 
 const getTierStyle = (tier) => {
-    switch(tier) {
+    switch (tier) {
         case 'Platinum': return 'bg-purple-100 text-purple-700 border-purple-200';
         case 'Gold': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
         case 'Silver': return 'bg-gray-200 text-gray-700 border-gray-300';
@@ -23,13 +23,13 @@ const CustomerManagement = () => {
     });
     const [loading, setLoading] = useState(() => !sessionStorage.getItem('restosys_admin_customers_cache'));
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: ''
     });
-    
+
     const [searchQuery, setSearchQuery] = useState('');
     const [tierFilter, setTierFilter] = useState('All Tiers');
 
@@ -38,7 +38,7 @@ const CustomerManagement = () => {
             const { data } = await api.get('/customers');
             const list = data || [];
             setCustomers(list);
-            try { sessionStorage.setItem('restosys_admin_customers_cache', JSON.stringify(list)); } catch (_) {}
+            try { sessionStorage.setItem('restosys_admin_customers_cache', JSON.stringify(list)); } catch (_) { }
         } catch (error) {
             console.error('Failed to fetch customers', error);
         } finally {
@@ -72,40 +72,40 @@ const CustomerManagement = () => {
 
     const filteredCustomers = customers.filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              (c.phone && c.phone.includes(searchQuery));
+            c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (c.phone && c.phone.includes(searchQuery));
         const matchesTier = tierFilter === 'All Tiers' || c.tier === tierFilter;
         return matchesSearch && matchesTier;
     });
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-4 sm:space-y-6 relative">
+        <div className="p-4 sm:p-6 md:p-8 max-w-[1800px] w-full mx-auto space-y-4 sm:space-y-6 relative">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Customer CRM</h2>
-                    <p className="text-gray-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Manage customer profiles, loyalty points, and history.</p>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Customer CRM</h2>
+                    <p className="text-gray-500 text-xs sm:text-sm mt-0.5 sm:mt-1 dark:text-slate-400">Manage customer profiles, loyalty points, and history.</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-initial justify-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-medium transition-colors text-xs sm:text-sm shadow-sm flex items-center gap-2">
+                    <button className="flex-1 sm:flex-initial justify-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-medium transition-colors text-xs sm:text-sm shadow-sm flex items-center gap-2 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800">
                         <Download size={16} /> Export
                     </button>
-                    <button 
+                    <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors flex items-center gap-2 text-xs sm:text-sm shadow-md shadow-green-900/10 whitespace-nowrap" 
+                        className="flex-1 sm:flex-initial justify-center bg-green-600 hover:bg-green-700 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-colors flex items-center gap-2 text-xs sm:text-sm shadow-md shadow-green-900/10 whitespace-nowrap"
                         style={{ fontFamily: 'Outfit, sans-serif' }}
                     >
                         <Plus size={18} /> Add Customer
                     </button>
                 </div>
             </div>
-            
-            <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+
+            <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center dark:bg-slate-900 dark:border-slate-800">
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="text" placeholder="Search by name, email, or phone..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all" />
+                    <input type="text" placeholder="Search by name, email, or phone..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800" />
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                    <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value)} className="w-full sm:w-auto bg-gray-50 border border-gray-200 text-gray-600 text-xs sm:text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500">
+                    <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value)} className="w-full sm:w-auto bg-gray-50 border border-gray-200 text-gray-600 text-xs sm:text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 dark:bg-slate-950 dark:text-slate-300 dark:border-slate-800">
                         <option>All Tiers</option>
                         <option>Platinum</option>
                         <option>Gold</option>
@@ -115,26 +115,26 @@ const CustomerManagement = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px]">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px] dark:bg-slate-900 dark:border-slate-800">
                 {loading ? (
                     <div className="flex justify-center p-12 sm:p-20">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                     </div>
                 ) : customers.length === 0 ? (
                     <div className="text-center p-12 sm:p-20">
-                        <p className="text-gray-500 text-sm">No customers found. Add a customer or wait for orders to arrive.</p>
+                        <p className="text-gray-500 text-sm dark:text-slate-400">No customers found. Add a customer or wait for orders to arrive.</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto custom-scrollbar">
                         <table className="w-full text-left min-w-[640px]">
-                            <thead className="bg-gray-50 border-b border-gray-100">
+                            <thead className="bg-gray-50 border-b border-gray-100 dark:bg-slate-950 dark:border-slate-800">
                                 <tr>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Visits</th>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Total Spend</th>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Loyalty Tier</th>
-                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Visit</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Customer</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Contact</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center dark:text-slate-400">Visits</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right dark:text-slate-400">Total Spend</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center dark:text-slate-400">Loyalty Tier</th>
+                                    <th className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-slate-400">Last Visit</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -146,20 +146,20 @@ const CustomerManagement = () => {
                                                     {customer.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="font-bold text-sm sm:text-base text-gray-900 group-hover:text-green-600 transition-colors truncate">{customer.name}</p>
-                                                    <p className="text-[11px] sm:text-xs text-gray-500">CUS-{customer.id.substring(customer.id.length - 4).toUpperCase()}</p>
+                                                    <p className="font-bold text-sm sm:text-base text-gray-900 group-hover:text-green-600 transition-colors truncate dark:text-white">{customer.name}</p>
+                                                    <p className="text-[11px] sm:text-xs text-gray-500 dark:text-slate-400">CUS-{customer.id.substring(customer.id.length - 4).toUpperCase()}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-4 sm:px-6 py-3.5 sm:py-4">
-                                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-1 truncate max-w-[200px]">
+                                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-1 truncate max-w-[200px] dark:text-slate-300">
                                                 <Mail size={14} className="text-gray-400 shrink-0" /> <span className="truncate">{customer.email}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-slate-300">
                                                 <Phone size={14} className="text-gray-400 shrink-0" /> {customer.phone}
                                             </div>
                                         </td>
-                                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-center font-bold text-xs sm:text-sm text-gray-700">
+                                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-center font-bold text-xs sm:text-sm text-gray-700 dark:text-slate-200">
                                             {customer.visits}
                                         </td>
                                         <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-right font-bold text-xs sm:text-sm text-green-600" style={{ fontFamily: 'Manrope, sans-serif' }}>
@@ -171,7 +171,7 @@ const CustomerManagement = () => {
                                                 {customer.tier}
                                             </span>
                                         </td>
-                                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs sm:text-sm text-gray-500">
+                                        <td className="px-4 sm:px-6 py-3.5 sm:py-4 text-xs sm:text-sm text-gray-500 dark:text-slate-400">
                                             {formatDate(customer.lastVisit)}
                                         </td>
                                     </tr>
@@ -186,40 +186,40 @@ const CustomerManagement = () => {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="font-bold text-gray-900 text-base sm:text-lg">Add New Customer</h3>
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200 dark:bg-slate-900">
+                        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 dark:border-slate-800">
+                            <h3 className="font-bold text-gray-900 text-base sm:text-lg dark:text-white">Add New Customer</h3>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
                                 <X size={20} />
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                <input 
-                                    type="text" 
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Full Name</label>
+                                <input
+                                    type="text"
                                     required
                                     value={formData.name}
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="e.g. John Doe"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input 
-                                    type="email" 
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Email Address</label>
+                                <input
+                                    type="email"
                                     required
                                     value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="john@example.com"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input 
-                                    type="tel" 
+                                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 dark:text-slate-200">Phone Number</label>
+                                <input
+                                    type="tel"
                                     inputMode="numeric"
                                     maxLength={10}
                                     pattern="[6-9][0-9]{9}"
@@ -227,23 +227,23 @@ const CustomerManagement = () => {
                                     onChange={(e) => {
                                         const clean = filterIndianMobile(e.target.value);
                                         if (e.target.value && !clean) toast.error('Mobile number must start with 6, 7, 8, or 9');
-                                        setFormData({...formData, phone: clean});
+                                        setFormData({ ...formData, phone: clean });
                                     }}
-                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+                                    className="w-full px-3.5 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all dark:bg-slate-950 dark:border-slate-800"
                                     placeholder="9876543210"
                                 />
                             </div>
-                            
+
                             <div className="pt-4 flex gap-3">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs sm:text-sm"
+                                    className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs sm:text-sm dark:text-slate-200"
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-sm shadow-green-600/20 transition-colors text-xs sm:text-sm"
                                 >
                                     Create Profile

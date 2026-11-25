@@ -70,7 +70,7 @@ const OrderDetailModal = ({ order, onClose, onAdvance, onPickup }) => {
                                     {item.addons?.length > 0 && <p className="text-xs text-gray-400">+{item.addons.join(', ')}</p>}
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-gray-500">×{qty}</p>
+                                    <p className="text-xs text-gray-500 dark:text-slate-400">×{qty}</p>
                                     <p className="text-sm font-bold text-green-600">₹{((item.price || 0) * qty).toFixed(0)}</p>
                                 </div>
                             </div>
@@ -81,7 +81,7 @@ const OrderDetailModal = ({ order, onClose, onAdvance, onPickup }) => {
                 {/* Footer */}
                 <div className="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 rounded-b-2xl">
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-gray-500">Total</span>
+                        <span className="text-sm text-gray-500 dark:text-slate-400">Total</span>
                         <span className="font-black text-lg text-green-600">₹{(order.totalPrice || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex gap-2">
@@ -250,7 +250,7 @@ const OrderManagement = () => {
     ];
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+        <div className="p-3 sm:p-5 md:p-6 max-w-[1800px] w-full mx-auto space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
                 <div>
@@ -296,7 +296,7 @@ const OrderManagement = () => {
 
             {/* Kanban Board */}
             {!loading && view === 'kanban' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 items-start">
                     {columns.map(col => {
                         const colOrders = getColumn(col.statuses);
                         return (
@@ -327,8 +327,8 @@ const OrderManagement = () => {
 
             {/* List View */}
             {!loading && view === 'list' && (
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-x-auto">
-                    <table className="w-full text-sm min-w-[640px]">
+                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-sm min-w-[700px]">
                         <thead>
                             <tr className="bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                                 <th className="text-left px-5 py-3 font-semibold">Order</th>

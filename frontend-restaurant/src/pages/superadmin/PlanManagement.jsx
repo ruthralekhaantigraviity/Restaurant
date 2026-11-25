@@ -16,10 +16,10 @@ const PlanManagement = () => {
         isOpen: false,
         title: '',
         message: '',
-        onConfirm: () => {},
+        onConfirm: () => { },
         isDestructive: true
     });
-    
+
     // Form state - now with monthlyPrice and yearlyPrice
     const [formData, setFormData] = useState({
         name: '',
@@ -90,7 +90,7 @@ const PlanManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const featuresArray = formData.features
             .split('\n')
             .map(f => f.trim())
@@ -147,14 +147,14 @@ const PlanManagement = () => {
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 font-sans">Subscription Plans</h2>
-                    <p className="text-sm text-gray-500 mt-1">Changes here will instantly reflect on the restaurant signup page.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-sans">Subscription Plans</h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Changes here will instantly reflect on the restaurant signup page.</p>
                 </div>
-                <button 
+                <button
                     onClick={() => handleOpenModal()}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 active:scale-95"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors shadow-lg shadow-blue-600/20 active:scale-95 text-xs font-bold"
                 >
-                    <Plus size={20} />
+                    <Plus size={18} />
                     New Plan
                 </button>
             </div>
@@ -165,36 +165,36 @@ const PlanManagement = () => {
                     const isEnterprise = plan.name?.toLowerCase().includes('enterprise');
                     const isPro = plan.name?.toLowerCase().includes('pro');
                     const badgeClass = isEnterprise
-                        ? 'bg-purple-100 text-purple-700 border-purple-200'
+                        ? 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
                         : isPro
-                            ? 'bg-blue-100 text-blue-700 border-blue-200'
-                            : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+                            ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+                            : 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
 
                     return (
                         <div
                             key={plan._id}
-                            className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 transition-all hover:shadow-md"
+                            className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-slate-800 transition-all hover:shadow-md"
                         >
                             {/* Section Header */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100 dark:border-slate-800">
                                 <div className="flex items-center gap-3 flex-wrap">
                                     <span className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border ${badgeClass}`}>
                                         Section {index + 1} • {plan.name} Tier
                                     </span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${plan.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${plan.isActive ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'}`}>
                                         {plan.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => handleOpenModal(plan)}
-                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-xs font-bold transition-all border border-gray-200 cursor-pointer"
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-all border border-gray-200 dark:border-slate-700 cursor-pointer"
                                     >
                                         <Edit size={14} /> Edit Plan
                                     </button>
                                     <button
                                         onClick={() => handleDelete(plan._id)}
-                                        className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all border border-red-100 cursor-pointer"
+                                        className="p-1.5 text-red-600 dark:text-red-400 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 rounded-xl transition-all border border-red-100 dark:border-red-900/50 cursor-pointer"
                                         title="Delete Plan"
                                     >
                                         <Trash2 size={16} />
@@ -206,36 +206,36 @@ const PlanManagement = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
                                 {/* Pricing Cards */}
                                 <div className="lg:col-span-4 space-y-3">
-                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider">Pricing Structure</h4>
-                                    <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl flex items-center justify-between">
+                                    <h4 className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-wider">Pricing Structure</h4>
+                                    <div className="p-4 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl flex items-center justify-between">
                                         <div>
-                                            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Monthly Billing</span>
-                                            <div className="text-2xl font-black text-blue-900 mt-0.5">
+                                            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Monthly Billing</span>
+                                            <div className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-0.5">
                                                 ₹{(plan.monthlyPrice || 0).toLocaleString('en-IN')}
-                                                <span className="text-xs font-normal text-blue-600">/mo</span>
+                                                <span className="text-xs font-normal text-blue-600 dark:text-blue-400">/mo</span>
                                             </div>
                                         </div>
-                                        <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-700 dark:text-blue-300 shrink-0">
                                             <IndianRupee size={20} />
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl flex items-center justify-between">
+                                    <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl flex items-center justify-between">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Yearly (Per Month)</span>
-                                                {plan.monthlyPrice && plan.yearlyPrice && (
-                                                    <span className="text-[10px] font-black bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">
-                                                        Save {Math.max(0, Math.round((1 - plan.yearlyPrice / plan.monthlyPrice) * 100))}%
+                                                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Yearly (Per Month)</span>
+                                                {plan.monthlyPrice > 0 && plan.yearlyPrice > 0 && plan.yearlyPrice < plan.monthlyPrice && (
+                                                    <span className="text-[10px] font-black bg-emerald-200 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 px-2 py-0.5 rounded-full">
+                                                        Save {Math.round((1 - plan.yearlyPrice / plan.monthlyPrice) * 100)}%
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="text-2xl font-black text-emerald-900 mt-0.5">
+                                            <div className="text-2xl font-black text-emerald-900 dark:text-emerald-200 mt-0.5">
                                                 ₹{(plan.yearlyPrice || 0).toLocaleString('en-IN')}
-                                                <span className="text-xs font-normal text-emerald-600">/mo</span>
+                                                <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">/mo</span>
                                             </div>
                                         </div>
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shrink-0">
                                             <TrendingUp size={20} />
                                         </div>
                                     </div>
@@ -243,13 +243,13 @@ const PlanManagement = () => {
 
                                 {/* Features List */}
                                 <div className="lg:col-span-8 flex flex-col justify-start">
-                                    <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Included Capabilities & Modules</h4>
+                                    <h4 className="text-xs font-black text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3">Included Capabilities & Modules</h4>
                                     {plan.features?.length > 0 ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             {plan.features.map((feature, idx) => (
                                                 <div
                                                     key={idx}
-                                                    className="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50/70 border border-gray-100 text-xs font-semibold text-gray-700"
+                                                    className="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50/70 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800 text-xs font-semibold text-gray-700 dark:text-slate-300"
                                                 >
                                                     <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                                                     <span className="truncate">{feature}</span>
@@ -257,7 +257,7 @@ const PlanManagement = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-400 italic">No features specified for this plan.</p>
+                                        <p className="text-sm text-gray-400 dark:text-slate-500 italic">No features specified for this plan.</p>
                                     )}
                                 </div>
                             </div>
@@ -265,8 +265,8 @@ const PlanManagement = () => {
                     );
                 })}
                 {plans.length === 0 && !loading && (
-                    <div className="p-12 text-center bg-white rounded-3xl border border-gray-100 text-gray-500 font-medium flex flex-col items-center">
-                        <AlertCircle className="w-12 h-12 text-gray-300 mb-4" />
+                    <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 font-medium flex flex-col items-center">
+                        <AlertCircle className="w-12 h-12 text-gray-300 dark:text-slate-600 mb-4" />
                         No subscription plans found. Create one to get started.
                     </div>
                 )}
@@ -288,8 +288,8 @@ const PlanManagement = () => {
                             <form id="planForm" onSubmit={handleSubmit} className="space-y-5 min-w-0 pr-1.5 flex-1">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-1">Plan Name</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="name"
                                         value={formData.name}
                                         onChange={handleInputChange}
@@ -298,13 +298,13 @@ const PlanManagement = () => {
                                         className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                                     />
                                 </div>
-                                
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-1">Monthly Price (₹)</label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 inputMode="numeric"
                                                 pattern="[0-9]*"
@@ -322,7 +322,7 @@ const PlanManagement = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-1">Yearly Price (₹/mo)</label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
-                                            <input 
+                                            <input
                                                 type="text"
                                                 inputMode="numeric"
                                                 pattern="[0-9]*"
@@ -342,7 +342,7 @@ const PlanManagement = () => {
                                     <div className="bg-green-50 border border-green-100 rounded-xl p-3 flex items-center gap-2 text-sm">
                                         <TrendingUp size={16} className="text-green-600 shrink-0" />
                                         <p className="text-green-700 font-medium">
-                                            Yearly saves <strong>{Math.round((1 - Number(formData.yearlyPrice) / Number(formData.monthlyPrice)) * 100)}%</strong> vs monthly 
+                                            Yearly saves <strong>{Math.round((1 - Number(formData.yearlyPrice) / Number(formData.monthlyPrice)) * 100)}%</strong> vs monthly
                                             (₹{(Number(formData.monthlyPrice) - Number(formData.yearlyPrice)).toLocaleString('en-IN')}/mo savings)
                                         </p>
                                     </div>
@@ -350,7 +350,7 @@ const PlanManagement = () => {
 
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-1">Features (One per line)</label>
-                                    <textarea 
+                                    <textarea
                                         name="features"
                                         value={formData.features}
                                         onChange={handleInputChange}
@@ -360,8 +360,8 @@ const PlanManagement = () => {
                                     ></textarea>
                                 </div>
                                 <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         id="isActive"
                                         name="isActive"
                                         checked={formData.isActive}
@@ -376,15 +376,15 @@ const PlanManagement = () => {
                             </form>
                         </div>
                         <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 shrink-0">
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 onClick={handleCloseModal}
                                 className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 form="planForm"
                                 className="px-5 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 active:scale-95"
                             >
@@ -395,9 +395,9 @@ const PlanManagement = () => {
                 </div>
             )}
 
-            <ConfirmModal 
-                {...confirmModal} 
-                onClose={() => setConfirmModal({...confirmModal, isOpen: false})} 
+            <ConfirmModal
+                {...confirmModal}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
             />
         </div>
     );

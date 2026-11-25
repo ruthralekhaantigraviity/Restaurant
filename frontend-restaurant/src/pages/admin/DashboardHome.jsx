@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Users, ShoppingBag, DollarSign, Sparkles, ArrowRight, Flame, UtensilsCrossed, BarChart2, ListOrdered } from 'lucide-react';
 import StatCard from '../../components/StatCard';
@@ -141,7 +141,7 @@ const DashboardHome = () => {
                     </div>
                     <Link
                         to="/admin/setup-wizard"
-                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer"
+                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-slate-950 font-black text-xs transition-all flex items-center gap-2 shadow-md shrink-0 cursor-pointer dark:bg-slate-900"
                     >
                         <span>Launch Setup Wizard</span>
                         <ArrowRight size={14} />

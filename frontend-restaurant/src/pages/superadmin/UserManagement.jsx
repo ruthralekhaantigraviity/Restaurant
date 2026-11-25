@@ -145,8 +145,8 @@ const UserManagement = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[750px]">
                         <thead>
                             <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
                                 <th className="p-5 font-bold">User</th>

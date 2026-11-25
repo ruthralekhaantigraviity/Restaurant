@@ -106,19 +106,19 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, 
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
                 <div
                     ref={modalRef}
-                    className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                    className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-100 bg-white shrink-0">
+                    <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
                         <div>
-                            <h2 className="text-xl font-black text-gray-900">Upgrade Your Plan</h2>
-                            <p className="text-sm text-gray-500 mt-0.5">
-                                Current plan: <span className="font-bold text-gray-800">{currentPlan || 'None'}</span>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white">Upgrade Your Plan</h2>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+                                Current plan: <span className="font-bold text-gray-800 dark:text-slate-200">{currentPlan || 'None'}</span>
                             </p>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+                            className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                         >
                             <X size={20} />
                         </button>
@@ -127,16 +127,16 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, 
                     <div className="overflow-y-auto flex-1">
                     {qrPlan ? (
                         <div className="p-8 flex flex-col items-center text-center space-y-5">
-                            <div className="p-4 bg-orange-50 rounded-2xl border border-orange-200">
+                            <div className="p-4 bg-orange-50 dark:bg-orange-950/40 rounded-2xl border border-orange-200 dark:border-orange-900/50">
                                 <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-sm border border-gray-200 flex items-center justify-center">
                                     <img src={qrPlan.qrImageUrl} alt="UPI QR Code" className="w-full h-full object-contain" />
                                 </div>
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-gray-900">
+                                <h3 className="text-lg font-black text-gray-900 dark:text-white">
                                     Scan &amp; Pay ₹{qrPlan.price.toLocaleString('en-IN')} for {qrPlan.planItem.name}
                                 </h3>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                                     Scan with any UPI app (GPay, PhonePe, Paytm) · Ref: {qrPlan.refId}
                                 </p>
                             </div>
@@ -145,7 +145,7 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, 
                                     type="button"
                                     onClick={() => setQrPlan(null)}
                                     disabled={subscribing !== null}
-                                    className="w-1/3 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition-colors cursor-pointer"
+                                    className="w-1/3 py-3 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
                                 >
                                     Back
                                 </button>
@@ -185,8 +185,8 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, 
                                             key={plan._id || idx}
                                             className={`relative rounded-2xl border-2 p-6 flex flex-col h-full transition-all
                                                 ${isCurrent
-                                                    ? `${meta?.border || 'border-gray-300'} bg-gray-50 shadow-sm`
-                                                    : 'border-gray-100 hover:border-gray-300 hover:shadow-md bg-white'
+                                                    ? `${meta?.border || 'border-gray-300 dark:border-slate-700'} bg-gray-50 dark:bg-slate-800/60 shadow-sm`
+                                                    : 'border-gray-100 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 hover:shadow-md bg-white dark:bg-slate-900'
                                                 }
                                                 ${isPopular && !isCurrent ? 'shadow-lg' : ''}
                                             `}
@@ -207,16 +207,16 @@ const PlanUpgradeModal = ({ currentPlan, plans, api, restaurant, setRestaurant, 
                                                 <Icon size={20} className={meta?.text} />
                                             </div>
 
-                                            <h3 className="text-lg font-black text-gray-900 mb-1">{plan.name}</h3>
+                                            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1">{plan.name}</h3>
 
-                                            <div className="mb-4 pb-4 border-b border-gray-100">
-                                                <span className="text-3xl font-black text-gray-900">₹{price.toLocaleString('en-IN')}</span>
-                                                <span className="text-gray-400 text-sm">/mo</span>
+                                            <div className="mb-4 pb-4 border-b border-gray-100 dark:border-slate-800">
+                                                <span className="text-3xl font-black text-gray-900 dark:text-white">₹{price.toLocaleString('en-IN')}</span>
+                                                <span className="text-gray-400 dark:text-slate-500 text-sm">/mo</span>
                                             </div>
 
                                             <ul className="space-y-2.5 mb-6 flex-1">
                                                 {(plan.features || []).map((f, i) => (
-                                                    <li key={i} className="flex items-start gap-2 text-xs font-medium text-gray-600 leading-snug">
+                                                    <li key={i} className="flex items-start gap-2 text-xs font-medium text-gray-600 dark:text-slate-300 leading-snug">
                                                         <Check size={14} className="text-green-500 mt-0.5 shrink-0" />
                                                         <span>{f}</span>
                                                     </li>

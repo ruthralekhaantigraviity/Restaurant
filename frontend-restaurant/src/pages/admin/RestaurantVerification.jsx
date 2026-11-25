@@ -338,7 +338,7 @@ const RestaurantVerification = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1.5 flex-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-black text-gray-900 text-sm md:text-base">{label}</span>
+                            <span className="font-black text-gray-900 text-sm md:text-base dark:text-white">{label}</span>
                             <span className="text-red-500 font-bold">*</span>
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${badgeColor}`}>
                                 <BadgeIcon size={10} />
@@ -354,7 +354,7 @@ const RestaurantVerification = () => {
 
                         {/* Existing file link */}
                         {doc?.filePath && (
-                            <div className="text-xs font-bold text-gray-500 flex items-center gap-1.5 pt-1.5">
+                            <div className="text-xs font-bold text-gray-500 flex items-center gap-1.5 pt-1.5 dark:text-slate-400">
                                 <FileText size={12} className="text-blue-500" />
                                 <a href={`${api.defaults.baseURL.replace('/api', '')}${doc.filePath}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
                                     View Submitted Document
@@ -376,9 +376,9 @@ const RestaurantVerification = () => {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRefs[fieldName].current.click()}
-                                    className="w-full md:w-auto px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-xl border border-gray-200 hover:border-gray-300 transition-all text-xs flex items-center justify-center gap-2 shadow-sm"
+                                    className="w-full md:w-auto px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-xl border border-gray-200 hover:border-gray-300 transition-all text-xs flex items-center justify-center gap-2 shadow-sm dark:bg-slate-950 dark:text-slate-200 dark:border-slate-800"
                                 >
-                                    <Upload size={14} className="text-gray-500" />
+                                    <Upload size={14} className="text-gray-500 dark:text-slate-400" />
                                     {doc ? 'Replace Document' : 'Choose File'}
                                 </button>
                             </div>
@@ -401,7 +401,7 @@ const RestaurantVerification = () => {
                 {/* Expiry date specific for FSSAI */}
                 {fieldName === 'fssai' && (
                     <div className="mt-4 pt-4 border-t border-gray-50 max-w-sm">
-                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider block mb-1">
+                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider block mb-1 dark:text-slate-400">
                             FSSAI License Expiry Date <span className="text-red-500 font-bold">*</span>
                         </label>
                         <input
@@ -410,7 +410,7 @@ const RestaurantVerification = () => {
                             onChange={(e) => setFssaiExpiryDate(e.target.value)}
                             disabled={!isEditable}
                             required
-                            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-green-400 focus:outline-none transition-all font-semibold text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-100 focus:border-green-400 focus:outline-none transition-all font-semibold text-sm disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-800"
                         />
                     </div>
                 )}
@@ -419,7 +419,7 @@ const RestaurantVerification = () => {
                 {fieldName === 'addressProof' && (
                     <div className="mt-4 pt-4 border-t border-gray-50 space-y-3">
                         <div>
-                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block mb-1">
+                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block mb-1 dark:text-slate-400">
                                 Full Business Address <span className="text-red-500 font-bold">*</span>
                             </label>
                             <textarea
@@ -429,7 +429,7 @@ const RestaurantVerification = () => {
                                 required
                                 rows={3}
                                 placeholder="Enter complete billing/operational address"
-                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-green-400 focus:outline-none transition-all font-semibold text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-green-400 focus:outline-none transition-all font-semibold text-sm disabled:bg-gray-50 disabled:text-gray-400 dark:border-slate-800"
                             />
                         </div>
                     </div>
@@ -459,12 +459,12 @@ const RestaurantVerification = () => {
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
             {/* Header info */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden dark:bg-slate-900 dark:border-slate-800">
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-green-500/5 rounded-full blur-xl pointer-events-none" />
 
                 <div className="space-y-1 z-10">
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Restaurant Verification</h2>
-                    <p className="text-sm text-gray-500 font-semibold">
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight dark:text-white">Restaurant Verification</h2>
+                    <p className="text-sm text-gray-500 font-semibold dark:text-slate-400">
                         SaaS compliance panel for restaurant identity and registration auditing.
                     </p>
                 </div>
@@ -523,8 +523,8 @@ const RestaurantVerification = () => {
 
                 {/* Mandatory section */}
                 <div className="space-y-4 min-w-0 pr-1.5 flex-1">
-                    <div className="border-b border-gray-100 pb-2">
-                        <h3 className="text-base font-black text-gray-900 uppercase tracking-wide">1. Mandatory Legal Documents</h3>
+                    <div className="border-b border-gray-100 pb-2 dark:border-slate-800">
+                        <h3 className="text-base font-black text-gray-900 uppercase tracking-wide dark:text-white">1. Mandatory Legal Documents</h3>
                         <p className="text-xs text-gray-400 font-semibold mt-0.5">All documents are required by regulation and cannot be skipped.</p>
                     </div>
 
@@ -543,10 +543,10 @@ const RestaurantVerification = () => {
                     <div className="border-b border-orange-100/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-base font-black text-gray-900 uppercase tracking-wide">2. Optional Brand Assets</h3>
+                                <h3 className="text-base font-black text-gray-900 uppercase tracking-wide dark:text-white">2. Optional Brand Assets</h3>
                                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700">Instant Landing Page Sync</span>
                             </div>
-                            <p className="text-xs text-gray-500 font-semibold mt-0.5">Upload logo &amp; showcase images to appear immediately on the customer landing page without waiting for KYC review.</p>
+                            <p className="text-xs text-gray-500 font-semibold mt-0.5 dark:text-slate-400">Upload logo &amp; showcase images to appear immediately on the customer landing page without waiting for KYC review.</p>
                         </div>
                         <button
                             type="button"
@@ -565,7 +565,7 @@ const RestaurantVerification = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         {/* Logo upload */}
                         <div className="space-y-2 min-w-0 pr-1.5 flex-1">
-                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block">Restaurant Logo (Image / PDF)</label>
+                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block dark:text-slate-400">Restaurant Logo (Image / PDF)</label>
                             {(logoBase64 || restaurant?.logo || verification?.documents?.logo?.filePath) && (() => {
                                 const verifPath = verification?.documents?.logo?.filePath || '';
                                 const restLogo = restaurant?.logo || '';
@@ -582,7 +582,7 @@ const RestaurantVerification = () => {
                                         <FileText size={16} /> PDF Logo Document Uploaded
                                     </div>
                                 ) : docUrl ? (
-                                    <div className="mb-3 w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white flex items-center justify-center">
+                                    <div className="mb-3 w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white flex items-center justify-center dark:bg-slate-900 dark:border-slate-800">
                                         <img
                                             src={docUrl}
                                             alt="Restaurant Logo"
@@ -611,16 +611,16 @@ const RestaurantVerification = () => {
                                 type="button"
                                 onClick={() => fileInputRefs.logo.current.click()}
                                 disabled={isUnderReview}
-                                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 text-xs flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:bg-gray-100"
+                                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 text-xs flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:bg-gray-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                             >
-                                <Upload size={14} className="text-gray-500" />
+                                <Upload size={14} className="text-gray-500 dark:text-slate-400" />
                                 {files.logo ? `Change Logo (${files.logo.name})` : 'Upload Logo'}
                             </button>
                         </div>
 
                         {/* Menu PDF upload */}
                         <div className="space-y-2 min-w-0 pr-1.5 flex-1">
-                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block">Menu PDF</label>
+                            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block dark:text-slate-400">Menu PDF</label>
                             {(verification?.documents?.menuPdf?.filePath || restaurant?.menuPdf) && (
                                 <div className="mb-3 flex items-center gap-1.5 text-xs font-bold text-blue-600">
                                     <FileText size={12} />
@@ -641,23 +641,23 @@ const RestaurantVerification = () => {
                                 type="button"
                                 onClick={() => fileInputRefs.menuPdf.current.click()}
                                 disabled={isUnderReview}
-                                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 text-xs flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:bg-gray-100"
+                                className="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 text-xs flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:bg-gray-100 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800"
                             >
-                                <Upload size={14} className="text-gray-500" />
+                                <Upload size={14} className="text-gray-500 dark:text-slate-400" />
                                 {files.menuPdf ? `Change Menu PDF (${files.menuPdf.name})` : 'Upload Menu PDF'}
                             </button>
                         </div>
                     </div>
 
                     {/* Multi images section */}
-                    <div className="space-y-3 pt-4 border-t border-gray-100">
-                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider block">Restaurant Showcase Images (Max 5)</label>
+                    <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider block dark:text-slate-400">Restaurant Showcase Images (Max 5)</label>
 
                         {/* Display existing images */}
                         {((verification?.documents?.images?.length || 0) > 0 || (restaurant?.showcaseImages?.length || 0) > 0) && (
                             <div className="flex flex-wrap gap-3 mb-3">
                                 {(verification?.documents?.images?.length ? verification.documents.images : (restaurant?.showcaseImages || [])).map((img, idx) => (
-                                    <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm group">
+                                    <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm group dark:border-slate-800">
                                         <img src={resolveDocUrl(img?.filePath || img)} alt="Showcase" className="w-full h-full object-cover" />
                                     </div>
                                 ))}
@@ -680,7 +680,7 @@ const RestaurantVerification = () => {
                                 className={`px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-xl border border-gray-200 text-xs flex items-center gap-2 shadow-sm cursor-pointer ${isUnderReview || (verification?.documents?.images?.length || 0) + optionalImages.length >= 5 ? 'opacity-50 pointer-events-none bg-gray-100' : ''
                                     }`}
                             >
-                                <Upload size={14} className="text-gray-500" />
+                                <Upload size={14} className="text-gray-500 dark:text-slate-400" />
                                 Add Showcase Images
                             </label>
                             <span className="text-xs text-gray-400 font-bold">
@@ -690,9 +690,9 @@ const RestaurantVerification = () => {
 
                         {/* Local selected images queue */}
                         {optionalImages.length > 0 && (
-                            <div className="flex flex-wrap gap-3 p-3 bg-white rounded-2xl border border-gray-100 mt-2">
+                            <div className="flex flex-wrap gap-3 p-3 bg-white rounded-2xl border border-gray-100 mt-2 dark:bg-slate-900 dark:border-slate-800">
                                 {optionalImages.map((file, i) => (
-                                    <div key={i} className="relative w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 p-1">
+                                    <div key={i} className="relative w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 p-1 dark:bg-slate-950 dark:border-slate-800">
                                         <span className="text-[10px] text-gray-400 font-bold truncate max-w-full">{file.name}</span>
                                         <button
                                             type="button"
@@ -729,10 +729,10 @@ const RestaurantVerification = () => {
                 </div>
 
                 {/* Form Footer Submit Action */}
-                <div className="bg-white border border-gray-100 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                <div className="bg-white border border-gray-100 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm dark:bg-slate-900 dark:border-slate-800">
                     <div className="flex items-start gap-3 max-w-xl">
                         <Info className="text-gray-400 shrink-0 mt-0.5" size={18} />
-                        <p className="text-xs font-semibold text-gray-500 leading-relaxed">
+                        <p className="text-xs font-semibold text-gray-500 leading-relaxed dark:text-slate-400">
                             By submitting these files, you verify that all documents are legal, valid, and match your registered restaurant identity. Falsification of documents will lead to permanent platform ban.
                         </p>
                     </div>

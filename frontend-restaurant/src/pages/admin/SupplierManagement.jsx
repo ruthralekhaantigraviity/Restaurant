@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, MapPin, Phone, Mail, ExternalLink, Edit2, Trash2, X, Star } from 'lucide-react';
+import { Search, Plus, MapPin, Phone, Mail, ExternalLink, Edit2, Trash2, X, Star, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useAuth } from '../../context/AuthContext';
@@ -211,11 +211,11 @@ const SupplierManagement = () => {
                                 </span>
                             </div>
                             
-                            {/* Delete Button (Hover) */}
+                            {/* Delete Button */}
                             <div className="absolute top-4 right-20 transition-opacity">
                                 <button 
                                     onClick={() => handleDelete(supplier._id)}
-                                    className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
+                                    className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/60 dark:text-red-400 dark:hover:bg-red-900/60 rounded-lg transition-colors cursor-pointer border border-red-200/80 dark:border-red-900/40 shadow-xs"
                                     title="Delete Supplier"
                                 >
                                     <Trash2 size={16} />
@@ -230,8 +230,8 @@ const SupplierManagement = () => {
                             <div className="space-y-3 mb-6">
                                 {supplier.contactPerson && (
                                     <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-slate-300">
-                                        <div className="w-6 flex justify-center"><Search size={16} className="text-gray-400 dark:text-slate-500" /></div>
-                                        <span>Contact: {supplier.contactPerson}</span>
+                                        <div className="w-6 flex justify-center"><User size={16} className="text-gray-400 dark:text-slate-500" /></div>
+                                        <span>Name: {supplier.contactPerson}</span>
                                     </div>
                                 )}
                                 <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-slate-300">

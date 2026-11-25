@@ -98,6 +98,10 @@ const expenseSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    penaltyAmount: {
+        type: Number,
+        default: 0,
+    },
     paymentMethod: {
         type: String,
         enum: ['Cash', 'Bank Transfer', 'UPI', 'Card', 'Cheque', 'Other'],

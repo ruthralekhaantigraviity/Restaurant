@@ -411,7 +411,7 @@ const SuperAdminDashboard = () => {
             )}
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
                 {[
                     { label: 'Total SaaS Revenue (MRR)', value: `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800/60' },
                     { label: 'Order Commission Earned', value: `₹${(stats.totalCommission || 0).toLocaleString('en-IN')}`, icon: CreditCard, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60' },
@@ -504,8 +504,8 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[950px]">
                         <thead>
                             <tr className="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 text-xs text-gray-400 dark:text-slate-400 uppercase tracking-wider">
                                 <th className="p-4 font-bold">Restaurant & Location</th>
@@ -602,13 +602,12 @@ const SuperAdminDashboard = () => {
                                                     <span className="text-[11px] font-bold text-gray-700 dark:text-slate-300">
                                                         {planPrice}<span className="text-[10px] text-gray-400 dark:text-slate-500 font-normal">/{cycle === 'yearly' ? 'yr' : 'mo'}</span>
                                                     </span>
-                                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black uppercase border ${
-                                                        (restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
-                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                                                            : (restaurant.subscription?.paymentStatus === 'Trial'
-                                                                ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
-                                                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800')
-                                                    }`}>
+                                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black uppercase border ${(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                                                        : (restaurant.subscription?.paymentStatus === 'Trial'
+                                                            ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800')
+                                                        }`}>
                                                         {(restaurant.subscription?.paymentStatus || 'Pending') === 'Paid' ? '● Paid' : (restaurant.subscription?.paymentStatus === 'Trial' ? '● Trial' : '○ Pending')}
                                                     </span>
                                                 </div>
@@ -719,448 +718,448 @@ const SuperAdminDashboard = () => {
                         Manage All Leads &amp; Demos <ArrowRight size={16} />
                     </Link>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[750px] text-left border-collapse table-fixed">
+                <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full min-w-[950px] text-left border-collapse">
                         <thead>
                             <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="p-4 font-bold w-[34%]">Contact Details</th>
-                                <th className="p-4 font-bold w-[18%] whitespace-nowrap">Subject</th>
-                                <th className="p-4 font-bold w-[18%]">Message</th>
-                                <th className="p-4 font-bold w-[14%] text-center whitespace-nowrap">Status</th>
-                                <th className="p-4 font-bold text-right w-[16%] whitespace-nowrap">Actions</th>
+                                <th className="p-4 font-bold min-w-[200px]">Contact Details</th>
+                                <th className="p-4 font-bold whitespace-nowrap w-28">Subject</th>
+                                <th className="p-4 font-bold min-w-[220px]">Message</th>
+                                <th className="p-4 font-bold text-center whitespace-nowrap min-w-[140px] w-36">Status</th>
+                                <th className="p-4 font-bold text-right whitespace-nowrap min-w-[180px] w-56">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {inquiries.map(inq => {
-                                const phoneDisplay = (inq.phone && inq.phone !== 'N/A' && inq.phone !== 'null' && inq.phone !== 'undefined')
-                                    ? inq.phone
-                                    : (inq.customerId?.phoneNumber || inq.customerId?.phone || inq.restaurantId?.phone || 'Not Provided');
-                                return (
-                                    <tr key={inq._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                        <td className="p-4 align-middle">
-                                            <div className="truncate">
-                                                <span className="font-bold text-gray-900 block leading-tight truncate">{inq.name}</span>
-                                                {inq.restaurantName && (
-                                                    <span className="text-xs text-gray-500 block font-semibold mt-0.5 truncate">{inq.restaurantName}</span>
-                                                )}
-                                                <span className="text-[11px] text-gray-400 block mt-0.5 truncate">{inq.email}</span>
-                                                <span className="text-[11px] text-gray-600 block font-medium mt-0.5 truncate">📞 {phoneDisplay}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 align-middle whitespace-nowrap">
-                                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-block ${inq.subject === 'Sales' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                inq.subject === 'Support' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                    inq.subject === 'Demo' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                                                        'bg-gray-50 text-gray-700 border-gray-100'
-                                                }`}>
-                                                {inq.subject}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 align-middle">
-                                            <p className="text-xs text-gray-600 font-medium leading-relaxed line-clamp-2 break-words" title={inq.message}>
-                                                {inq.message}
-                                            </p>
-                                        </td>
-                                        <td className="p-4 align-middle text-center whitespace-nowrap">
-                                            <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border inline-block ${inq.status === 'Resolved' ? 'bg-green-50 text-green-700 border-green-100' :
-                                                inq.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                                    'bg-blue-50 text-blue-700 border-blue-100'
-                                                }`}>
-                                                {inq.status}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 align-middle text-right whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-1.5">
+                            <tbody className="divide-y divide-gray-50">
+                                {inquiries.map(inq => {
+                                    const phoneDisplay = (inq.phone && inq.phone !== 'N/A' && inq.phone !== 'null' && inq.phone !== 'undefined')
+                                        ? inq.phone
+                                        : (inq.customerId?.phoneNumber || inq.customerId?.phone || inq.restaurantId?.phone || 'Not Provided');
+                                    return (
+                                        <tr key={inq._id} className="hover:bg-gray-50/80 transition-colors text-sm">
+                                            <td className="p-4 align-middle">
+                                                <div className="max-w-xs">
+                                                    <span className="font-bold text-gray-900 block leading-tight truncate">{inq.name}</span>
+                                                    {inq.restaurantName && (
+                                                        <span className="text-xs text-gray-500 block font-semibold mt-0.5 truncate">{inq.restaurantName}</span>
+                                                    )}
+                                                    <span className="text-[11px] text-gray-400 block mt-0.5 truncate">{inq.email}</span>
+                                                    <span className="text-[11px] text-gray-600 block font-medium mt-0.5 truncate">📞 {phoneDisplay}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 align-middle whitespace-nowrap w-28">
+                                                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border inline-block ${inq.subject === 'Sales' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                        inq.subject === 'Support' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                            inq.subject === 'Demo' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                                                'bg-gray-50 text-gray-700 border-gray-100'
+                                                        }`}>
+                                                        {inq.subject}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 align-middle">
+                                                    <p className="text-xs text-gray-600 font-medium leading-relaxed line-clamp-2 break-words" title={inq.message}>
+                                                        {inq.message}
+                                                    </p>
+                                                </td>
+                                                <td className="p-4 align-middle text-center whitespace-nowrap min-w-[140px] w-36">
+                                                    <span className={`inline-flex items-center justify-center px-3 py-1.5 text-xs font-bold rounded-lg border whitespace-nowrap shrink-0 ${inq.status === 'Resolved' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                        inq.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                            'bg-blue-50 text-blue-700 border-blue-100'
+                                                        }`}>
+                                                        {inq.status}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 align-middle text-right whitespace-nowrap min-w-[180px] w-56">
+                                            <div className="flex items-center justify-end gap-2 shrink-0 flex-nowrap">
                                                 <button
                                                     onClick={() => setViewingInquiry(inq)}
-                                                    className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all active:scale-[0.97]"
+                                                    className="h-8 w-8 inline-flex items-center justify-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all cursor-pointer shrink-0"
                                                     title="View Full Details"
                                                 >
-                                                    <Eye size={16} />
+                                                    <Eye size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleUpdateInquiryStatus(inq._id, inq.status)}
-                                                    className="px-3 py-1.5 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
+                                                    className="h-8 px-3 inline-flex items-center justify-center text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all cursor-pointer shrink-0"
                                                 >
                                                     {inq.status === 'New' ? 'Start Progress' : inq.status === 'In Progress' ? 'Resolve' : 'Reopen'}
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteInquiry(inq._id, inq.name)}
-                                                    className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all active:scale-[0.97]"
+                                                    className="h-8 w-8 inline-flex items-center justify-center text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all cursor-pointer shrink-0"
                                                     title="Delete Inquiry"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={15} />
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 );
                             })}
-                            {inquiries.length === 0 && (
-                                <tr>
-                                    <td colSpan="5" className="p-10 text-center">
-                                        <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
-                                        <p className="text-gray-500 font-medium text-lg">No inquiries received yet.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                    {inquiries.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan="5" className="p-10 text-center">
+                                                                <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
+                                                                <p className="text-gray-500 font-medium text-lg">No inquiries received yet.</p>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
             </div>
 
-            {/* Customer Support Enquiries (Tickets) */}
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-gray-50/50">
-                    <div>
-                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Customer Support Enquiries (Tickets)</h2>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Support tickets submitted by registered restaurant partners/customers.</p>
-                    </div>
-                    <Link to="/super-admin/support" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
-                        Open Support Console <ArrowRight size={16} />
-                    </Link>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
-                                <th className="p-5 font-bold">Ticket ID / Restaurant</th>
-                                <th className="p-5 font-bold">Category</th>
-                                <th className="p-5 font-bold">Priority</th>
-                                <th className="p-5 font-bold">Subject / Description</th>
-                                <th className="p-5 font-bold">Status</th>
-                                <th className="p-5 font-bold text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {tickets.slice(0, 10).map(tkt => (
-                                <tr key={tkt._id} className="hover:bg-gray-50/80 transition-colors text-sm">
-                                    <td className="p-5">
-                                        <div>
-                                            <span className="font-bold text-blue-600 block">{tkt.ticketId}</span>
-                                            <span className="text-xs text-gray-900 block font-semibold">{tkt.restaurantId?.name || 'Platform Customer'}</span>
-                                            <span className="text-[11px] text-gray-400 block">{tkt.restaurantId?.email || 'N/A'}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-5">
-                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">
-                                            {tkt.category}
-                                        </span>
-                                    </td>
-                                    <td className="p-5">
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase border ${tkt.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
-                                            tkt.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                                                tkt.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                                                    'bg-green-100 text-green-700 border-green-200'
-                                            }`}>
-                                            {tkt.priority}
-                                        </span>
-                                    </td>
-                                    <td className="p-5 max-w-xs">
-                                        <div>
-                                            <span className="font-bold text-gray-900 block truncate">{tkt.subject}</span>
-                                            <span className="text-xs text-gray-500 line-clamp-2 mt-0.5" title={tkt.description}>{tkt.description}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-5">
-                                        <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${tkt.status === 'Resolved' || tkt.status === 'Closed' ? 'bg-green-50 text-green-700 border-green-100' :
-                                            tkt.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                                                'bg-blue-50 text-blue-700 border-blue-100'
-                                            }`}>
-                                            {tkt.status}
-                                        </span>
-                                    </td>
-                                    <td className="p-5 text-right whitespace-nowrap space-x-2">
-                                        <button
-                                            onClick={() => handleUpdateTicketStatus(tkt._id, tkt.status)}
-                                            className="px-3 py-1 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
-                                        >
-                                            {tkt.status === 'Open' ? 'In Progress' : tkt.status === 'In Progress' ? 'Resolve' : 'Reopen'}
-                                        </button>
-                                        <Link
-                                            to={`/super-admin/support/tickets/${tkt._id}`}
-                                            className="px-3 py-1 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all active:scale-[0.97] inline-block"
-                                        >
-                                            View Details
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                            {tickets.length === 0 && (
-                                <tr>
-                                    <td colSpan="6" className="p-10 text-center">
-                                        <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
-                                        <p className="text-gray-500 font-medium text-lg">No support enquiries received yet.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* System & Broadcast Notifications Preview */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 font-sans tracking-tight">Recent System Notifications</h2>
-                        <p className="text-sm text-gray-500 mt-1">Platform broadcasts, system alerts, and automated activity notifications.</p>
-                    </div>
-                    <Link to="/super-admin/notifications" className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl">
-                        View Full Notifications <ArrowRight size={16} />
-                    </Link>
-                </div>
-                <div className="divide-y divide-gray-50">
-                    {notifications.slice(0, 5).map(n => (
-                        <div key={n._id} className="p-5 flex items-start justify-between gap-4 hover:bg-gray-50/50 transition-colors">
-                            <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Bell size={18} />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
-                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider">{n.type || 'System'}</span>
-                                        {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                            {/* Customer Support Enquiries (Tickets) */}
+                            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-gray-50/50">
+                                    <div>
+                                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-sans tracking-tight">Customer Support Enquiries (Tickets)</h2>
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Support tickets submitted by registered restaurant partners/customers.</p>
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">{n.desc}</p>
+                                    <Link to="/super-admin/support" className="flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl self-start sm:self-auto">
+                                        Open Support Console <ArrowRight size={16} />
+                                    </Link>
                                 </div>
-                            </div>
-                            <span className="text-[11px] text-gray-400 font-medium shrink-0">
-                                {new Date(n.createdAt).toLocaleDateString()}
-                            </span>
-                        </div>
-                    ))}
-                    {notifications.length === 0 && (
-                        <div className="p-10 text-center">
-                            <Bell className="mx-auto text-gray-300 mb-3" size={40} />
-                            <p className="text-gray-500 font-medium text-lg">No notifications found.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* View Details Modal */}
-            {viewingRestaurant && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setViewingRestaurant(null)}></div>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/70">
-                            <div>
-                                <h3 className="font-bold text-gray-900 text-lg">Restaurant Subscription & Profile</h3>
-                                <p className="text-xs text-gray-500">Comprehensive membership and POS configuration details</p>
-                            </div>
-                            <button onClick={() => setViewingRestaurant(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                            <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
-                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-                                    {viewingRestaurant.logo ? (
-                                        <img src={viewingRestaurant.logo} alt={viewingRestaurant.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-black text-2xl">
-                                            {viewingRestaurant.name.charAt(0)}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <h4 className="text-lg font-black text-gray-900 truncate">{viewingRestaurant.name}</h4>
-                                    <p className="text-xs text-gray-600 font-semibold mt-0.5">Owner: {viewingRestaurant.ownerId?.name || 'Partner Admin'}</p>
-                                    <p className="text-[11px] text-gray-500 truncate">{viewingRestaurant.ownerId?.email || 'N/A'}</p>
-                                    {viewingRestaurant.phone && (
-                                        <p className="text-[11px] text-gray-500">📞 {viewingRestaurant.phone}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="space-y-2.5 text-sm">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Subscription Tier:</span>
-                                    <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-black rounded-lg border border-purple-200">
-                                        {viewingRestaurant.subscription?.plan || 'Basic'} Tier
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Billing Cycle:</span>
-                                    <span className="text-gray-900 font-bold capitalize">
-                                        {viewingRestaurant.subscription?.billingCycle || 'monthly'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Recurring Price:</span>
-                                    <span className="text-gray-900 font-black">
-                                        ₹{(viewingRestaurant.subscription?.price || (
-                                            (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'enterprise' ? 12999 :
-                                                (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
-                                        )).toLocaleString('en-IN')} / {viewingRestaurant.subscription?.billingCycle === 'yearly' ? 'year' : 'month'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Subscription Status:</span>
-                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.subscription?.status === 'Active'
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                        : 'bg-red-50 text-red-700 border-red-200'
-                                        }`}>
-                                        {viewingRestaurant.subscription?.status || 'Active'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Member Since:</span>
-                                    <span className="text-gray-900 font-semibold">
-                                        {viewingRestaurant.createdAt ? new Date(viewingRestaurant.createdAt).toLocaleDateString() : 'N/A'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 font-medium">Next Renewal:</span>
-                                    <span className="text-gray-900 font-semibold">
-                                        {viewingRestaurant.subscription?.expiryDate ? new Date(viewingRestaurant.subscription?.expiryDate).toLocaleDateString() : 'Perpetual'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center border-t border-gray-100 pt-2.5">
-                                    <span className="text-gray-500 font-medium">Renewal Countdown:</span>
-                                    <span className="font-black text-blue-600">
-                                        {calculateRemainingDays(viewingRestaurant.subscription?.expiryDate)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Custom Billing POS Details */}
-                            {viewingRestaurant.billingConfig?.isCustomBillingActive && (
-                                <div className="bg-emerald-50/60 rounded-2xl p-4 border border-emerald-100 space-y-2 mt-3">
-                                    <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider">
-                                        <Sparkles size={14} className="text-emerald-600" />
-                                        Custom POS Architecture Active
-                                    </div>
-                                    <p className="text-xs text-gray-700">
-                                        <span className="font-semibold">Format:</span> {viewingRestaurant.billingConfig?.outletFormat || 'Custom Outlet'}
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5 pt-1">
-                                        {Object.entries(viewingRestaurant.billingConfig?.modules || {})
-                                            .filter(([_, active]) => active)
-                                            .map(([mod]) => (
-                                                <span key={mod} className="px-2 py-0.5 bg-white text-emerald-800 text-[10px] font-bold rounded-md border border-emerald-200">
-                                                    ✓ {mod.replace(/([A-Z])/g, ' $1').trim()}
-                                                </span>
+                                <div className="overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-left border-collapse min-w-[950px]">
+                                        <thead>
+                                            <tr className="bg-white border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+                                                <th className="p-5 font-bold">Ticket ID / Restaurant</th>
+                                                <th className="p-5 font-bold">Category</th>
+                                                <th className="p-5 font-bold">Priority</th>
+                                                <th className="p-5 font-bold">Subject / Description</th>
+                                                <th className="p-5 font-bold">Status</th>
+                                                <th className="p-5 font-bold text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-50">
+                                            {tickets.slice(0, 10).map(tkt => (
+                                                <tr key={tkt._id} className="hover:bg-gray-50/80 transition-colors text-sm">
+                                                    <td className="p-5">
+                                                        <div>
+                                                            <span className="font-bold text-blue-600 block">{tkt.ticketId}</span>
+                                                            <span className="text-xs text-gray-900 block font-semibold">{tkt.restaurantId?.name || 'Platform Customer'}</span>
+                                                            <span className="text-[11px] text-gray-400 block">{tkt.restaurantId?.email || 'N/A'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200">
+                                                            {tkt.category}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black tracking-wider uppercase border ${tkt.priority === 'Critical' ? 'bg-red-100 text-red-700 border-red-200' :
+                                                            tkt.priority === 'High' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                                                                tkt.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                                                    'bg-green-100 text-green-700 border-green-200'
+                                                            }`}>
+                                                            {tkt.priority}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-5 max-w-xs">
+                                                        <div>
+                                                            <span className="font-bold text-gray-900 block truncate">{tkt.subject}</span>
+                                                            <span className="text-xs text-gray-500 line-clamp-2 mt-0.5" title={tkt.description}>{tkt.description}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border ${tkt.status === 'Resolved' || tkt.status === 'Closed' ? 'bg-green-50 text-green-700 border-green-100' :
+                                                            tkt.status === 'In Progress' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                                                'bg-blue-50 text-blue-700 border-blue-100'
+                                                            }`}>
+                                                            {tkt.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-5 text-right whitespace-nowrap space-x-2">
+                                                        <button
+                                                            onClick={() => handleUpdateTicketStatus(tkt._id, tkt.status)}
+                                                            className="px-3 py-1 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-[0.97]"
+                                                        >
+                                                            {tkt.status === 'Open' ? 'In Progress' : tkt.status === 'In Progress' ? 'Resolve' : 'Reopen'}
+                                                        </button>
+                                                        <Link
+                                                            to={`/super-admin/support/tickets/${tkt._id}`}
+                                                            className="px-3 py-1 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-all active:scale-[0.97] inline-block"
+                                                        >
+                                                            View Details
+                                                        </Link>
+                                                    </td>
+                                                </tr>
                                             ))}
+                                            {tickets.length === 0 && (
+                                                <tr>
+                                                    <td colSpan="6" className="p-10 text-center">
+                                                        <MessageSquare className="mx-auto text-gray-300 mb-3" size={40} />
+                                                        <p className="text-gray-500 font-medium text-lg">No support enquiries received yet.</p>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* System & Broadcast Notifications Preview */}
+                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-900 font-sans tracking-tight">Recent System Notifications</h2>
+                                        <p className="text-sm text-gray-500 mt-1">Platform broadcasts, system alerts, and automated activity notifications.</p>
+                                    </div>
+                                    <Link to="/super-admin/notifications" className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl">
+                                        View Full Notifications <ArrowRight size={16} />
+                                    </Link>
+                                </div>
+                                <div className="divide-y divide-gray-50">
+                                    {notifications.slice(0, 5).map(n => (
+                                        <div key={n._id} className="p-5 flex items-start justify-between gap-4 hover:bg-gray-50/50 transition-colors">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Bell size={18} />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-gray-900 text-sm">{n.title}</h4>
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider">{n.type || 'System'}</span>
+                                                        {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 mt-1">{n.desc}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-[11px] text-gray-400 font-medium shrink-0">
+                                                {new Date(n.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {notifications.length === 0 && (
+                                        <div className="p-10 text-center">
+                                            <Bell className="mx-auto text-gray-300 mb-3" size={40} />
+                                            <p className="text-gray-500 font-medium text-lg">No notifications found.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* View Details Modal */}
+                            {viewingRestaurant && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setViewingRestaurant(null)}></div>
+                                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/70">
+                                            <div>
+                                                <h3 className="font-bold text-gray-900 text-lg">Restaurant Subscription & Profile</h3>
+                                                <p className="text-xs text-gray-500">Comprehensive membership and POS configuration details</p>
+                                            </div>
+                                            <button onClick={() => setViewingRestaurant(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                                <X size={20} />
+                                            </button>
+                                        </div>
+                                        <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                                            <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
+                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                                    {viewingRestaurant.logo ? (
+                                                        <img src={viewingRestaurant.logo} alt={viewingRestaurant.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-black text-2xl">
+                                                            {viewingRestaurant.name.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <h4 className="text-lg font-black text-gray-900 truncate">{viewingRestaurant.name}</h4>
+                                                    <p className="text-xs text-gray-600 font-semibold mt-0.5">Owner: {viewingRestaurant.ownerId?.name || 'Partner Admin'}</p>
+                                                    <p className="text-[11px] text-gray-500 truncate">{viewingRestaurant.ownerId?.email || 'N/A'}</p>
+                                                    {viewingRestaurant.phone && (
+                                                        <p className="text-[11px] text-gray-500">📞 {viewingRestaurant.phone}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2.5 text-sm">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Subscription Tier:</span>
+                                                    <span className="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-black rounded-lg border border-purple-200">
+                                                        {viewingRestaurant.subscription?.plan || 'Basic'} Tier
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Billing Cycle:</span>
+                                                    <span className="text-gray-900 font-bold capitalize">
+                                                        {viewingRestaurant.subscription?.billingCycle || 'monthly'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Recurring Price:</span>
+                                                    <span className="text-gray-900 font-black">
+                                                        ₹{(viewingRestaurant.subscription?.price || (
+                                                            (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'enterprise' ? 12999 :
+                                                                (viewingRestaurant.subscription?.plan || '').toLowerCase() === 'pro' ? 5999 : 2999
+                                                        )).toLocaleString('en-IN')} / {viewingRestaurant.subscription?.billingCycle === 'yearly' ? 'year' : 'month'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Subscription Status:</span>
+                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg border ${viewingRestaurant.subscription?.status === 'Active'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                        : 'bg-red-50 text-red-700 border-red-200'
+                                                        }`}>
+                                                        {viewingRestaurant.subscription?.status || 'Active'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Member Since:</span>
+                                                    <span className="text-gray-900 font-semibold">
+                                                        {viewingRestaurant.createdAt ? new Date(viewingRestaurant.createdAt).toLocaleDateString() : 'N/A'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-500 font-medium">Next Renewal:</span>
+                                                    <span className="text-gray-900 font-semibold">
+                                                        {viewingRestaurant.subscription?.expiryDate ? new Date(viewingRestaurant.subscription?.expiryDate).toLocaleDateString() : 'Perpetual'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center border-t border-gray-100 pt-2.5">
+                                                    <span className="text-gray-500 font-medium">Renewal Countdown:</span>
+                                                    <span className="font-black text-blue-600">
+                                                        {calculateRemainingDays(viewingRestaurant.subscription?.expiryDate)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Custom Billing POS Details */}
+                                            {viewingRestaurant.billingConfig?.isCustomBillingActive && (
+                                                <div className="bg-emerald-50/60 rounded-2xl p-4 border border-emerald-100 space-y-2 mt-3">
+                                                    <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wider">
+                                                        <Sparkles size={14} className="text-emerald-600" />
+                                                        Custom POS Architecture Active
+                                                    </div>
+                                                    <p className="text-xs text-gray-700">
+                                                        <span className="font-semibold">Format:</span> {viewingRestaurant.billingConfig?.outletFormat || 'Custom Outlet'}
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-1.5 pt-1">
+                                                        {Object.entries(viewingRestaurant.billingConfig?.modules || {})
+                                                            .filter(([_, active]) => active)
+                                                            .map(([mod]) => (
+                                                                <span key={mod} className="px-2 py-0.5 bg-white text-emerald-800 text-[10px] font-bold rounded-md border border-emerald-200">
+                                                                    ✓ {mod.replace(/([A-Z])/g, ' $1').trim()}
+                                                                </span>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {viewingRestaurant.address && (
+                                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100 text-xs text-gray-600">
+                                                    <span className="font-bold text-gray-700 block mb-0.5">Location / Address:</span>
+                                                    {viewingRestaurant.address}
+                                                </div>
+                                            )}
+
+                                            <button
+                                                onClick={() => setViewingRestaurant(null)}
+                                                className="w-full mt-2 py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
+                                            >
+                                                Close Details
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
+                            {/* Inquiry Detail Modal */}
+                            {viewingInquiry && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setViewingInquiry(null)} />
+                                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                                                    <MessageSquare size={18} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900 text-base">Inquiry &amp; Lead Details</h3>
+                                                    <p className="text-[11px] text-gray-400">Received {new Date(viewingInquiry.createdAt).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => setViewingInquiry(null)}
+                                                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                                            >
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            <div className="grid grid-cols-2 gap-3 text-xs">
+                                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Sender Name</span>
+                                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.name}</span>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Restaurant / Org</span>
+                                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.restaurantName || 'N/A'}</span>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Email Address</span>
+                                                    <a href={`mailto:${viewingInquiry.email}`} className="font-bold text-blue-600 block mt-0.5 hover:underline truncate">{viewingInquiry.email || 'N/A'}</a>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Phone Number</span>
+                                                    <span className="font-bold text-gray-900 block mt-0.5">
+                                                        {viewingInquiry.phone && viewingInquiry.phone !== 'N/A'
+                                                            ? viewingInquiry.phone
+                                                            : (viewingInquiry.customerId?.phoneNumber || viewingInquiry.customerId?.phone || viewingInquiry.restaurantId?.phone || 'Not Provided')}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                            {viewingRestaurant.address && (
-                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100 text-xs text-gray-600">
-                                    <span className="font-bold text-gray-700 block mb-0.5">Location / Address:</span>
-                                    {viewingRestaurant.address}
+                                            <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Subject</span>
+                                                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white border border-blue-200 text-blue-800">{viewingInquiry.subject}</span>
+                                                </div>
+                                                <p className="text-xs font-semibold text-gray-800">{viewingInquiry.subject}</p>
+                                            </div>
+
+                                            <div>
+                                                <label className="text-xs font-bold text-gray-700 block mb-1.5">Full Message</label>
+                                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-700 leading-relaxed font-normal whitespace-pre-wrap max-h-48 overflow-y-auto">
+                                                    {viewingInquiry.message || 'No message content provided.'}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 pt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        handleUpdateInquiryStatus(viewingInquiry._id, viewingInquiry.status);
+                                                        setViewingInquiry(prev => ({
+                                                            ...prev,
+                                                            status: prev.status === 'New' ? 'In Progress' : prev.status === 'In Progress' ? 'Resolved' : 'In Progress'
+                                                        }));
+                                                    }}
+                                                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-xs"
+                                                >
+                                                    Mark as {viewingInquiry.status === 'New' ? 'In Progress' : viewingInquiry.status === 'In Progress' ? 'Resolved' : 'In Progress'}
+                                                </button>
+                                                <button
+                                                    onClick={() => setViewingInquiry(null)}
+                                                    className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
-
-                            <button
-                                onClick={() => setViewingRestaurant(null)}
-                                className="w-full mt-2 py-2.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
-                            >
-                                Close Details
-                            </button>
+                            <ConfirmModal
+                                isOpen={Boolean(confirmDeleteInquiry)}
+                                onClose={() => setConfirmDeleteInquiry(null)}
+                                onConfirm={handleConfirmDeleteInquiry}
+                                title="Delete Inquiry"
+                                message={`Are you sure you want to permanently delete the inquiry from "${confirmDeleteInquiry?.name}"? This action cannot be undone.`}
+                                confirmText="Delete Inquiry"
+                                isDestructive={true}
+                            />
                         </div>
-                    </div>
-                </div>
-            )}
-            {/* Inquiry Detail Modal */}
-            {viewingInquiry && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setViewingInquiry(null)} />
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                                    <MessageSquare size={18} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 text-base">Inquiry &amp; Lead Details</h3>
-                                    <p className="text-[11px] text-gray-400">Received {new Date(viewingInquiry.createdAt).toLocaleString()}</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setViewingInquiry(null)}
-                                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-3 text-xs">
-                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Sender Name</span>
-                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.name}</span>
-                                </div>
-                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Restaurant / Org</span>
-                                    <span className="font-bold text-gray-900 text-sm block mt-0.5">{viewingInquiry.restaurantName || 'N/A'}</span>
-                                </div>
-                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Email Address</span>
-                                    <a href={`mailto:${viewingInquiry.email}`} className="font-bold text-blue-600 block mt-0.5 hover:underline truncate">{viewingInquiry.email || 'N/A'}</a>
-                                </div>
-                                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Phone Number</span>
-                                    <span className="font-bold text-gray-900 block mt-0.5">
-                                        {viewingInquiry.phone && viewingInquiry.phone !== 'N/A'
-                                            ? viewingInquiry.phone
-                                            : (viewingInquiry.customerId?.phoneNumber || viewingInquiry.customerId?.phone || viewingInquiry.restaurantId?.phone || 'Not Provided')}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="p-3.5 bg-blue-50/50 rounded-xl border border-blue-100">
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Subject</span>
-                                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white border border-blue-200 text-blue-800">{viewingInquiry.subject}</span>
-                                </div>
-                                <p className="text-xs font-semibold text-gray-800">{viewingInquiry.subject}</p>
-                            </div>
-
-                            <div>
-                                <label className="text-xs font-bold text-gray-700 block mb-1.5">Full Message</label>
-                                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-700 leading-relaxed font-normal whitespace-pre-wrap max-h-48 overflow-y-auto">
-                                    {viewingInquiry.message || 'No message content provided.'}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-2">
-                                <button
-                                    onClick={() => {
-                                        handleUpdateInquiryStatus(viewingInquiry._id, viewingInquiry.status);
-                                        setViewingInquiry(prev => ({
-                                            ...prev,
-                                            status: prev.status === 'New' ? 'In Progress' : prev.status === 'In Progress' ? 'Resolved' : 'In Progress'
-                                        }));
-                                    }}
-                                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors text-xs"
-                                >
-                                    Mark as {viewingInquiry.status === 'New' ? 'In Progress' : viewingInquiry.status === 'In Progress' ? 'Resolved' : 'In Progress'}
-                                </button>
-                                <button
-                                    onClick={() => setViewingInquiry(null)}
-                                    className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-xs"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            <ConfirmModal
-                isOpen={Boolean(confirmDeleteInquiry)}
-                onClose={() => setConfirmDeleteInquiry(null)}
-                onConfirm={handleConfirmDeleteInquiry}
-                title="Delete Inquiry"
-                message={`Are you sure you want to permanently delete the inquiry from "${confirmDeleteInquiry?.name}"? This action cannot be undone.`}
-                confirmText="Delete Inquiry"
-                isDestructive={true}
-            />
-        </div>
-    );
+                        );
 };
 
-export default SuperAdminDashboard;
+                        export default SuperAdminDashboard;
