@@ -404,20 +404,18 @@ const SubscriptionPortal = () => {
                                     )}
                                 </h3>
                             </div>
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs inline-flex items-center gap-2 ${
-                                isPaidActive || isTrialActive
-                                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs inline-flex items-center gap-2 ${isPaidActive || isTrialActive
+                                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                                : isPendingApproval
+                                    ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                    : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                                }`}>
+                                <span className={`w-2 h-2 rounded-full ${isPaidActive || isTrialActive
+                                    ? 'bg-emerald-400 animate-pulse'
                                     : isPendingApproval
-                                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                            }`}>
-                                <span className={`w-2 h-2 rounded-full ${
-                                    isPaidActive || isTrialActive
-                                        ? 'bg-emerald-400 animate-pulse'
-                                        : isPendingApproval
-                                            ? 'bg-amber-400 animate-pulse'
-                                            : 'bg-rose-400'
-                                }`}></span>
+                                        ? 'bg-amber-400 animate-pulse'
+                                        : 'bg-rose-400'
+                                    }`}></span>
                                 {isManualFrozen ? 'Manually Frozen' : isPendingApproval ? 'Pending Approval' : isTrialActive ? 'Trial Active' : isPaidActive ? 'Paid Active' : 'Frozen / Inactive'}
                             </span>
                         </div>
@@ -560,7 +558,7 @@ const SubscriptionPortal = () => {
                                         </div>
                                     </div>
 
-                                    <ul className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 my-6">
+                                    <ul className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-6 mb-2">
                                         {plan.features.slice(0, 6).map((feat, idx) => (
                                             <li key={idx} className="flex items-start gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">
                                                 <CheckCircle size={15} className="text-emerald-500 shrink-0 mt-0.5" />
@@ -570,16 +568,18 @@ const SubscriptionPortal = () => {
                                     </ul>
                                 </div>
 
-                                <button
-                                    onClick={() => handleSelectPlan(plan)}
-                                    disabled={isSubmitting}
-                                    className={`w-full h-12 px-6 py-3 rounded-2xl font-black text-sm tracking-wide transition-all mt-auto inline-flex items-center justify-center text-center cursor-pointer active:scale-98 shadow-sm ${isCurrent && isPaidActive
-                                        ? 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800/80 cursor-default'
-                                        : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
-                                        }`}
-                                >
-                                    {isCurrent && isPaidActive ? 'Your Current Plan' : 'Select Plan & Unlock'}
-                                </button>
+                                <div className="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+                                    <button
+                                        onClick={() => handleSelectPlan(plan)}
+                                        disabled={isSubmitting || (isCurrent && isPaidActive)}
+                                        className={`w-full py-3.5 px-6 min-h-[48px] rounded-2xl font-bold text-sm tracking-wide transition-all inline-flex items-center justify-center text-center cursor-pointer active:scale-98 shadow-sm ${isCurrent && isPaidActive
+                                            ? 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-slate-900/90 dark:text-orange-400 dark:border-orange-500/50 cursor-default'
+                                            : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/20'
+                                            }`}
+                                    >
+                                        {isCurrent && isPaidActive ? 'Your Current Plan' : 'Select Plan & Unlock'}
+                                    </button>
+                                </div>
                             </div>
                         );
                     })}

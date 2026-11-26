@@ -4,19 +4,22 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import { CustomerAuthProvider } from './context/CustomerAuthContext';
 import { CartProvider } from './context/CartContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
-        <CustomerAuthProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </CustomerAuthProvider>
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <CustomerAuthProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </CustomerAuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </ErrorBoundary>
   </StrictMode>,
 );

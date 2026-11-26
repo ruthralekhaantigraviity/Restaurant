@@ -29,11 +29,6 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-html.dark {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-}
-
 body {
   margin: 0;
   padding: 0;

@@ -213,7 +213,7 @@ const CategoryManagement = ({ embedded = false, onUpdated }) => {
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     <button 
                                                         onClick={() => handleDelete(cat._id)}
-                                                        className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                                                        className="p-1.5 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg transition-colors cursor-pointer border border-rose-200 dark:border-rose-900/60 shadow-2xs"
                                                         title="Delete Category"
                                                     >
                                                         <Trash2 size={15} />

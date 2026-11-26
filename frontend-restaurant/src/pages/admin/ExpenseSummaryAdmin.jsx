@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-    DollarSign, TrendingDown, TrendingUp, Calendar, Building2, Search, 
-    Download, PieChart as PieIcon, ArrowUpRight, ArrowDownRight, Tag, 
-    Plus, Filter, FileText, CheckCircle2, Receipt, AlertCircle, 
+import {
+    DollarSign, TrendingDown, TrendingUp, Calendar, Building2, Search,
+    Download, PieChart as PieIcon, ArrowUpRight, ArrowDownRight, Tag,
+    Plus, Filter, FileText, CheckCircle2, Receipt, AlertCircle,
     CreditCard, Clock, RefreshCw, X, AlertTriangle, Layers,
     Edit2, Trash2, Eye
 } from 'lucide-react';
-import { 
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
+import {
+    PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -46,14 +46,19 @@ const getPaymentBadge = (status) => {
     switch (status) {
         case 'Paid':
             return <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold">Paid</span>;
+            return <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Paid</span>;
         case 'Partially Paid':
             return <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-bold">Partially Paid</span>;
+            return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Partially Paid</span>;
         case 'Pending':
             return <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold">Pending</span>;
+            return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Pending</span>;
         case 'Overdue':
             return <span className="bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs font-bold">Overdue</span>;
+            return <span className="bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Overdue</span>;
         default:
             return <span className="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-full text-xs font-bold">{status}</span>;
+            return <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">{status}</span>;
     }
 };
 
@@ -102,7 +107,7 @@ const ExpenseSummaryAdmin = () => {
         isOpen: false,
         title: '',
         message: '',
-        onConfirm: () => {},
+        onConfirm: () => { },
         isDestructive: true
     });
 
@@ -174,7 +179,7 @@ const ExpenseSummaryAdmin = () => {
                     if (fallbackRes.data && fallbackRes.data.length > 0) {
                         expData = fallbackRes.data;
                     }
-                } catch (_) {}
+                } catch (_) { }
             }
 
             setExpenses(expData);
@@ -416,10 +421,10 @@ const ExpenseSummaryAdmin = () => {
         return expenses.filter(e => {
             if (!searchQuery) return true;
             const q = searchQuery.toLowerCase();
-            return (e.title?.toLowerCase().includes(q) || 
-                    e.description?.toLowerCase().includes(q) || 
-                    e.category?.toLowerCase().includes(q) ||
-                    e.billingPeriod?.toLowerCase().includes(q));
+            return (e.title?.toLowerCase().includes(q) ||
+                e.description?.toLowerCase().includes(q) ||
+                e.category?.toLowerCase().includes(q) ||
+                e.billingPeriod?.toLowerCase().includes(q));
         });
     }, [expenses, searchQuery]);
 
@@ -470,7 +475,7 @@ const ExpenseSummaryAdmin = () => {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start xl:self-center">
-                    <button 
+                    <button
                         onClick={handleGenerateRecurring}
                         disabled={isGeneratingRecurring}
                         className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer whitespace-nowrap active:scale-95 disabled:opacity-60"
@@ -479,13 +484,13 @@ const ExpenseSummaryAdmin = () => {
                         <RefreshCw size={15} className={isGeneratingRecurring ? 'animate-spin text-emerald-600' : ''} />
                         <span>{isGeneratingRecurring ? 'Generating Bills...' : 'Check Recurring Bills'}</span>
                     </button>
-                    <button 
+                    <button
                         onClick={handleExportCSV}
                         className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-xs cursor-pointer whitespace-nowrap"
                     >
                         <Download size={15} /> Export CSV
                     </button>
-                    <button 
+                    <button
                         onClick={() => setIsAddModalOpen(true)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-sm shadow-md shadow-emerald-900/10 cursor-pointer whitespace-nowrap"
                     >
@@ -567,41 +572,37 @@ const ExpenseSummaryAdmin = () => {
             <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
                 <button
                     onClick={() => handleTabChange('expenses')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
-                        activeTab === 'expenses'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${activeTab === 'expenses'
+                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
                 >
                     <Receipt size={16} /> All Expenses & Invoices ({filteredExpenses.length})
                 </button>
                 <button
                     onClick={() => handleTabChange('bills')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
-                        activeTab === 'bills'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${activeTab === 'bills'
+                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
                 >
                     <Building2 size={16} /> Rent & Utility Bills ({utilityBills.length})
                 </button>
                 <button
                     onClick={() => handleTabChange('pending')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
-                        activeTab === 'pending'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${activeTab === 'pending'
+                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
                 >
                     <AlertCircle size={16} /> Pending & Overdue Liabilities ({pendingBills.length})
                 </button>
                 <button
                     onClick={() => handleTabChange('analytics')}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
-                        activeTab === 'analytics'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap ${activeTab === 'analytics'
+                        ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
                 >
                     <PieIcon size={16} /> Category Breakdown
                 </button>
@@ -611,7 +612,7 @@ const ExpenseSummaryAdmin = () => {
             <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="relative w-full md:w-80">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input 
+                    <input
                         type="text"
                         placeholder="Search title, category, description..."
                         value={searchQuery}
@@ -621,7 +622,7 @@ const ExpenseSummaryAdmin = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <select 
+                    <select
                         value={selectedPeriod}
                         onChange={(e) => setSelectedPeriod(e.target.value)}
                         className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
@@ -634,7 +635,7 @@ const ExpenseSummaryAdmin = () => {
                         <option value="all">All Time</option>
                     </select>
 
-                    <select 
+                    <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
                         className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
@@ -643,7 +644,7 @@ const ExpenseSummaryAdmin = () => {
                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
 
-                    <select 
+                    <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                         className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
@@ -656,7 +657,7 @@ const ExpenseSummaryAdmin = () => {
                     </select>
 
                     {branches.length > 1 && (
-                        <select 
+                        <select
                             value={selectedBranch}
                             onChange={(e) => setSelectedBranch(e.target.value)}
                             className="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
@@ -735,9 +736,9 @@ const ExpenseSummaryAdmin = () => {
                                                 </div>
                                             </td>
                                             <td className="py-4.5 px-6 align-middle min-w-[170px] whitespace-nowrap">
-                                                <span 
+                                                <span
                                                     className="px-3 py-1.5 rounded-lg text-xs font-bold inline-block whitespace-nowrap shadow-2xs"
-                                                    style={{ 
+                                                    style={{
                                                         backgroundColor: `${CATEGORY_COLORS[e.category] || '#64748B'}18`,
                                                         color: CATEGORY_COLORS[e.category] || '#64748B'
                                                     }}
@@ -804,7 +805,7 @@ const ExpenseSummaryAdmin = () => {
                                             <td className="py-4.5 px-6 text-right pr-8 whitespace-nowrap align-middle min-w-[180px]">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {e.balanceDue > 0 && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => {
                                                                 setSelectedExpenseForPayment(e);
                                                                 setPaymentForm({
@@ -880,19 +881,19 @@ const ExpenseSummaryAdmin = () => {
                                         paddingAngle={2}
                                     >
                                         {categoryChartData.map((entry, index) => (
-                                            <Cell 
-                                                key={`cell-${index}`} 
-                                                fill={CATEGORY_COLORS[entry.name] || '#64748B'} 
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={CATEGORY_COLORS[entry.name] || '#64748B'}
                                             />
                                         ))}
                                     </Pie>
-                                    <Tooltip 
+                                    <Tooltip
                                         contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                                         formatter={(value, name) => {
                                             const total = categoryChartData.reduce((s, c) => s + c.value, 0);
                                             const pct = total > 0 ? ((Number(value) / total) * 100).toFixed(1) : 0;
                                             return [`₹${Number(value).toLocaleString('en-IN')}`, `${name} (${pct}%)`];
-                                        }} 
+                                        }}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
@@ -911,9 +912,9 @@ const ExpenseSummaryAdmin = () => {
                                 return (
                                     <div key={cat.name} className="py-3 flex items-center justify-between text-sm">
                                         <div className="flex items-center gap-2.5">
-                                            <span 
-                                                className="w-3 h-3 rounded-full shrink-0" 
-                                                style={{ backgroundColor: CATEGORY_COLORS[cat.name] || '#64748B' }} 
+                                            <span
+                                                className="w-3 h-3 rounded-full shrink-0"
+                                                style={{ backgroundColor: CATEGORY_COLORS[cat.name] || '#64748B' }}
                                             />
                                             <span className="font-semibold text-slate-800 dark:text-slate-200">{cat.name}</span>
                                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
@@ -943,8 +944,8 @@ const ExpenseSummaryAdmin = () => {
                         </div>
                         <form onSubmit={handleSaveExpense} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                <input 
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title *</label>
+                                <input
                                     type="text"
                                     required
                                     value={expenseForm.title}
@@ -956,8 +957,8 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                    <select 
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category *</label>
+                                    <select
                                         value={expenseForm.category}
                                         onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
                                         className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
@@ -966,8 +967,8 @@ const ExpenseSummaryAdmin = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                    <input 
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Amount (₹) *</label>
+                                    <input
                                         type="number"
                                         step="any"
                                         min="1"
@@ -981,8 +982,8 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Date <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                    <input 
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Date *</label>
+                                    <input
                                         type="date"
                                         required
                                         value={expenseForm.date}
@@ -992,7 +993,7 @@ const ExpenseSummaryAdmin = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Due Date</label>
-                                    <input 
+                                    <input
                                         type="date"
                                         value={expenseForm.dueDate}
                                         onChange={(e) => setExpenseForm({ ...expenseForm, dueDate: e.target.value })}
@@ -1004,7 +1005,7 @@ const ExpenseSummaryAdmin = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Billing Period</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={expenseForm.billingPeriod}
                                         onChange={(e) => setExpenseForm({ ...expenseForm, billingPeriod: e.target.value })}
@@ -1015,7 +1016,7 @@ const ExpenseSummaryAdmin = () => {
                                 {branches.length > 0 && (
                                     <div>
                                         <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Branch</label>
-                                        <select 
+                                        <select
                                             value={expenseForm.branchId}
                                             onChange={(e) => setExpenseForm({ ...expenseForm, branchId: e.target.value })}
                                             className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
@@ -1034,7 +1035,7 @@ const ExpenseSummaryAdmin = () => {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-[11px] font-bold text-slate-400 mb-1">Paid Now (₹)</label>
-                                        <input 
+                                        <input
                                             type="number"
                                             step="any"
                                             min="0"
@@ -1045,7 +1046,7 @@ const ExpenseSummaryAdmin = () => {
                                     </div>
                                     <div>
                                         <label className="block text-[11px] font-bold text-slate-400 mb-1">Payment Method</label>
-                                        <select 
+                                        <select
                                             value={expenseForm.paymentMethod}
                                             onChange={(e) => setExpenseForm({ ...expenseForm, paymentMethod: e.target.value })}
                                             className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
@@ -1062,7 +1063,7 @@ const ExpenseSummaryAdmin = () => {
 
                             {/* Recurring Checkbox */}
                             <div className="flex items-center gap-2">
-                                <input 
+                                <input
                                     type="checkbox"
                                     id="isRecurring"
                                     checked={expenseForm.isRecurring}
@@ -1075,14 +1076,14 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsAddModalOpen(false)}
                                     className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     type="submit"
                                     className="px-5 py-2 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs"
                                 >
@@ -1160,8 +1161,8 @@ const ExpenseSummaryAdmin = () => {
 
                         <form onSubmit={handleRecordPayment} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                <input 
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Disbursement Amount (₹) *</label>
+                                <input
                                     type="number"
                                     step="any"
                                     required
@@ -1172,8 +1173,8 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                <select 
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Payment Method *</label>
+                                <select
                                     value={paymentForm.paymentMethod}
                                     onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
                                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold"
@@ -1190,7 +1191,7 @@ const ExpenseSummaryAdmin = () => {
                                 <label className="block text-xs font-bold uppercase text-slate-500 mb-1">
                                     Transaction Ref / Cheque # <span className="text-red-500 font-black">*</span>
                                 </label>
-                                <input 
+                                <input
                                     type="text"
                                     required
                                     value={paymentForm.paymentReference}
@@ -1201,14 +1202,14 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsPaymentModalOpen(false)}
                                     className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     type="submit"
                                     className="px-5 py-2 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs cursor-pointer"
                                 >
@@ -1232,8 +1233,8 @@ const ExpenseSummaryAdmin = () => {
                         </div>
                         <form onSubmit={handleUpdateExpense} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                <input 
+                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Title *</label>
+                                <input
                                     type="text"
                                     required
                                     value={editForm.title}
@@ -1244,8 +1245,8 @@ const ExpenseSummaryAdmin = () => {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                    <select 
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Category *</label>
+                                    <select
                                         value={editForm.category}
                                         onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                                         className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white"
@@ -1254,8 +1255,8 @@ const ExpenseSummaryAdmin = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Total Amount (₹) <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                    <input 
+                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Total Amount (₹) *</label>
+                                    <input
                                         type="number"
                                         step="any"
                                         min="1"
@@ -1270,7 +1271,7 @@ const ExpenseSummaryAdmin = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Expense Date</label>
-                                    <input 
+                                    <input
                                         type="date"
                                         required
                                         value={editForm.date}
@@ -1280,7 +1281,7 @@ const ExpenseSummaryAdmin = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Due Date</label>
-                                    <input 
+                                    <input
                                         type="date"
                                         value={editForm.dueDate}
                                         onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
@@ -1292,7 +1293,7 @@ const ExpenseSummaryAdmin = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Paid Amount (₹)</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         step="any"
                                         min="0"
@@ -1303,7 +1304,7 @@ const ExpenseSummaryAdmin = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1">Billing Period</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={editForm.billingPeriod}
                                         onChange={(e) => setEditForm({ ...editForm, billingPeriod: e.target.value })}
@@ -1314,7 +1315,7 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <input 
+                                <input
                                     type="checkbox"
                                     id="editIsRecurring"
                                     checked={editForm.isRecurring}
@@ -1327,14 +1328,14 @@ const ExpenseSummaryAdmin = () => {
                             </div>
 
                             <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsEditModalOpen(false)}
                                     className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     type="submit"
                                     className="px-5 py-2 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs cursor-pointer"
                                 >
@@ -1430,7 +1431,7 @@ const ExpenseSummaryAdmin = () => {
             )}
 
             {/* CONFIRMATION MODAL */}
-            <ConfirmModal 
+            <ConfirmModal
                 isOpen={confirmModal.isOpen}
                 onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
                 onConfirm={confirmModal.onConfirm}

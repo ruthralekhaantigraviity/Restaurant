@@ -203,56 +203,55 @@ const SupplierManagement = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredSuppliers.map(supplier => (
-                        <div key={supplier._id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
-                            {/* Status Badge */}
-                            <div className="absolute top-0 right-0 m-4 flex items-center gap-2">
-                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${supplier.isActive ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-800/60'}`}>
-                                    {supplier.isActive ? 'Active' : 'Inactive'}
-                                </span>
-                            </div>
-                            
-                            {/* Delete Button */}
-                            <div className="absolute top-4 right-20 transition-opacity">
-                                <button 
-                                    onClick={() => handleDelete(supplier._id)}
-                                    className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/60 dark:text-red-400 dark:hover:bg-red-900/60 rounded-lg transition-colors cursor-pointer border border-red-200/80 dark:border-red-900/40 shadow-xs"
-                                    title="Delete Supplier"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
-                            </div>
-
-                            <div className="mb-4 pr-12">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{supplier.name}</h3>
-                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1">{supplier.category}</p>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
-                                {supplier.contactPerson && (
-                                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-slate-300">
-                                        <div className="w-6 flex justify-center"><User size={16} className="text-gray-400 dark:text-slate-500" /></div>
-                                        <span>Name: {supplier.contactPerson}</span>
+                        <div key={supplier._id} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full min-h-[300px]">
+                            <div>
+                                {/* Header: Title + Category on Left, Badge + Delete on Right */}
+                                <div className="flex items-start justify-between gap-3 mb-4">
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate" title={supplier.name}>{supplier.name}</h3>
+                                        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">{supplier.category}</p>
                                     </div>
-                                )}
-                                <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-slate-300">
-                                    <div className="w-6 flex justify-center"><Phone size={16} className="text-gray-400 dark:text-slate-500" /></div>
-                                    <span>{supplier.phone}</span>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${supplier.isActive ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800/60' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-800/60'}`}>
+                                            {supplier.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                        <button 
+                                            onClick={() => handleDelete(supplier._id)}
+                                            className="p-1.5 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-400 dark:hover:bg-rose-900/60 rounded-lg transition-colors cursor-pointer border border-rose-200/80 dark:border-rose-900/40 shadow-xs"
+                                            title="Delete Supplier"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
                                 </div>
-                                {supplier.email && (
-                                    <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-slate-300">
-                                        <div className="w-6 flex justify-center"><Mail size={16} className="text-gray-400 dark:text-slate-500" /></div>
-                                        <span className="truncate">{supplier.email}</span>
+
+                                <div className="space-y-2.5 mb-6">
+                                    {supplier.contactPerson && (
+                                        <div className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-slate-300">
+                                            <div className="w-5 flex justify-center shrink-0"><User size={15} className="text-gray-400 dark:text-slate-500" /></div>
+                                            <span className="truncate">Name: {supplier.contactPerson}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-slate-300">
+                                        <div className="w-5 flex justify-center shrink-0"><Phone size={15} className="text-gray-400 dark:text-slate-500" /></div>
+                                        <span>{supplier.phone}</span>
                                     </div>
-                                )}
-                                {supplier.address && (
-                                    <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-slate-300">
-                                        <div className="w-6 flex justify-center mt-0.5"><MapPin size={16} className="text-gray-400 dark:text-slate-500" /></div>
-                                        <span className="line-clamp-2">{supplier.address}</span>
-                                    </div>
-                                )}
+                                    {supplier.email && (
+                                        <div className="flex items-center gap-2.5 text-sm text-gray-600 dark:text-slate-300">
+                                            <div className="w-5 flex justify-center shrink-0"><Mail size={15} className="text-gray-400 dark:text-slate-500" /></div>
+                                            <span className="truncate">{supplier.email}</span>
+                                        </div>
+                                    )}
+                                    {supplier.address && (
+                                        <div className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-slate-300">
+                                            <div className="w-5 flex justify-center shrink-0 mt-0.5"><MapPin size={15} className="text-gray-400 dark:text-slate-500" /></div>
+                                            <span className="line-clamp-2">{supplier.address}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                            <div className="w-full pt-2">
                                 <button 
                                     onClick={() => handleEditClick(supplier)}
                                     className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-98"

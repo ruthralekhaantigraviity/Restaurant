@@ -6,6 +6,7 @@ import {
     X, LogOut, ChevronRight, User, UtensilsCrossed, BookOpen
 } from 'lucide-react';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
+import ThemeToggle from './ThemeToggle';
 
 export const CUSTOMER_DASHBOARD_TABS = [
     { id: 'profile', name: 'Profile & Settings', icon: User, desc: 'Account Details & Password' },
@@ -93,13 +94,13 @@ const CustomerNavDrawer = ({ isOpen, onClose, activeTab, onSelectTab }) => {
 
             {/* Slide-out Navigation Drawer Panel */}
             <aside 
-                className={`fixed top-0 bottom-0 left-0 w-80 max-w-[85vw] bg-white z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-out transform ${
+                className={`fixed top-0 bottom-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-out transform ${
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
                 aria-label="Customer Navigation Drawer"
             >
                 {/* Drawer Top Header */}
-                <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-orange-50/50 to-white">
+                <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-orange-50/50 to-white dark:from-slate-900 dark:to-slate-800">
                     <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-xl bg-[#FF5A1F] text-white flex items-center justify-center shadow-md shadow-[#FF5A1F]/25">
                             <UtensilsCrossed size={18} className="stroke-[2.2]" />
@@ -113,15 +114,18 @@ const CustomerNavDrawer = ({ isOpen, onClose, activeTab, onSelectTab }) => {
                             </span>
                         </div>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center cursor-pointer"
-                        aria-label="Close menu"
-                        title="Close"
-                    >
-                        <X size={20} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <ThemeToggle iconSize={18} />
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors flex items-center justify-center cursor-pointer"
+                            aria-label="Close menu"
+                            title="Close"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* User Summary Card */}

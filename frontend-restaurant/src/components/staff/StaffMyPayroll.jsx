@@ -17,7 +17,7 @@ const getPayrollBadge = (status, paymentStatus) => {
     }
     if (paymentStatus === 'Partially Paid') {
         return (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800 whitespace-nowrap shrink-0">
                 <Clock size={13} className="text-blue-600 dark:text-blue-400" />
                 Partially Paid
             </span>

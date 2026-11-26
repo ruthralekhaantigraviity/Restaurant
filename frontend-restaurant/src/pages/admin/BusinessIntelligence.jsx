@@ -271,8 +271,8 @@ const BusinessIntelligence = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 font-sans text-gray-900 dark:text-slate-100 print:p-0">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div>
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="max-w-2xl">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         Business Intelligence (BI) Console
                     </h2>
@@ -281,7 +281,7 @@ const BusinessIntelligence = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-nowrap print:hidden">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 shrink-0 print:hidden">
                     <button
                         onClick={fetchBIData}
                         className="h-10 w-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-slate-200 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all shadow-xs shrink-0 cursor-pointer"
@@ -307,13 +307,13 @@ const BusinessIntelligence = () => {
             </div>
 
             {/* Filter Bar (Timeframe, Outlet Branch, Category) */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 print:hidden">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 print:hidden">
                 <div className="flex items-center gap-2 shrink-0">
                     <Sparkles size={16} className="text-indigo-500 animate-pulse" />
                     <span className="text-xs font-black text-gray-900 dark:text-slate-100 uppercase tracking-wider">BI Controls & Filters</span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full xl:w-auto justify-start">
                     {/* Timeframe Filter */}
                     <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-950 px-3 py-2 rounded-xl border border-gray-200/80 dark:border-slate-800">
                         <span className="text-xs font-bold text-gray-400 dark:text-slate-500 shrink-0">Period:</span>

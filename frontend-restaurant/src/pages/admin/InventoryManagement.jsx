@@ -21,13 +21,13 @@ const getStatusBadge = (quantity, minStock) => {
 const getPaymentBadge = (status) => {
     switch (status) {
         case 'Paid':
-            return <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold">Paid</span>;
+            return <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Paid</span>;
         case 'Partially Paid':
-            return <span className="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-bold">Partially Paid</span>;
+            return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Partially Paid</span>;
         case 'Pending':
-            return <span className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold">Pending</span>;
+            return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Pending</span>;
         default:
-            return <span className="bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full text-xs font-bold dark:text-slate-100">{status}</span>;
+            return <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">{status}</span>;
     }
 };
 

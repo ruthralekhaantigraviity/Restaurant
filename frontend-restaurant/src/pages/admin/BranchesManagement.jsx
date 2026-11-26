@@ -189,16 +189,17 @@ const BranchesManagement = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredBranches.map(branch => (
-                        <div key={branch._id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden hover:shadow-md transition-all group">
-                            <div className="p-5 border-b border-gray-50 dark:border-slate-800">
+                        <div key={branch._id} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden hover:shadow-md transition-all group flex flex-col justify-between h-full">
+                            <div className="p-5 border-b border-gray-50 dark:border-slate-800 flex-1">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${branch.isActive ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${branch.isActive ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
                                             <MapPin size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-slate-100" style={{ fontFamily: 'Poppins, sans-serif' }}>{branch.name}</h3>
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${branch.isActive ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'}`}>
+                                            <h3 className="font-bold text-gray-900 dark:text-slate-100 text-base" style={{ fontFamily: 'Poppins, sans-serif' }}>{branch.name}</h3>
+                                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1 border ${branch.isActive ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${branch.isActive ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
                                                 {branch.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
@@ -206,35 +207,35 @@ const BranchesManagement = () => {
                                 </div>
                                 
                                 <div className="space-y-2 mt-4 text-sm text-gray-500 dark:text-slate-400">
-                                    <p className="flex items-center gap-2"><MapPin size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> {branch.location?.address || 'No address'}</p>
-                                    <p className="flex items-center gap-2"><Phone size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> {branch.contact?.phone || 'No phone'}</p>
+                                    <p className="flex items-center gap-2"><MapPin size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> <span className="line-clamp-1">{branch.location?.address || 'No address specified'}</span></p>
+                                    <p className="flex items-center gap-2"><Phone size={14} className="text-blue-500 dark:text-blue-400 shrink-0" /> <span>{branch.contact?.phone || 'No phone'}</span></p>
                                 </div>
                             </div>
                             
-                            <div className="bg-gray-50/50 dark:bg-slate-800/50 p-5 flex justify-between items-center border-b border-gray-100 dark:border-slate-800">
+                            <div className="bg-gray-50/50 dark:bg-slate-800/50 p-4 px-5 flex justify-between items-center border-b border-gray-100 dark:border-slate-800">
                                 <div>
-                                    <p className="text-xs text-gray-400 dark:text-slate-500 font-medium mb-1">Manager</p>
+                                    <p className="text-xs text-gray-400 dark:text-slate-500 font-medium mb-0.5">Manager</p>
                                     <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{branch.manager?.name || 'Unassigned'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-gray-400 dark:text-slate-500 font-medium mb-1">Monthly Rev</p>
-                                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400" style={{ fontFamily: 'Manrope, sans-serif' }}>₹0</p>
+                                    <p className="text-xs text-gray-400 dark:text-slate-500 font-medium mb-0.5">Monthly Rev</p>
+                                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400" style={{ fontFamily: 'Manrope, sans-serif' }}>₹0</p>
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="bg-white dark:bg-slate-900 px-5 py-3 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 opacity-100">
+                            <div className="bg-white dark:bg-slate-900 px-5 py-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
                                 <button 
                                     onClick={() => handleOpenModal(branch)}
-                                    className="text-sm flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors font-semibold cursor-pointer"
+                                    className="px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-900/60 transition-colors cursor-pointer"
                                 >
-                                    <Edit2 size={14} /> Edit
+                                    <Edit2 size={13} /> Edit
                                 </button>
                                 <button 
                                     onClick={() => handleDeleteClick(branch)}
-                                    className="text-sm flex items-center gap-1.5 text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 transition-colors font-semibold cursor-pointer"
+                                    className="px-3 py-1.5 rounded-xl font-bold text-xs inline-flex items-center gap-1.5 text-rose-600 dark:text-rose-400 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer shadow-2xs"
                                 >
-                                    <Trash2 size={14} /> Delete
+                                    <Trash2 size={13} /> Delete
                                 </button>
                             </div>
                         </div>
