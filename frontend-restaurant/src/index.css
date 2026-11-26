@@ -531,3 +531,14 @@ input::-ms-clear {
     size: A4 portrait;
   }
 }
+
+/* Additional dark mode overrides for admin UI */
+.dark .bg-white\/10 { background-color: rgba(30,41,59,0.1) !important; }
+.dark .bg-white\/20 { background-color: rgba(30,41,59,0.2) !important; }
+.dark .bg-white\/30 { background-color: rgba(30,41,59,0.3) !important; }
+.dark .bg-white\/90 { background-color: rgba(30,41,59,0.9) !important; }
+.dark .bg-white\/50 { background-color: rgba(30,41,59,0.5) !important; }
+.dark .bg-white\/25 { background-color: rgba(30,41,59,0.25) !important; }
+.dark .bg-white\/5 { background-color: rgba(30,41,59,0.05) !important; }
+.dark .border-white { border-color: #334155 !important; }
+.dark .text-white { color: #f1f5f9 !important; }
