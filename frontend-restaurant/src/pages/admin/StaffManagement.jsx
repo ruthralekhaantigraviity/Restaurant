@@ -92,7 +92,7 @@ const getAttendancePill = (status) => {
 const getPayrollBadge = (status) => {
     switch (status) {
         case 'Paid': return <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Paid</span>;
-        case 'Partially Paid': return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Partially Paid</span>;
+        case 'Partially Paid': return <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-[10px] font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0 leading-none">Partially Paid</span>;
         case 'Approved': return <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Approved</span>;
         case 'Generated': return <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap inline-flex items-center justify-center shrink-0">Generated</span>;
         case 'Pending Payment':
@@ -1903,7 +1903,7 @@ const StaffManagement = () => {
                                         <th className="py-4 px-6">Overtime</th>
                                         <th className="py-4 px-6">Gross Pay</th>
                                         <th className="py-4 px-6">Net Payable</th>
-                                        <th className="py-4 px-6 text-center whitespace-nowrap min-w-[130px]">Status</th>
+                                        <th className="py-4 px-6 text-center whitespace-nowrap w-[150px]">Status</th>
                                         <th className="py-4 px-6 text-right">Actions</th>
                                     </tr>
                                 </thead>
@@ -1950,7 +1950,7 @@ const StaffManagement = () => {
                                                     <td className="py-4 px-6 font-mono font-bold text-slate-900 dark:text-white">
                                                         ₹{(c.netSalaryPayable || 0).toLocaleString('en-IN')}
                                                     </td>
-                                                    <td className="py-4 px-6 text-center whitespace-nowrap min-w-[130px]">
+                                                    <td className="py-4 px-6 text-center whitespace-nowrap w-[150px]">
                                                         {getPayrollBadge(p.paymentStatus || p.status)}
                                                     </td>
                                                     <td className="py-4 px-6 text-right">
