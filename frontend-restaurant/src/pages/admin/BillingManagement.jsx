@@ -498,10 +498,10 @@ const BillingManagement = () => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
                 <div>
                     <div className="flex items-center gap-2">
-                        <span className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                        <span className="p-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                             <Receipt size={24} />
                         </span>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
                             Billing Management
                         </h2>
                     </div>
@@ -510,22 +510,22 @@ const BillingManagement = () => {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <button
                         onClick={() => setActiveTab('pos')}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer"
+                        className="flex-1 sm:flex-none justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer shrink-0"
                     >
                         <Plus size={16} /> New Counter Bill
                     </button>
                     <button
                         onClick={handleExportCSV}
-                        className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                        className="flex-1 sm:flex-none justify-center bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shadow-xs shrink-0"
                     >
                         <Download size={15} /> Export CSV
                     </button>
                     <button
                         onClick={fetchData}
-                        className="p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl transition-colors cursor-pointer border border-gray-200 dark:border-slate-700"
+                        className="p-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl transition-colors cursor-pointer border border-gray-200 dark:border-slate-700 shrink-0"
                         title="Refresh Data"
                     >
                         <RefreshCcw size={16} className={loading ? 'animate-spin' : ''} />
@@ -640,43 +640,43 @@ const BillingManagement = () => {
 
             {/* Navigation Tabs Bar */}
             <div className="bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
-                    <button
-                        onClick={() => setActiveTab('active')}
-                        className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'active'
-                            ? 'bg-emerald-600 text-white shadow-md'
-                            : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        <Clock size={16} /> Active Open Bills ({activeOpenBills.length})
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('invoices')}
-                        className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'invoices'
-                            ? 'bg-emerald-600 text-white shadow-md'
-                            : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        <FileText size={16} /> Invoices &amp; History
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('pos')}
-                        className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'pos'
-                            ? 'bg-emerald-600 text-white shadow-md'
-                            : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        <Plus size={16} /> Quick POS Counter Billing
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('summary')}
-                        className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${activeTab === 'summary'
-                            ? 'bg-emerald-600 text-white shadow-md'
-                            : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        <Landmark size={16} /> Day-End Cash Summary
-                    </button>
-                </div>
+                <button
+                    onClick={() => setActiveTab('active')}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'active'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                        }`}
+                >
+                    <Clock size={16} /> Active Open Bills ({activeOpenBills.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('invoices')}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'invoices'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                        }`}
+                >
+                    <FileText size={16} /> Invoices &amp; History
+                </button>
+                <button
+                    onClick={() => setActiveTab('pos')}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'pos'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                        }`}
+                >
+                    <Plus size={16} /> Quick POS Counter
+                </button>
+                <button
+                    onClick={() => setActiveTab('summary')}
+                    className={`px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 ${activeTab === 'summary'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                        }`}
+                >
+                    <Landmark size={16} /> Day-End Summary
+                </button>
+            </div>
 
                 {/* TAB 1: ACTIVE OPEN BILLS */}
                 {activeTab === 'active' && (
@@ -795,7 +795,7 @@ const BillingManagement = () => {
                 {activeTab === 'invoices' && (
                     <div className="space-y-4">
                         {/* Filters Toolbar */}
-                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                             <div className="relative w-full md:w-80">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                 <input
@@ -807,12 +807,12 @@ const BillingManagement = () => {
                                 />
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
                                 {/* Period Filter */}
                                 <select
                                     value={periodFilter}
                                     onChange={(e) => setPeriodFilter(e.target.value)}
-                                    className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200"
+                                    className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 cursor-pointer"
                                 >
                                     <option value="today">Today</option>
                                     <option value="yesterday">Yesterday</option>
@@ -825,7 +825,7 @@ const BillingManagement = () => {
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200"
+                                    className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 cursor-pointer"
                                 >
                                     <option value="All">All Status</option>
                                     <option value="Paid">Paid Only</option>
@@ -837,7 +837,7 @@ const BillingManagement = () => {
                                 <select
                                     value={methodFilter}
                                     onChange={(e) => setMethodFilter(e.target.value)}
-                                    className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200"
+                                    className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 cursor-pointer"
                                 >
                                     <option value="All">All Methods</option>
                                     <option value="Cash">Cash</option>
@@ -850,7 +850,7 @@ const BillingManagement = () => {
                                 <select
                                     value={typeFilter}
                                     onChange={(e) => setTypeFilter(e.target.value)}
-                                    className="px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200"
+                                    className="w-full sm:w-auto px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-200 cursor-pointer"
                                 >
                                     <option value="All">All Types</option>
                                     <option value="Dine In">Dine In</option>
@@ -1408,7 +1408,7 @@ const BillingManagement = () => {
                             {/* Payment Method Selector */}
                             <div>
                                 <label className="text-xs font-bold text-gray-600 dark:text-slate-300 block mb-2">Select Payment Method</label>
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {['Cash', 'UPI', 'Card', 'Split'].map(m => (
                                         <button
                                             key={m}
@@ -1455,14 +1455,14 @@ const BillingManagement = () => {
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={() => setSettleModalOrder(null)}
-                                    className="flex-1 py-2.5 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs text-gray-700 dark:text-slate-300 rounded-xl transition-colors cursor-pointer"
+                                    className="flex-1 py-3 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 font-bold text-xs text-gray-700 dark:text-slate-300 rounded-xl transition-colors cursor-pointer text-center"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleConfirmSettle}
                                     disabled={isSubmittingSettle}
-                                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-bold text-xs text-white rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-bold text-xs text-white rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer text-center"
                                 >
                                     <CheckCircle2 size={16} /> {isSubmittingSettle ? 'Settling...' : 'Confirm & Settle'}
                                 </button>

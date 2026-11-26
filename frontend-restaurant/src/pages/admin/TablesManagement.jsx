@@ -289,19 +289,19 @@ const TablesManagement = () => {
             {/* Header & Unified Tabs */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         Table Management &amp; QR Digital Menu
                     </h2>
-                    <p className="text-gray-500 text-sm mt-1 dark:text-slate-400">
+                    <p className="text-gray-500 text-xs sm:text-sm mt-1 dark:text-slate-400">
                         Manage dining tables, generate table QR codes, and enable contactless customer ordering.
                     </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex p-1 bg-gray-100 rounded-xl border border-gray-200 dark:border-slate-800">
+                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    <div className="flex p-1 bg-gray-100 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 w-full sm:w-auto">
                         <button
                             type="button"
                             onClick={() => setActiveTab('tables')}
-                            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${activeTab === 'tables' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            className={`flex-1 sm:flex-none justify-center px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${activeTab === 'tables' ? 'bg-white dark:bg-slate-900 text-green-700 dark:text-emerald-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             <Users size={14} /> Tables ({tables.length})
@@ -309,7 +309,7 @@ const TablesManagement = () => {
                         <button
                             type="button"
                             onClick={() => setActiveTab('qr')}
-                            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${activeTab === 'qr' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            className={`flex-1 sm:flex-none justify-center px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${activeTab === 'qr' ? 'bg-white dark:bg-slate-900 text-green-700 dark:text-emerald-400 shadow-sm' : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             <QrCode size={14} /> QR Digital Menu
@@ -318,7 +318,7 @@ const TablesManagement = () => {
 
                     <button
                         onClick={handleAddClick}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm shadow-sm cursor-pointer"
+                        className="w-full sm:w-auto justify-center bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm shadow-sm cursor-pointer shrink-0"
                     >
                         <Plus size={18} /> Add Table
                     </button>
