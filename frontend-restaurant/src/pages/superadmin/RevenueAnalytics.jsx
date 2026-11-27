@@ -38,6 +38,7 @@ const RevenueAnalytics = () => {
             setLoading(false);
         }
     };
+export default RevenueAnalytics;
 
     useEffect(() => {
         fetchData();
@@ -53,7 +54,9 @@ const RevenueAnalytics = () => {
     }
 
     const stats = analytics?.stats || {};
+export default RevenueAnalytics;
     const trends = analytics?.trends || {};
+export default RevenueAnalytics;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 text-slate-900 dark:text-slate-100">
@@ -257,5 +260,6 @@ const RevenueAnalytics = () => {
         </div>
     );
 };
+export default RevenueAnalytics;
 
 export default RevenueAnalytics;

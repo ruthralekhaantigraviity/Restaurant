@@ -544,3 +544,12 @@ html.dark .hover\:bg-gray-100:hover {
   }
 }
 
+
+/* Dark mode overrides for Tailwind white utilities used in customer pages */
+.dark .bg-white { background-color: #1e293b !important; }
+.dark .bg-white\/95 { background-color: rgba(30,41,59,.95) !important; }
+.dark .bg-white\/75 { background-color: rgba(30,41,59,.75) !important; }
+.dark .text-slate-800 { color: #f1f5f9 !important; }
+.dark .text-slate-700 { color: #e2e8f0 !important; }
+.dark .border-slate-100 { border-color: #334155 !important; }
+.dark .border-slate-200 { border-color: #475569 !important; }
