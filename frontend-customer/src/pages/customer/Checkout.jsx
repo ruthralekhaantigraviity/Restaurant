@@ -551,7 +551,7 @@ const Checkout = () => {
                                         <p className="font-extrabold text-gray-800 uppercase tracking-wider text-[9px] mb-1">Delivery Settings</p>
                                         <div className="flex justify-between">
                                             <span>Radius Limit:</span>
-                                            <span className="font-bold text-gray-900">{selectedRestaurantObj.deliverySettings?.radius || 5} km</span>
+                                            <span className="inline-block font-bold text-gray-900 dark:text-gray-100">{selectedRestaurantObj.deliverySettings?.radius || 5} km</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span>Operating Hours:</span>
