@@ -179,7 +179,7 @@ const ManagerSales = () => {
             </div>
 
             {/* Sales KPIs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl text-white shadow-md">
                     <div className="flex justify-between items-start mb-2">
                         <p className="text-green-50 font-medium">Gross Sales</p>

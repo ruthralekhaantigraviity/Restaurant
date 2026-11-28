@@ -41,7 +41,7 @@ const WaiterDashboard = () => {
         const onWaiterSearch = (e) => setSearchQuery(e.detail || '');
         const onStaffClockOut = () => {
             setIsClockedIn(false);
-            try { localStorage.removeItem('waiter_shift_clocked_in'); } catch (_) {}
+            try { localStorage.removeItem('waiter_shift_clocked_in'); } catch (_) { }
         };
         window.addEventListener('waiter-search', onWaiterSearch);
         window.addEventListener('staff-clock-out', onStaffClockOut);
@@ -80,7 +80,7 @@ const WaiterDashboard = () => {
                     return true;
                 }
             }
-        } catch (_) {}
+        } catch (_) { }
         return false;
     });
 
@@ -103,7 +103,7 @@ const WaiterDashboard = () => {
                 lastClockOutTime: null
             }));
 
-            await api.post('/staff/clock-in', { status: 'Present' }).catch(() => {});
+            await api.post('/staff/clock-in', { status: 'Present' }).catch(() => { });
             toast.success('Successfully clocked in! Shift is active.');
             fetchData();
         } catch (err) {
@@ -196,7 +196,7 @@ const WaiterDashboard = () => {
             setActiveOrders(ords.filter(o => !['Delivered', 'Completed'].includes(o.status)));
             const tbls = Array.isArray(tablesRes.data) ? tablesRes.data : [];
             setDbTables(tbls);
-            try { sessionStorage.setItem('restosys_waiter_tables_cache', JSON.stringify(tbls)); } catch (_) {}
+            try { sessionStorage.setItem('restosys_waiter_tables_cache', JSON.stringify(tbls)); } catch (_) { }
             setServiceRequests(Array.isArray(requestsRes.data) ? requestsRes.data : []);
 
             if (attendanceRes?.data) {
@@ -336,7 +336,7 @@ const WaiterDashboard = () => {
                     try {
                         sessionStorage.removeItem('restosys_tables_cache');
                         localStorage.removeItem('restosys_tables_cache');
-                    } catch (_) {}
+                    } catch (_) { }
                 }
             }
         });
@@ -385,10 +385,15 @@ const WaiterDashboard = () => {
         try {
             await api.put(`/tables/${activeTable.dbId}/status`, { status: newStatus });
             toast.success(`Table ${activeTable.id} is now ${newStatus}`);
-            fetchData();
+            setDbTables(prev => {
+                const updated = prev.map(tb => tb._id === activeTable.dbId ? { ...tb, status: newStatus } : tb);
+                try { sessionStorage.setItem('restosys_waiter_tables_cache', JSON.stringify(updated)); } catch (_) { }
+                return updated;
+            });
             setActiveTable(prev => ({ ...prev, status: newStatus }));
+            fetchData();
         } catch (error) {
-            toast.error("Failed to change table status");
+            toast.error(error.response?.data?.message || "Failed to change table status");
         }
     };
 
@@ -403,7 +408,7 @@ const WaiterDashboard = () => {
         const displayId = String(t.tableNumber).toLowerCase().startsWith('table') ? t.tableNumber : `Table ${t.tableNumber}`;
         const order = activeOrders.find(o => norm(o.tableNumber) === norm(t.tableNumber) || String(o.tableNumber) === String(t.tableNumber));
         let displayStatus = t.status || 'Available';
-        if (order) {
+        if (order && (!t.status || t.status === 'Available' || t.status === 'Occupied')) {
             displayStatus = 'Occupied';
             if (order.status === 'Served') displayStatus = 'Billing';
             else if (order.status === 'Ready' || order.status === 'Ready for Pickup') displayStatus = 'Needs Attention';
@@ -697,18 +702,18 @@ const WaiterDashboard = () => {
     const getTableBadgeStyle = (status) => {
         switch (status) {
             case 'Available':
-                return 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:border-emerald-400 hover:shadow-emerald-100';
+                return 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-300 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-emerald-100 dark:hover:shadow-none';
             case 'Waiting for Food':
             case 'Occupied':
-                return 'bg-amber-50 border-amber-200 text-amber-800 hover:border-amber-400 hover:shadow-amber-100';
+                return 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/80 text-amber-800 dark:text-amber-300 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-amber-100 dark:hover:shadow-none';
             case 'Billing':
-                return 'bg-blue-50 border-blue-200 text-blue-800 hover:border-blue-400 hover:shadow-blue-100';
+                return 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/80 text-blue-800 dark:text-blue-300 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-blue-100 dark:hover:shadow-none';
             case 'Reserved':
-                return 'bg-purple-50 border-purple-200 text-purple-800 hover:border-purple-400 hover:shadow-purple-100';
+                return 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/80 text-purple-800 dark:text-purple-300 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-purple-100 dark:hover:shadow-none';
             case 'Needs Attention':
-                return 'bg-rose-50 border-rose-200 text-rose-800 hover:border-rose-400 hover:shadow-rose-100';
+                return 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 text-rose-800 dark:text-rose-300 hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-rose-100 dark:hover:shadow-none';
             default:
-                return 'bg-slate-50 border-slate-200 text-slate-700';
+                return 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300';
         }
     };
 
@@ -745,7 +750,7 @@ const WaiterDashboard = () => {
     if (!isClockedIn) {
         return (
             <div className="w-full max-w-[1600px] mx-auto min-h-[75vh] flex items-center justify-center p-4 font-sans">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
+                <div className="bg-white dark:bg-slate-900 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
                     <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 shadow-inner">
                         <Clock size={40} className="animate-pulse" />
                     </div>
@@ -778,7 +783,7 @@ const WaiterDashboard = () => {
     }
 
     return (
-        <div className="w-full max-w-[1700px] mx-auto text-slate-900 font-sans pb-16 selection:bg-emerald-100 selection:text-emerald-900">
+        <div className="w-full max-w-[1700px] mx-auto text-slate-900 dark:text-slate-100 font-sans pb-16 selection:bg-emerald-100 selection:text-emerald-900">
             <div className="space-y-4 sm:space-y-6">
 
                 {/* Sleek Waitstaff Shift & Station Control Strip */}
@@ -809,98 +814,98 @@ const WaiterDashboard = () => {
                 {/* -------------------------------------------------- */}
                 {/* SHIFT SUMMARY CARDS */}
                 {/* -------------------------------------------------- */}
-                <section id="shift-status" className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3.5">
+                <section id="shift-status" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-3.5">
 
                     {/* Card 1: Shift Status */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Shift Status</span>
-                            <span className={`w-2.5 h-2.5 rounded-full ${isClockedIn ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Shift Status</span>
+                            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isClockedIn ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
                         </div>
-                        <div className={`font-extrabold text-sm flex items-center gap-1.5 ${isClockedIn ? 'text-emerald-700' : 'text-slate-500'}`}>
-                            <UserCheck size={16} className={isClockedIn ? 'text-emerald-600' : 'text-slate-400'} /> {isClockedIn ? 'On Duty' : 'Off Duty'}
+                        <div className={`font-extrabold text-sm flex items-center gap-1.5 ${isClockedIn ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                            <UserCheck size={16} className={`shrink-0 ${isClockedIn ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} /> <span className="truncate">{isClockedIn ? 'On Duty' : 'Off Duty'}</span>
                         </div>
-                        <div className="mt-2 text-[10px] font-semibold text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-2 truncate">
-                            <Clock size={11} /> {attendance?.checkIn ? `In: ${new Date(attendance.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : (isClockedIn ? 'Shift Active' : 'Not Clocked In')}
+                        <div className="mt-2 text-[10px] font-semibold text-slate-400 dark:text-slate-400 flex items-center gap-1 border-t border-slate-100 dark:border-slate-800 pt-2 truncate">
+                            <Clock size={11} className="shrink-0" /> <span className="truncate">{attendance?.checkIn ? `In: ${new Date(attendance.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : (isClockedIn ? 'Shift Active' : 'Not Clocked In')}</span>
                         </div>
                     </div>
 
                     {/* Card 2: Tables Assigned */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Tables Assigned</span>
-                            <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Tables Assigned</span>
+                            <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                                 <Utensils size={14} />
                             </div>
                         </div>
-                        <div className="text-2xl font-black text-slate-900 tracking-tight">
+                        <div className="text-xl 2xl:text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">
                             {assignedTablesCount} <span className="text-xs font-bold text-slate-400">Tables</span>
                         </div>
-                        <div className="mt-1.5 text-[10px] font-bold text-emerald-600">
+                        <div className="mt-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 truncate">
                             {assignedTablesCount > 0 ? `${assignedTablesCount} active floor stations` : 'No tables assigned'}
                         </div>
                     </div>
 
                     {/* Card 3: Active Orders */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Active Orders</span>
-                            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-xl">
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Active Orders</span>
+                            <div className="p-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
                                 <Layers size={14} />
                             </div>
                         </div>
-                        <div className="text-2xl font-black text-slate-900 tracking-tight">
+                        <div className="text-xl 2xl:text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">
                             {activeOrdersCount} <span className="text-xs font-bold text-slate-400">Orders</span>
                         </div>
-                        <div className="mt-1.5 text-[10px] font-semibold text-blue-600">
+                        <div className="mt-1.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 truncate">
                             {activeOrders.filter(o => o.status === 'Preparing' || o.status === 'Accepted').length} preparing in kitchen
                         </div>
                     </div>
 
                     {/* Card 4: Food Ready */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Food Ready</span>
-                            <div className="p-1.5 bg-amber-50 text-amber-600 rounded-xl">
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Food Ready</span>
+                            <div className="p-1.5 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 rounded-xl shrink-0">
                                 <Flame size={14} />
                             </div>
                         </div>
-                        <div className="text-2xl font-black text-amber-600 tracking-tight flex items-center gap-1.5">
+                        <div className="text-xl 2xl:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight flex items-center gap-1.5 truncate">
                             {foodReadyCount} <span className="text-xs font-bold text-slate-400">Waiting</span>
                         </div>
-                        <div className="mt-1.5 text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit">
+                        <div className="mt-1.5 text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200/50 dark:border-amber-800/60 px-2 py-0.5 rounded-md w-fit max-w-full truncate">
                             Serve Immediately 🔥
                         </div>
                     </div>
 
                     {/* Card 5: Customer Rating */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Customer Rating</span>
-                            <div className="p-1.5 bg-yellow-50 text-yellow-600 rounded-xl">
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Customer Rating</span>
+                            <div className="p-1.5 bg-yellow-50 dark:bg-yellow-950/60 text-yellow-600 dark:text-yellow-400 rounded-xl shrink-0">
                                 <Star size={14} className="fill-yellow-500" />
                             </div>
                         </div>
-                        <div className="text-2xl font-black text-slate-900 tracking-tight">
-                            {waiterRating} <span className="text-xs font-extrabold text-slate-400">/ 5.0</span>
+                        <div className="text-xl 2xl:text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                            {waiterRating}
                         </div>
-                        <div className="mt-1.5 text-[10px] font-semibold text-slate-400 flex items-center gap-1">
-                            <Award size={11} className="text-emerald-600" /> Customer Service Score
+                        <div className="mt-1.5 text-[10px] font-semibold text-slate-400 flex items-center gap-1 truncate">
+                            <Award size={11} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> <span className="truncate">Customer Service Score</span>
                         </div>
                     </div>
 
                     {/* Card 6: Today's Tips */}
-                    <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Today's Tips</span>
-                            <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <div className="min-w-0 bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300 group hover:-translate-y-0.5 flex flex-col justify-between">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Today's Tips</span>
+                            <div className="p-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl shrink-0">
                                 <DollarSign size={14} />
                             </div>
                         </div>
-                        <div className="text-2xl font-black text-emerald-700 tracking-tight">
+                        <div className="text-xl 2xl:text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tight truncate">
                             ₹{todayTips}
                         </div>
-                        <div className="mt-1.5 text-[10px] font-bold text-emerald-600">
+                        <div className="mt-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 truncate">
                             Live shift tip earnings
                         </div>
                     </div>
@@ -910,82 +915,82 @@ const WaiterDashboard = () => {
                 {/* -------------------------------------------------- */}
                 {/* PRIORITY ACTION CENTER */}
                 {/* -------------------------------------------------- */}
-                <section id="priority-actions" className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-3.5 sm:p-5 shadow-xs">
-                    <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xs">
+                <section id="priority-actions" className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xs shrink-0">
                                 <Flame size={18} />
                             </div>
-                            <div>
-                                <h2 className="font-extrabold text-base text-slate-900 tracking-tight">Priority Action Center</h2>
-                                <p className="text-xs text-slate-400 font-medium">Urgent tasks ranked by priority level</p>
+                            <div className="min-w-0">
+                                <h2 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight truncate">Priority Action Center</h2>
+                                <p className="text-xs text-slate-400 font-medium truncate">Urgent tasks ranked by priority level</p>
                             </div>
                         </div>
-                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 px-3 py-1 rounded-full shrink-0 whitespace-nowrap">
                             {priorityActions.length} Critical {priorityActions.length === 1 ? 'Item' : 'Items'}
                         </span>
                     </div>
 
                     {priorityActions.length === 0 ? (
-                        <div className="p-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        <div className="p-8 text-center bg-slate-50/50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700/80">
                             <CheckCircle2 size={32} className="mx-auto text-emerald-500 mb-2" />
-                            <p className="font-bold text-slate-800 text-sm">All priority actions completed!</p>
+                            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">All priority actions completed!</p>
                             <p className="text-xs text-slate-400 mt-1">Great job! No pending urgent requests.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
                             {priorityActions.map((item) => {
                                 const IconComponent = item.icon;
                                 const styleConfig = {
                                     rose: {
-                                        bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200/80',
+                                        bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50 dark:from-rose-950/50 dark:to-rose-900/20 border-rose-200/80 dark:border-rose-800/60',
                                         bar: 'bg-rose-500',
-                                        badge: 'text-rose-700 bg-rose-200/60',
-                                        time: 'text-rose-600',
-                                        title: 'text-rose-950',
-                                        sub: 'text-rose-800',
-                                        detail: 'text-rose-700/80',
+                                        badge: 'text-rose-700 dark:text-rose-300 bg-rose-200/60 dark:bg-rose-900/60',
+                                        time: 'text-rose-600 dark:text-rose-400',
+                                        title: 'text-rose-950 dark:text-rose-100',
+                                        sub: 'text-rose-800 dark:text-rose-200',
+                                        detail: 'text-rose-700/80 dark:text-rose-300/80',
                                         btn: 'bg-rose-600 hover:bg-rose-700 text-white'
                                     },
                                     amber: {
-                                        bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200/80',
+                                        bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/50 dark:to-amber-900/20 border-amber-200/80 dark:border-amber-800/60',
                                         bar: 'bg-amber-500',
-                                        badge: 'text-amber-800 bg-amber-200/60',
-                                        time: 'text-amber-700',
-                                        title: 'text-amber-950',
-                                        sub: 'text-amber-900',
-                                        detail: 'text-amber-800/80',
+                                        badge: 'text-amber-800 dark:text-amber-300 bg-amber-200/60 dark:bg-amber-900/60',
+                                        time: 'text-amber-700 dark:text-amber-400',
+                                        title: 'text-amber-950 dark:text-amber-100',
+                                        sub: 'text-amber-900 dark:text-amber-200',
+                                        detail: 'text-amber-800/80 dark:text-amber-300/80',
                                         btn: 'bg-amber-600 hover:bg-amber-700 text-white'
                                     },
                                     blue: {
-                                        bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200/80',
+                                        bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/50 dark:to-blue-900/20 border-blue-200/80 dark:border-blue-800/60',
                                         bar: 'bg-blue-500',
-                                        badge: 'text-blue-800 bg-blue-200/60',
-                                        time: 'text-blue-700',
-                                        title: 'text-blue-950',
-                                        sub: 'text-blue-900',
-                                        detail: 'text-blue-800/80',
+                                        badge: 'text-blue-800 dark:text-blue-300 bg-blue-200/60 dark:bg-blue-900/60',
+                                        time: 'text-blue-700 dark:text-blue-400',
+                                        title: 'text-blue-950 dark:text-blue-100',
+                                        sub: 'text-blue-900 dark:text-blue-200',
+                                        detail: 'text-blue-800/80 dark:text-blue-300/80',
                                         btn: 'bg-blue-600 hover:bg-blue-700 text-white'
                                     },
                                     emerald: {
-                                        bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200/80',
+                                        bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/50 dark:to-emerald-900/20 border-emerald-200/80 dark:border-emerald-800/60',
                                         bar: 'bg-emerald-500',
-                                        badge: 'text-emerald-800 bg-emerald-200/60',
-                                        time: 'text-emerald-700',
-                                        title: 'text-emerald-950',
-                                        sub: 'text-emerald-900',
-                                        detail: 'text-emerald-800/80',
+                                        badge: 'text-emerald-800 dark:text-emerald-300 bg-emerald-200/60 dark:bg-emerald-900/60',
+                                        time: 'text-emerald-700 dark:text-emerald-400',
+                                        title: 'text-emerald-950 dark:text-emerald-100',
+                                        sub: 'text-emerald-900 dark:text-emerald-200',
+                                        detail: 'text-emerald-800/80 dark:text-emerald-300/80',
                                         btn: 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                     }
                                 }[item.color] || {
-                                    bg: 'bg-slate-50 border-slate-200',
+                                    bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
                                     bar: 'bg-slate-400',
-                                    badge: 'text-slate-700 bg-slate-200',
-                                    time: 'text-slate-600',
-                                    title: 'text-slate-900',
-                                    sub: 'text-slate-800',
-                                    detail: 'text-slate-600',
-                                    btn: 'bg-slate-800 text-white'
+                                    badge: 'text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700',
+                                    time: 'text-slate-600 dark:text-slate-400',
+                                    title: 'text-slate-900 dark:text-white',
+                                    sub: 'text-slate-800 dark:text-slate-200',
+                                    detail: 'text-slate-600 dark:text-slate-400',
+                                    btn: 'bg-slate-800 dark:bg-slate-700 text-white'
                                 };
 
                                 return (
@@ -1021,20 +1026,20 @@ const WaiterDashboard = () => {
                 {/* -------------------------------------------------- */}
                 {/* MAIN LAYOUT: LEFT (70%) & RIGHT (30%) */}
                 {/* -------------------------------------------------- */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6">
 
                     {/* LEFT COLUMN (70%) - Restaurant Floor & Order Tracker */}
-                    <div className="lg:col-span-8 space-y-4 sm:space-y-6">
+                    <div className="xl:col-span-8 space-y-4 sm:space-y-6 min-w-0">
 
                         {/* Interactive Restaurant Floor Layout */}
-                        <div id="floor-plan" className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-3.5 sm:p-6 shadow-xs">
+                        <div id="floor-plan" className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-6 shadow-xs">
 
                             {/* Layout Header & Filters */}
-                            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100">
+                            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100 dark:border-slate-800">
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="font-extrabold text-lg text-slate-900 tracking-tight whitespace-nowrap">Interactive Floor Plan</h3>
-                                        <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                        <h3 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight whitespace-nowrap">Interactive Floor Plan</h3>
+                                        <span className="text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full whitespace-nowrap">
                                             {filteredTables.length} Tables
                                         </span>
                                     </div>
@@ -1046,22 +1051,22 @@ const WaiterDashboard = () => {
                                     <button
                                         onClick={() => setAssignedOnly(!assignedOnly)}
                                         className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${assignedOnly
-                                                ? 'bg-amber-500 border-amber-500 text-white shadow-xs'
-                                                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200/70'
+                                            ? 'bg-amber-500 border-amber-500 text-white shadow-xs'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200/70 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <Star size={13} className={assignedOnly ? 'fill-white' : ''} />
                                         My Tables ({assignedIds.length})
                                     </button>
 
-                                    <div className="flex items-center bg-slate-100 p-1 rounded-xl gap-1 shrink-0">
+                                    <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl gap-1 shrink-0">
                                         {['All', 'Available', 'Waiting for Food', 'Billing', 'Needs Attention'].map((st) => (
                                             <button
                                                 key={st}
                                                 onClick={() => setStatusFilter(st)}
                                                 className={`px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer whitespace-nowrap ${statusFilter === st
-                                                        ? 'bg-white text-slate-900 shadow-xs'
-                                                        : 'text-slate-500 hover:text-slate-800'
+                                                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                                                     }`}
                                             >
                                                 {st === 'Waiting for Food' ? 'Waiting' : st}
@@ -1072,23 +1077,23 @@ const WaiterDashboard = () => {
                             </div>
 
                             {/* Tables Grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                                 {filteredTables.map((t) => {
                                     const isAssigned = assignedIds.includes(t.id) || assignedIds.includes(t.rawId);
                                     return (
                                         <div
-                                            key={t.id}
+                                            key={`table-${t._id || t.rawId || t.id}`}
                                             onClick={() => openTablePanel(t)}
-                                            className={`p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer relative flex flex-col justify-between h-36 group hover:scale-[1.02] hover:shadow-md ${getTableBadgeStyle(t.status)}`}
+                                            className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer relative flex flex-col justify-between min-h-[144px] group hover:scale-[1.02] hover:shadow-md min-w-0 ${getTableBadgeStyle(t.status)}`}
                                         >
                                             {/* Top Row: Table Name & Star */}
-                                            <div className="flex items-center justify-between">
-                                                <span className="font-black text-base tracking-tight">{t.id}</span>
-                                                <div className="flex items-center gap-1">
+                                            <div className="flex items-center justify-between gap-1.5">
+                                                <span className="font-black text-sm sm:text-base tracking-tight truncate">{t.id}</span>
+                                                <div className="flex items-center gap-1 shrink-0">
                                                     {isAssigned && (
                                                         <Star size={14} className="fill-amber-400 text-amber-500" title="Assigned to you" />
                                                     )}
-                                                    <span className="text-[10px] font-bold opacity-75">{t.seats} seats</span>
+                                                    <span className="text-[10px] font-bold opacity-75 whitespace-nowrap">{t.seats} seats</span>
                                                 </div>
                                             </div>
 
@@ -1105,7 +1110,7 @@ const WaiterDashboard = () => {
                                             </div>
 
                                             {/* Bottom Row: Status Badge */}
-                                            <div className="flex items-center justify-between border-t border-black/5 pt-2">
+                                            <div className="flex items-center justify-between border-t border-black/5 dark:border-white/10 pt-2">
                                                 {getStatusPill(t.status)}
                                                 <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </div>
@@ -1115,7 +1120,7 @@ const WaiterDashboard = () => {
                             </div>
 
                             {filteredTables.length === 0 && (
-                                <div className="text-center py-12 text-slate-400 font-semibold text-xs bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="text-center py-12 text-slate-400 font-semibold text-xs bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                     No floor tables matching current filters.
                                 </div>
                             )}
@@ -1123,54 +1128,54 @@ const WaiterDashboard = () => {
                         </div>
 
                         {/* Live Order Tracker Section */}
-                        <div id="kitchen-tracker" className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs">
-                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div id="kitchen-tracker" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-xs">
+                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                                 <div>
-                                    <h3 className="font-extrabold text-lg text-slate-900 tracking-tight">Live Kitchen Order Tracker</h3>
+                                    <h3 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">Live Kitchen Order Tracker</h3>
                                     <p className="text-xs text-slate-400 font-medium">Real-time status progression of active kitchen orders</p>
                                 </div>
-                                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full">
                                     {activeOrders.length} Active Kitchen Tickets
                                 </span>
                             </div>
 
                             <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1">
                                 {activeOrders.length === 0 ? (
-                                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 font-medium text-xs">
+                                    <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-400 font-medium text-xs">
                                         All active orders have been served!
                                     </div>
                                 ) : (
                                     activeOrders.map((order) => {
                                         const currentStep = getOrderStageStep(order.status);
                                         return (
-                                            <div key={order._id} className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-all space-y-3">
+                                            <div key={order._id} className="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all space-y-3">
 
                                                 {/* Header Row */}
                                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                                     <div className="flex items-center gap-2.5 flex-wrap">
-                                                        <span className="font-black text-sm text-slate-900">
+                                                        <span className="font-black text-sm text-slate-900 dark:text-white">
                                                             {order.tableNumber && order.tableNumber !== 'Any' && order.tableNumber !== 'Takeout'
                                                                 ? (order.tableNumber.startsWith('Table') ? order.tableNumber : `Table ${order.tableNumber}`)
                                                                 : (order.orderType === 'Delivery' ? '🛵 Delivery' : '📦 Self-Pickup Counter')}
                                                         </span>
                                                         {isKotOnlyOrder(order) && (
-                                                            <span className="text-[10px] font-black text-orange-700 bg-orange-100/80 border border-orange-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                            <span className="text-[10px] font-black text-orange-700 dark:text-orange-300 bg-orange-100/80 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 px-2 py-0.5 rounded-md flex items-center gap-1">
                                                                 <Printer size={10} /> KOT Mode
                                                             </span>
                                                         )}
                                                         {order.tableNumber && order.tableNumber !== 'Any' && order.tableNumber !== 'Takeout' && (
                                                             <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${order.serviceType === 'Self Dine-In (KFC Style)'
-                                                                    ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                                                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                                                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                                                                : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                                                                 }`}>
                                                                 {order.serviceType === 'Self Dine-In (KFC Style)' ? 'Self Dine-In' : 'Waiter Service'}
                                                             </span>
                                                         )}
-                                                        <span className="text-[10px] font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+                                                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-md">
                                                             #{order._id.substring(order._id.length - 5).toUpperCase()}
                                                         </span>
                                                         {order.customerName && (
-                                                            <span className="text-xs font-semibold text-slate-700">
+                                                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                                                 👤 {order.customerName}
                                                             </span>
                                                         )}
@@ -1180,8 +1185,8 @@ const WaiterDashboard = () => {
                                                             <Clock size={12} /> ETA: 8-12m
                                                         </span>
                                                         <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${(order.status === 'Ready' || order.status === 'Ready for Pickup')
-                                                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 animate-pulse'
-                                                                : 'bg-amber-100 text-amber-800 border-amber-300'
+                                                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 animate-pulse'
+                                                            : 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
                                                             }`}>
                                                             {order.status}
                                                         </span>
@@ -1189,22 +1194,22 @@ const WaiterDashboard = () => {
                                                 </div>
 
                                                 {/* Ordered Items Summary */}
-                                                <p className="text-xs font-medium text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200/60">
+                                                <p className="text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700">
                                                     {order.orderItems?.map(i => `${i.qty}x ${i.name}`).join(' • ')}
                                                 </p>
 
                                                 {/* Animated 5-Stage Progress Bar */}
                                                 <div className="pt-1">
                                                     <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-400 mb-1.5">
-                                                        <span className={currentStep >= 1 ? 'text-emerald-700' : ''}>1. Received</span>
-                                                        <span className={currentStep >= 2 ? 'text-emerald-700' : ''}>2. Preparing</span>
-                                                        <span className={currentStep >= 3 ? 'text-emerald-700 font-black' : ''}>3. Ready</span>
-                                                        <span className={currentStep >= 4 ? 'text-emerald-700' : ''}>4. Picked Up</span>
-                                                        <span className={currentStep >= 5 ? 'text-emerald-700' : ''}>5. Served</span>
+                                                        <span className={currentStep >= 1 ? 'text-emerald-700 dark:text-emerald-400' : ''}>1. Received</span>
+                                                        <span className={currentStep >= 2 ? 'text-emerald-700 dark:text-emerald-400' : ''}>2. Preparing</span>
+                                                        <span className={currentStep >= 3 ? 'text-emerald-700 dark:text-emerald-400 font-black' : ''}>3. Ready</span>
+                                                        <span className={currentStep >= 4 ? 'text-emerald-700 dark:text-emerald-400' : ''}>4. Picked Up</span>
+                                                        <span className={currentStep >= 5 ? 'text-emerald-700 dark:text-emerald-400' : ''}>5. Served</span>
                                                     </div>
 
                                                     {/* Progress Track */}
-                                                    <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden relative">
+                                                    <div className="w-full bg-slate-200/80 dark:bg-slate-700 rounded-full h-2 overflow-hidden relative">
                                                         <div
                                                             className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 ease-out"
                                                             style={{ width: `${(currentStep / 5) * 100}%` }}
@@ -1214,12 +1219,12 @@ const WaiterDashboard = () => {
 
                                                 {/* Action Buttons: KOT_ONLY vs KDS Mode */}
                                                 {isKotOnlyOrder(order) ? (
-                                                    <div className="flex items-center justify-between pt-2 gap-2 flex-wrap border-t border-slate-200/60">
+                                                    <div className="flex items-center justify-between pt-2 gap-2 flex-wrap border-t border-slate-200/60 dark:border-slate-700">
                                                         {/* Physical KOT Print Trigger (does NOT mark ready/completed) */}
                                                         <button
                                                             type="button"
                                                             onClick={() => handlePrintOrderKOT(order)}
-                                                            className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs shadow-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                                                            className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 font-bold px-3 py-1.5 rounded-xl text-xs shadow-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
                                                             title="Print Kitchen Order Ticket (ESC/POS 80mm)"
                                                         >
                                                             <Printer size={13} className="text-orange-600" /> Print KOT
@@ -1378,65 +1383,65 @@ const WaiterDashboard = () => {
                     </div>
 
                     {/* RIGHT COLUMN (30%) - Notifications, Tasks, Performance */}
-                    <div className="lg:col-span-4 space-y-6">
+                    <div className="xl:col-span-4 space-y-5 sm:space-y-6 min-w-0">
 
                         {/* Live Notifications Feed */}
-                        <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs">
-                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-                                    <h3 className="font-extrabold text-base text-slate-900 tracking-tight">Live Floor Feed</h3>
+                                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight">Live Floor Feed</h3>
                                 </div>
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Realtime</span>
                             </div>
 
                             <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
-                                <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-2xl flex items-start gap-2.5">
-                                    <Flame size={15} className="text-emerald-600 shrink-0 mt-0.5" />
+                                <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl flex items-start gap-2.5">
+                                    <Flame size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-extrabold text-xs text-emerald-950">Kitchen Order Ready</p>
-                                        <p className="text-[11px] text-emerald-700 mt-0.5">Table 5: 2x Grilled Salmon ready for pickup</p>
-                                        <span className="text-[9px] text-emerald-500 font-semibold mt-1 block">1m ago</span>
+                                        <p className="font-extrabold text-xs text-emerald-950 dark:text-emerald-200">Kitchen Order Ready</p>
+                                        <p className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-0.5">Table 5: 2x Grilled Salmon ready for pickup</p>
+                                        <span className="text-[9px] text-emerald-500 dark:text-emerald-400 font-semibold mt-1 block">1m ago</span>
                                     </div>
                                 </div>
 
-                                <div className="p-3 bg-amber-50/70 border border-amber-100 rounded-2xl flex items-start gap-2.5">
-                                    <Receipt size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                                <div className="p-3 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 rounded-2xl flex items-start gap-2.5">
+                                    <Receipt size={15} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-extrabold text-xs text-amber-950">Bill Requested</p>
-                                        <p className="text-[11px] text-amber-700 mt-0.5">Table 7 requested final invoice check</p>
-                                        <span className="text-[9px] text-amber-500 font-semibold mt-1 block">3m ago</span>
+                                        <p className="font-extrabold text-xs text-amber-950 dark:text-amber-200">Bill Requested</p>
+                                        <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">Table 7 requested final invoice check</p>
+                                        <span className="text-[9px] text-amber-500 dark:text-amber-400 font-semibold mt-1 block">3m ago</span>
                                     </div>
                                 </div>
 
-                                <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-2xl flex items-start gap-2.5">
-                                    <Bell size={15} className="text-blue-600 shrink-0 mt-0.5" />
+                                <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl flex items-start gap-2.5">
+                                    <Bell size={15} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-extrabold text-xs text-blue-950">Water Request</p>
-                                        <p className="text-[11px] text-blue-700 mt-0.5">Table 3 customer requested refill</p>
-                                        <span className="text-[9px] text-blue-500 font-semibold mt-1 block">5m ago</span>
+                                        <p className="font-extrabold text-xs text-blue-950 dark:text-blue-200">Water Request</p>
+                                        <p className="text-[11px] text-blue-700 dark:text-blue-300 mt-0.5">Table 3 customer requested refill</p>
+                                        <span className="text-[9px] text-blue-500 dark:text-blue-400 font-semibold mt-1 block">5m ago</span>
                                     </div>
                                 </div>
 
-                                <div className="p-3 bg-purple-50/70 border border-purple-100 rounded-2xl flex items-start gap-2.5">
-                                    <Users size={15} className="text-purple-600 shrink-0 mt-0.5" />
+                                <div className="p-3 bg-purple-50/70 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50 rounded-2xl flex items-start gap-2.5">
+                                    <Users size={15} className="text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="font-extrabold text-xs text-purple-950">Reservation Arrived</p>
-                                        <p className="text-[11px] text-purple-700 mt-0.5">Party of 4 for Table 8 arrived at host station</p>
-                                        <span className="text-[9px] text-purple-500 font-semibold mt-1 block">8m ago</span>
+                                        <p className="font-extrabold text-xs text-purple-950 dark:text-purple-200">Reservation Arrived</p>
+                                        <p className="text-[11px] text-purple-700 dark:text-purple-300 mt-0.5">Party of 4 for Table 8 arrived at host station</p>
+                                        <span className="text-[9px] text-purple-500 dark:text-purple-400 font-semibold mt-1 block">8m ago</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Today's Tasks Checklist */}
-                        <div id="shift-tasks" className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs">
-                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div id="shift-tasks" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <CheckSquare size={18} className="text-emerald-600" />
-                                    <h3 className="font-extrabold text-base text-slate-900 tracking-tight">Today's Tasks</h3>
+                                    <CheckSquare size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight">Today's Tasks</h3>
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
                                     {tasks.filter(t => t.done).length}/{tasks.length} Done
                                 </span>
                             </div>
@@ -1447,23 +1452,23 @@ const WaiterDashboard = () => {
                                         key={task.id}
                                         onClick={() => toggleTask(task.id)}
                                         className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${task.done
-                                                ? 'bg-slate-50 border-slate-200/60 opacity-65 line-through text-slate-400'
-                                                : task.urgent
-                                                    ? 'bg-rose-50/40 border-rose-200/60 text-slate-800 hover:border-rose-300'
-                                                    : 'bg-white border-slate-200/70 text-slate-800 hover:border-slate-300'
+                                            ? 'bg-slate-50 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/60 opacity-65 line-through text-slate-400'
+                                            : task.urgent
+                                                ? 'bg-rose-50/40 dark:bg-rose-950/30 border-rose-200/60 dark:border-rose-800/60 text-slate-800 dark:text-slate-100 hover:border-rose-300'
+                                                : 'bg-white dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-slate-300 dark:hover:border-slate-600'
                                             }`}
                                     >
                                         <div className="flex items-center gap-2.5">
                                             <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${task.done
-                                                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                                                    : 'bg-white border-slate-300'
+                                                ? 'bg-emerald-600 border-emerald-600 text-white'
+                                                : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600'
                                                 }`}>
                                                 {task.done && <Check size={12} strokeWidth={3} />}
                                             </div>
                                             <span className="text-xs font-bold">{task.text}</span>
                                         </div>
                                         {task.urgent && !task.done && (
-                                            <span className="text-[9px] font-black uppercase text-rose-600 bg-rose-100 px-2 py-0.5 rounded-md">
+                                            <span className="text-[9px] font-black uppercase text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/70 px-2 py-0.5 rounded-md">
                                                 Urgent
                                             </span>
                                         )}
@@ -1473,42 +1478,42 @@ const WaiterDashboard = () => {
                         </div>
 
                         {/* Performance Panel */}
-                        <div id="performance" className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs">
-                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div id="performance" className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
+                            <div className="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
                                 <div className="flex items-center gap-2">
-                                    <TrendingUp size={18} className="text-emerald-600" />
-                                    <h3 className="font-extrabold text-base text-slate-900 tracking-tight">Shift Performance</h3>
+                                    <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                    <h3 className="font-extrabold text-base text-slate-900 dark:text-white tracking-tight">Shift Performance</h3>
                                 </div>
-                                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                                <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full">
                                     Top 5%
                                 </span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 text-center mb-4">
-                                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <div className="text-xl font-black text-slate-900">28</div>
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                    <div className="text-xl font-black text-slate-900 dark:text-white">28</div>
                                     <div className="text-[10px] font-bold text-slate-400">Orders Served</div>
                                 </div>
-                                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <div className="text-xl font-black text-slate-900">14m</div>
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                    <div className="text-xl font-black text-slate-900 dark:text-white">14m</div>
                                     <div className="text-[10px] font-bold text-slate-400">Avg Serve Time</div>
                                 </div>
                             </div>
 
                             {/* Circular Ring Metric */}
-                            <div className="flex items-center justify-around bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl">
+                            <div className="flex items-center justify-around bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 p-4 rounded-2xl">
                                 <div className="flex items-center gap-3">
                                     {/* SVG Progress Ring */}
                                     <div className="relative w-14 h-14 flex items-center justify-center">
                                         <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-200" fill="transparent" />
-                                            <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-600" fill="transparent" strokeDasharray="138" strokeDashoffset="14" strokeLinecap="round" />
+                                            <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-200 dark:text-emerald-900" fill="transparent" />
+                                            <circle cx="28" cy="28" r="22" stroke="currentColor" strokeWidth="4" className="text-emerald-600 dark:text-emerald-400" fill="transparent" strokeDasharray="138" strokeDashoffset="14" strokeLinecap="round" />
                                         </svg>
-                                        <span className="absolute font-black text-xs text-emerald-950">98%</span>
+                                        <span className="absolute font-black text-xs text-emerald-950 dark:text-emerald-200">98%</span>
                                     </div>
                                     <div>
-                                        <p className="font-extrabold text-xs text-emerald-950">Accuracy Score</p>
-                                        <p className="text-[10px] text-emerald-700 font-medium">0 order mistakes today</p>
+                                        <p className="font-extrabold text-xs text-emerald-950 dark:text-emerald-200">Accuracy Score</p>
+                                        <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">0 order mistakes today</p>
                                     </div>
                                 </div>
                             </div>
@@ -1522,18 +1527,18 @@ const WaiterDashboard = () => {
             {/* -------------------------------------------------- */}
             {/* TABLE DETAILS PANEL (Slide-out) */}
             {/* -------------------------------------------------- */}
-            <div className={`fixed inset-y-0 right-0 w-full sm:w-[500px] bg-white shadow-2xl border-l border-slate-200 transform transition-transform duration-300 ease-out z-50 flex flex-col ${panelOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed inset-y-0 right-0 w-full sm:w-[500px] bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-out z-50 flex flex-col ${panelOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
                 {/* Panel Header */}
-                <div className="p-5 border-b border-slate-100 bg-slate-50/80 flex justify-between items-center shrink-0">
+                <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex justify-between items-center shrink-0">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">{activeTable?.id}</h2>
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{activeTable?.id}</h2>
                             <button
                                 onClick={() => handleToggleAssignment(activeTable?.id)}
                                 className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 px-3 py-1 rounded-xl transition-all border ${assignedIds.includes(activeTable?.id) || assignedIds.includes(activeTable?.rawId)
-                                        ? 'bg-amber-100 text-amber-800 border-amber-300'
-                                        : 'bg-white hover:bg-slate-50 text-slate-500 border-slate-300'
+                                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700'
+                                    : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-300 dark:border-slate-600'
                                     }`}
                             >
                                 <Star size={11} className={assignedIds.includes(activeTable?.id) || assignedIds.includes(activeTable?.rawId) ? 'fill-amber-500 text-amber-500' : ''} />
@@ -1541,29 +1546,29 @@ const WaiterDashboard = () => {
                             </button>
                         </div>
                         <p className="text-xs text-slate-400 font-semibold mt-1">
-                            Status: <span className="font-extrabold text-slate-800">{activeTable?.status}</span>
+                            Status: <span className="font-extrabold text-slate-800 dark:text-slate-200">{activeTable?.status}</span>
                         </p>
                     </div>
                     <button
                         onClick={() => setPanelOpen(false)}
-                        className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all cursor-pointer"
+                        className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                     >
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Table Tags / Special Customer Notes */}
-                <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/30 flex items-center gap-2 overflow-x-auto text-[10px] font-bold">
-                    <span className="bg-pink-100 text-pink-800 border border-pink-200 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/40 flex items-center gap-2 overflow-x-auto text-[10px] font-bold">
+                    <span className="bg-pink-100 dark:bg-pink-950/60 text-pink-800 dark:text-pink-300 border border-pink-200 dark:border-pink-800 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
                         🎂 Birthday Celebration
                     </span>
-                    <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                    <span className="bg-yellow-100 dark:bg-yellow-950/60 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
                         ⭐ VIP Customer
                     </span>
-                    <span className="bg-rose-100 text-rose-800 border border-rose-200 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                    <span className="bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
                         ⚠️ Allergy: Nuts
                     </span>
-                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                    <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
                         🧅 No Onion / Garlic
                     </span>
                 </div>
@@ -1580,8 +1585,8 @@ const WaiterDashboard = () => {
                                     key={st}
                                     onClick={() => handleTableStatusChange(st)}
                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${activeTable?.status === st
-                                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                        ? 'bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-xs'
+                                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     {st}
@@ -1598,36 +1603,36 @@ const WaiterDashboard = () => {
                                 <button
                                     key={item._id}
                                     onClick={() => addToCart(item)}
-                                    className="p-3 text-left border border-slate-200/80 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all group cursor-pointer"
+                                    className="p-3 text-left border border-slate-200/80 dark:border-slate-700 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/30 transition-all group cursor-pointer"
                                 >
-                                    <p className="font-extrabold text-xs text-slate-800 group-hover:text-emerald-700 truncate">{item.name}</p>
-                                    <p className="text-emerald-600 font-black text-[11px] mt-0.5">₹{item.price}</p>
+                                    <p className="font-extrabold text-xs text-slate-800 dark:text-slate-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 truncate">{item.name}</p>
+                                    <p className="text-emerald-600 dark:text-emerald-400 font-black text-[11px] mt-0.5">₹{item.price}</p>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     {/* Cart / Selected Items */}
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/60">
+                    <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700">
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Cart / Draft Order</h3>
                         {cart.length === 0 ? (
                             <p className="text-xs text-slate-400 italic text-center py-4">No items added yet. Click menu items above.</p>
                         ) : (
                             <div className="space-y-2 min-w-0 pr-1.5 flex-1">
                                 {cart.map((c) => (
-                                    <div key={c._id} className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200/60">
+                                    <div key={c._id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-700">
                                         <div>
-                                            <p className="font-bold text-xs text-slate-800">{c.name}</p>
+                                            <p className="font-bold text-xs text-slate-800 dark:text-slate-100">{c.name}</p>
                                             <p className="text-[10px] text-slate-400">₹{c.price} each</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => removeFromCart(c._id)} className="w-6 h-6 bg-slate-100 rounded-md text-slate-600 font-bold text-xs hover:bg-slate-200">-</button>
+                                            <button onClick={() => removeFromCart(c._id)} className="w-6 h-6 bg-slate-100 dark:bg-slate-800 rounded-md text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-700">-</button>
                                             <span className="font-bold text-xs w-4 text-center">{c.qty}</span>
-                                            <button onClick={() => addToCart(c)} className="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs hover:bg-emerald-200">+</button>
+                                            <button onClick={() => addToCart(c)} className="w-6 h-6 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-md font-bold text-xs hover:bg-emerald-200 dark:hover:bg-emerald-900">+</button>
                                         </div>
                                     </div>
                                 ))}
-                                <div className="pt-2 border-t border-slate-200 flex justify-between font-black text-xs text-slate-900">
+                                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-black text-xs text-slate-900 dark:text-white">
                                     <span>Total:</span>
                                     <span>₹{cart.reduce((a, b) => a + (b.price * b.qty), 0)}</span>
                                 </div>
@@ -1641,8 +1646,8 @@ const WaiterDashboard = () => {
                             onClick={handleSendToKitchen}
                             disabled={cart.length === 0}
                             className={`py-3 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${cart.length > 0
-                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
-                                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
                                 }`}
                         >
                             <Send size={14} /> Send to Kitchen
@@ -1657,14 +1662,14 @@ const WaiterDashboard = () => {
 
                         <button
                             onClick={() => setTransferModalOpen(true)}
-                            className="py-3 px-3 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-purple-200"
+                            className="py-3 px-3 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-purple-200 dark:border-purple-800"
                         >
                             <ArrowRightLeft size={14} /> Transfer Table
                         </button>
 
                         <button
                             onClick={() => setManagerModalOpen(true)}
-                            className="py-3 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-rose-200"
+                            className="py-3 px-3 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-rose-200 dark:border-rose-800"
                         >
                             <ShieldAlert size={14} /> Call Manager
                         </button>
@@ -1688,16 +1693,16 @@ const WaiterDashboard = () => {
 
                 {/* FAB Quick Action Menu Popover */}
                 {fabOpen && (
-                    <div className="absolute bottom-16 right-0 w-56 bg-white rounded-2xl border border-slate-200 shadow-2xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="absolute bottom-16 right-0 w-56 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-bottom-2">
                         <button
                             onClick={() => {
                                 setFabOpen(false);
                                 const target = activeTable || tables.find(t => t.status === 'Available') || tables[0];
                                 if (target) openTablePanel(target);
                             }}
-                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
+                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-800 dark:hover:text-emerald-300 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                         >
-                            <Plus size={14} className="text-emerald-600" /> Take New Order
+                            <Plus size={14} className="text-emerald-600 dark:text-emerald-400" /> Take New Order
                         </button>
                         <button
                             onClick={() => {
@@ -1709,9 +1714,9 @@ const WaiterDashboard = () => {
                                     toast.error("No occupied table with active order found.");
                                 }
                             }}
-                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-800 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
+                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-800 dark:hover:text-blue-300 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                         >
-                            <Receipt size={14} className="text-blue-600" /> Generate Bill
+                            <Receipt size={14} className="text-blue-600 dark:text-blue-400" /> Generate Bill
                         </button>
                         <button
                             onClick={() => {
@@ -1721,9 +1726,9 @@ const WaiterDashboard = () => {
                                 setTargetTableId('');
                                 setTransferModalOpen(true);
                             }}
-                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-800 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
+                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/50 hover:text-purple-800 dark:hover:text-purple-300 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                         >
-                            <ArrowRightLeft size={14} className="text-purple-600" /> Transfer Table
+                            <ArrowRightLeft size={14} className="text-purple-600 dark:text-purple-400" /> Transfer Table
                         </button>
                         <button
                             onClick={() => {
@@ -1733,24 +1738,24 @@ const WaiterDashboard = () => {
                                 setSplitParts(2);
                                 setSplitModalOpen(true);
                             }}
-                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-800 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
+                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-amber-950/50 hover:text-amber-800 dark:hover:text-amber-300 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                         >
-                            <DollarSign size={14} className="text-amber-600" /> Split Bill
+                            <DollarSign size={14} className="text-amber-600 dark:text-amber-400" /> Split Bill
                         </button>
                         <button
                             onClick={() => {
                                 setFabOpen(false);
                                 setManagerModalOpen(true);
                             }}
-                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-rose-50 hover:text-rose-800 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
+                            className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-800 dark:hover:text-rose-300 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer"
                         >
-                            <ShieldAlert size={14} className="text-rose-600" /> Call Manager
+                            <ShieldAlert size={14} className="text-rose-600 dark:text-rose-400" /> Call Manager
                         </button>
                         <button
                             onClick={() => { setFabOpen(false); setSettingsOpen(true); }}
-                            className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer border-t border-slate-100 mt-1 pt-2"
+                            className="w-full text-left px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white rounded-xl flex items-center gap-2.5 transition-colors cursor-pointer border-t border-slate-100 dark:border-slate-800 mt-1 pt-2"
                         >
-                            <Settings size={14} className="text-slate-600" /> Dashboard Settings
+                            <Settings size={14} className="text-slate-600 dark:text-slate-400" /> Dashboard Settings
                         </button>
                     </div>
                 )}
@@ -1770,7 +1775,7 @@ const WaiterDashboard = () => {
             {/* -------------------------------------------------- */}
             {settingsOpen && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full p-6 space-y-6 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white dark:bg-slate-900 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-2xl w-full p-6 space-y-6 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
 
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -1837,32 +1842,32 @@ const WaiterDashboard = () => {
             {/* -------------------------------------------------- */}
             {transferModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
-                        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+                        <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                             <div className="flex items-center gap-2.5">
-                                <ArrowRightLeft className="text-purple-600" size={20} />
-                                <h3 className="font-extrabold text-slate-900 text-lg">Transfer Table</h3>
+                                <ArrowRightLeft className="text-purple-600 dark:text-purple-400" size={20} />
+                                <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Transfer Table</h3>
                             </div>
-                            <button onClick={() => setTransferModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">
+                            <button onClick={() => setTransferModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
                                 <X size={16} />
                             </button>
                         </div>
 
-                        <p className="text-xs text-slate-500 font-medium">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                             Move an active order from one occupied table to another available floor table.
                         </p>
 
                         <div className="space-y-3 min-w-0 pr-1.5 flex-1">
                             <div>
-                                <label className="text-xs font-bold text-slate-700 block mb-1">Source Table (Current Order):</label>
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Source Table (Current Order):</label>
                                 <select
                                     value={sourceTableId}
                                     onChange={(e) => setSourceTableId(e.target.value)}
-                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-purple-500"
+                                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-purple-500"
                                 >
                                     <option value="">-- Select Source Table --</option>
                                     {tables.filter(t => t.orders).map(t => (
-                                        <option key={t.id} value={t.rawId || t.id.replace(/^Table\s+/i, '')}>
+                                        <option key={`table-${t._id || t.rawId || t.id}`} value={t.rawId || t.id.replace(/^Table\s+/i, '')}>
                                             {t.id} (Order #{String(t.orders._id).slice(-5).toUpperCase()} - ₹{t.orders.totalPrice})
                                         </option>
                                     ))}
@@ -1870,11 +1875,11 @@ const WaiterDashboard = () => {
                             </div>
 
                             <div>
-                                <label className="text-xs font-bold text-slate-700 block mb-1">Target Table (Destination):</label>
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Table (Destination):</label>
                                 <select
                                     value={targetTableId}
                                     onChange={(e) => setTargetTableId(e.target.value)}
-                                    className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-purple-500"
+                                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-purple-500"
                                 >
                                     <option value="">-- Select Destination Table --</option>
                                     {dbTables.map(t => (
@@ -1887,7 +1892,7 @@ const WaiterDashboard = () => {
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setTransferModalOpen(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
+                            <button onClick={() => setTransferModalOpen(false)} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs">
                                 Cancel
                             </button>
                             <button onClick={handleExecuteTransfer} className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl text-xs shadow-md cursor-pointer">
@@ -1903,54 +1908,54 @@ const WaiterDashboard = () => {
             {/* -------------------------------------------------- */}
             {splitModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
-                        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+                        <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                             <div className="flex items-center gap-2.5">
-                                <DollarSign className="text-amber-600" size={20} />
-                                <h3 className="font-extrabold text-slate-900 text-lg">Split Bill Calculation</h3>
+                                <DollarSign className="text-amber-600 dark:text-amber-400" size={20} />
+                                <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Split Bill Calculation</h3>
                             </div>
-                            <button onClick={() => setSplitModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">
+                            <button onClick={() => setSplitModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
                                 <X size={16} />
                             </button>
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">Select Occupied Table:</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Select Occupied Table:</label>
                             <select
                                 value={sourceTableId}
                                 onChange={(e) => setSourceTableId(e.target.value)}
-                                className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-amber-500 mb-3"
+                                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-amber-500 mb-3"
                             >
                                 <option value="">-- Select Table --</option>
                                 {tables.filter(t => t.orders).map(t => (
-                                    <option key={t.id} value={t.rawId || t.id.replace(/^Table\s+/i, '')}>
+                                    <option key={`table-${t._id || t.rawId || t.id}`} value={t.rawId || t.id.replace(/^Table\s+/i, '')}>
                                         {t.id} (Bill: ₹{t.orders.totalPrice})
                                     </option>
                                 ))}
                             </select>
                         </div>
 
-                        <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-amber-900 space-y-1">
+                        <div className="bg-amber-50 dark:bg-amber-950/50 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 space-y-1">
                             <p className="text-xs font-bold">Bill Total for {splitSourceTableObj?.id || 'Selected Table'}:</p>
                             <p className="text-2xl font-black">₹{splitBillTotal}</p>
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1.5">Number of Guests / Split Parts:</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Number of Guests / Split Parts:</label>
                             <div className="flex items-center gap-3">
-                                <button onClick={() => setSplitParts(Math.max(2, splitParts - 1))} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black text-base hover:bg-slate-200 cursor-pointer">-</button>
-                                <span className="font-extrabold text-lg text-slate-900 w-8 text-center">{splitParts}</span>
-                                <button onClick={() => setSplitParts(splitParts + 1)} className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-black text-base hover:bg-amber-200 cursor-pointer">+</button>
+                                <button onClick={() => setSplitParts(Math.max(2, splitParts - 1))} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-black text-base hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">-</button>
+                                <span className="font-extrabold text-lg text-slate-900 dark:text-white w-8 text-center">{splitParts}</span>
+                                <button onClick={() => setSplitParts(splitParts + 1)} className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-black text-base hover:bg-amber-200 dark:hover:bg-amber-900 cursor-pointer">+</button>
                             </div>
                         </div>
 
-                        <div className="p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 flex justify-between">
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 flex justify-between">
                             <span>Amount Per Guest:</span>
-                            <span className="text-amber-700 font-black">₹{splitPerGuest}</span>
+                            <span className="text-amber-700 dark:text-amber-400 font-black">₹{splitPerGuest}</span>
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setSplitModalOpen(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
+                            <button onClick={() => setSplitModalOpen(false)} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs">
                                 Close
                             </button>
                             <button onClick={handleExecuteSplitBill} className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl text-xs shadow-md cursor-pointer">
@@ -1966,27 +1971,27 @@ const WaiterDashboard = () => {
             {/* -------------------------------------------------- */}
             {managerModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
-                        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+                        <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                             <div className="flex items-center gap-2.5">
-                                <ShieldAlert className="text-rose-600" size={20} />
-                                <h3 className="font-extrabold text-slate-900 text-lg">Call Manager Assistance</h3>
+                                <ShieldAlert className="text-rose-600 dark:text-rose-400" size={20} />
+                                <h3 className="font-extrabold text-slate-900 dark:text-white text-lg">Call Manager Assistance</h3>
                             </div>
-                            <button onClick={() => setManagerModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200">
+                            <button onClick={() => setManagerModalOpen(false)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
                                 <X size={16} />
                             </button>
                         </div>
 
-                        <p className="text-xs text-slate-500 font-medium">
-                            Send an urgent notification to Floor Manager for <span className="font-bold text-slate-900">{activeTable?.id || 'Floor'}</span>.
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                            Send an urgent notification to Floor Manager for <span className="font-bold text-slate-900 dark:text-white">{activeTable?.id || 'Floor'}</span>.
                         </p>
 
                         <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1.5">Reason for Assistance:</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Reason for Assistance:</label>
                             <select
                                 value={managerReason}
                                 onChange={(e) => setManagerReason(e.target.value)}
-                                className="w-full p-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-rose-500"
+                                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:border-rose-500"
                             >
                                 <option value="Table Assistance Needed">Table Assistance Needed</option>
                                 <option value="Bill Correction / Discount Request">Bill Correction / Discount Request</option>
@@ -1997,7 +2002,7 @@ const WaiterDashboard = () => {
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setManagerModalOpen(false)} className="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
+                            <button onClick={() => setManagerModalOpen(false)} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs">
                                 Cancel
                             </button>
                             <button onClick={handleExecuteCallManager} className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-xl text-xs shadow-md">

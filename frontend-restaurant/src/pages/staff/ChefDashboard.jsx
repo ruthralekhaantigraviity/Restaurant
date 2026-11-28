@@ -515,7 +515,7 @@ const ChefDashboard = () => {
             )}
 
             {/* 2. Top KDS Kitchen Command Header */}
-            <div className="bg-white dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3.5 sm:space-y-6">
+            <div className="${order.status === 'Pending' || order.status === 'Accepted' ? 'bg-amber-100 dark:bg-amber-900' : order.status === 'Preparing' ? 'bg-blue-100 dark:bg-blue-900' : ['Ready','Ready for Pickup'].includes(order.status) ? 'bg-emerald-100 dark:bg-emerald-900' : 'bg-gray-100 dark:bg-gray-800'} backdrop-blur-md p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3.5 sm:space-y-6">
 
                 {/* Header Title & Station Selector */}
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-6 pb-3.5 sm:pb-6 border-b border-slate-200 dark:border-slate-800">
@@ -730,11 +730,11 @@ const ChefDashboard = () => {
                             return (
                                 <div
                                     key={order._id}
-                                    className={`bg-white dark:bg-slate-900/90 rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl dark:shadow-2xl flex flex-col overflow-hidden border-2 transition-all duration-300 ${isPriority ? 'border-red-500 shadow-red-500/10' : 'border-slate-200 dark:border-slate-800/90'
+                                    className={`${order.status === 'Pending' || order.status === 'Accepted' ? 'bg-amber-100 dark:bg-amber-900' : order.status === 'Preparing' ? 'bg-blue-100 dark:bg-blue-900' : ['Ready','Ready for Pickup'].includes(order.status) ? 'bg-emerald-100 dark:bg-emerald-900' : 'bg-gray-100 dark:bg-gray-800'} rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl dark:shadow-2xl flex flex-col overflow-hidden border-2 transition-all duration-300 ${isPriority ? 'border-red-500 shadow-red-500/10' : 'border-slate-200 dark:border-slate-800/90'
                                         }`}
                                 >
                                     {/* Ticket Top Header */}
-                                    <div className={`px-4 sm:px-5 py-3 sm:py-4 flex justify-between items-center ${isPriority ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-800'
+                                    <div className={`px-4 sm:px-5 py-3 sm:py-4 flex justify-between items-center ${isPriority ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white' : 'bg-gradient-to-r from-amber-600 to-orange-600 text-white border-b border-amber-500'
                                         }`}>
                                         <div className="space-y-1 min-w-0 pr-1.5 flex-1">
                                             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -878,7 +878,7 @@ const ChefDashboard = () => {
                                         {order.status === 'Preparing' && (
                                             <button
                                                 onClick={() => updateStatus(order._id, isSelfOrder(order) ? 'Ready for Pickup' : 'Ready')}
-                                                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold py-2.5 rounded-xl sm:rounded-2xl transition-all shadow-md shadow-emerald-600/20 flex justify-center items-center gap-2 text-xs cursor-pointer active:scale-95"
+                                                className="w-full whitespace-nowrap bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold py-2.5 rounded-xl sm:rounded-2xl transition-all shadow-md shadow-emerald-600/20 flex justify-center items-center gap-2 text-xs cursor-pointer active:scale-95"
                                             >
                                                 <Sparkles size={15} />
                                                 <span>{isSelfOrder(order) ? 'Transfer to Pickup Counter' : 'Mark Ticket Prepared & Transfer'}</span>
@@ -952,7 +952,7 @@ const ChefDashboard = () => {
                                             const timeDiffMinutes = Math.floor((currentTime - new Date(order.createdAt)) / 60000);
                                             const isSelf = order.orderType === 'Self-Pickup' || order.orderType === 'Self Pickup';
                                             return (
-                                                <div key={order._id} className="bg-slate-50 dark:bg-slate-950/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-800 space-y-2.5 sm:space-y-3 shadow-sm">
+                                                <div key={order._id} className="bg-amber-100 dark:bg-amber-900 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-800 space-y-2.5 sm:space-y-3 shadow-sm flex flex-col">
                                                     <div className="flex justify-between items-center gap-1.5">
                                                         <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                                                             <span className="font-mono font-black text-xs sm:text-sm text-slate-900 dark:text-white">#{order._id.substring(order._id.length - 5).toUpperCase()}</span>
@@ -1099,7 +1099,7 @@ const ChefDashboard = () => {
                                     onChange={(e) => setNewIngredient(e.target.value)}
                                     className="flex-1 min-w-0 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-red-500"
                                 />
-                                <button type="submit" className="bg-red-600 hover:bg-red-500 text-white font-extrabold rounded-xl sm:rounded-2xl px-4 sm:px-5 flex items-center justify-center transition-colors shadow-md shadow-red-600/30 cursor-pointer text-xs shrink-0">
+                                <button type="submit" className="whitespace-nowrap bg-orange-600 hover:bg-orange-500 text-white font-extrabold py-2.5 px-4 sm:px-5 rounded-xl sm:rounded-2xl inline-flex items-center justify-center gap-2 transition-all shadow-md shadow-orange-600/20 cursor-pointer text-xs shrink-0 active:scale-95">
                                     <Plus size={16} /> Add
                                 </button>
                             </form>

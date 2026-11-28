@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
     LayoutGrid, ClipboardList, Clock, CheckSquare, LogOut, Utensils, Settings,
     Flame, ChefHat, UserCheck, TrendingUp, Bell, Star, CalendarDays, CreditCard, ChevronRight
 } from 'lucide-react';
@@ -36,7 +36,7 @@ const WaiterSidebar = () => {
             } else {
                 setIsDesktopCollapsed(prev => {
                     const next = !prev;
-                    try { localStorage.setItem('waiter_sidebar_collapsed', String(next)); } catch (_) {}
+                    try { localStorage.setItem('waiter_sidebar_collapsed', String(next)); } catch (_) { }
                     return next;
                 });
             }
@@ -110,37 +110,37 @@ const WaiterSidebar = () => {
 
     return (
         <>
-        {/* Mobile Overlay */}
-        {isOpen && (
-            <div 
-                className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-30 md:hidden" 
-                onClick={() => setIsOpen(false)}
-            />
-        )}
-        <aside className={clsx(
-            "w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 shadow-sm h-screen fixed inset-y-0 left-0 md:sticky md:top-0 flex flex-col transition-all duration-300 z-40",
-            isDesktopCollapsed ? "md:-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none md:overflow-hidden" : "md:translate-x-0 md:w-64",
-            isOpen ? "translate-x-0 w-64" : "-translate-x-full"
-        )}>
-            {/* Header */}
-            <div className="h-16 flex items-center px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
-                <div className="flex items-center gap-3">
-                    {logoSrc && !logoError ? (
-                        <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                            <img 
-                                src={logoSrc} 
-                                alt="Logo" 
-                                onError={() => setLogoError(true)}
-                                className="w-full h-full object-cover" 
-                            />
-                        </div>
+            {/* Mobile Overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-30 md:hidden"
+                    onClick={() => setIsOpen(false)}
+                />
+            )}
+            <aside className={clsx(
+                "w-72 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 shadow-sm h-screen fixed inset-y-0 left-0 md:sticky md:top-0 flex flex-col transition-all duration-300 z-40",
+                isDesktopCollapsed ? "md:-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none md:overflow-hidden" : "md:translate-x-0 md:w-72",
+                isOpen ? "translate-x-0 w-72" : "-translate-x-full"
+            )}>
+                {/* Header */}
+                <div className="h-16 flex items-center px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                    <div className="flex items-center gap-3">
+                        {logoSrc && !logoError ? (
+                            <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                                <img
+                                    src={logoSrc}
+                                    alt="Logo"
+                                    onError={() => setLogoError(true)}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                     ) : (
                         <div className="w-10 h-10 bg-teal-600 text-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
                             <Utensils className="text-white" size={22} strokeWidth={2.5} />
                         </div>
                     )}
                     <div>
-                        <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none truncate max-w-[140px]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                        <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none truncate max-w-[160px]" style={{ fontFamily: 'Poppins, sans-serif' }}>
                             {restaurant && restaurant.name ? restaurant.name : 'FoodNest'}
                         </h1>
                         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mt-1">Floor Desk</span>
@@ -162,28 +162,28 @@ const WaiterSidebar = () => {
                                     ? location.pathname === '/waiter' 
                                     : location.pathname === item.path;
 
-                                return (
-                                    <li key={item.name}>
-                                        <NavLink
-                                            to={item.path}
-                                            end={item.path === '/waiter'}
-                                            className={clsx(
-                                                "relative flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-sm group",
-                                                isActive 
-                                                ? "bg-slate-900 text-white dark:bg-teal-600 dark:text-white shadow-xs font-semibold" 
-                                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-3 truncate">
-                                                <Icon size={17} className={clsx("transition-transform group-hover:scale-110 shrink-0", isActive ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200")} />
-                                                <span className="truncate">{item.name}</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                                                {item.badge && (
-                                                    <span className={clsx("text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md shrink-0", isActive ? "bg-white/20 text-white" : item.badgeColor)}>
-                                                        {item.badge}
-                                                    </span>
-                                                )}
+                return (
+                <li key={item.name}>
+                    <NavLink
+                        to={item.path}
+                        end={item.path === '/waiter'}
+                        className={clsx(
+                            "relative flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-sm group",
+                            isActive
+                                ? "bg-slate-900 text-white dark:bg-teal-600 dark:text-white shadow-xs font-semibold"
+                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                        )}
+                    >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <Icon size={17} className={clsx("transition-transform group-hover:scale-110 shrink-0", isActive ? "text-white" : "text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200")} />
+                            <span className="text-[13px] leading-snug whitespace-nowrap">{item.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0 ml-1.5">
+                            {item.badge && (
+                                <span className={clsx("text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md shrink-0", isActive ? "bg-white/20 text-white" : item.badgeColor)}>
+                                    {item.badge}
+                                </span>
+                            )}
                                                 {isActive && <ChevronRight size={14} className="opacity-80" />}
                                             </div>
                                         </NavLink>
@@ -193,38 +193,38 @@ const WaiterSidebar = () => {
                         </ul>
                     </div>
                 ))}
-            </nav>
+            </nav >
 
-            {/* Footer Profile & Logout */}
-            <div className="p-3 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
+    {/* Footer Profile & Logout */ }
+    < div className = "p-3 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900" >
                 <div className="px-3 py-2 mb-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{restaurant?.name || 'Floor Staff'}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Service & Order Desk</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-400 font-medium">Service & Order Desk</p>
                 </div>
                 <button 
                     onClick={() => setShowLogoutConfirm(true)} 
-                    className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-all text-sm cursor-pointer"
+                    className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-bold text-rose-600 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-950/60 hover:text-rose-700 dark:hover:text-rose-300 border border-rose-200/70 dark:border-rose-900/50 transition-all text-sm cursor-pointer"
                 >
                     <LogOut size={17} />
                     <span>End Shift</span>
                 </button>
-            </div>
-        </aside>
+            </div >
+        </aside >
 
-        <ConfirmModal
-            isOpen={showLogoutConfirm}
-            onClose={() => setShowLogoutConfirm(false)}
-            onConfirm={() => {
-                logout();
-                toast.success('Successfully signed out');
-                navigate('/login');
-            }}
-            title="End Shift & Sign Out"
-            message="Are you sure you want to end your shift and sign out of the Waiter Desk?"
-            confirmText="End Shift & Sign Out"
-            cancelText="Stay on Floor"
-            isDestructive={true}
-        />
+    <ConfirmModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+            logout();
+            toast.success('Successfully signed out');
+            navigate('/login');
+        }}
+        title="End Shift & Sign Out"
+        message="Are you sure you want to end your shift and sign out of the Waiter Desk?"
+        confirmText="End Shift & Sign Out"
+        cancelText="Stay on Floor"
+        isDestructive={true}
+    />
         </>
     );
 };

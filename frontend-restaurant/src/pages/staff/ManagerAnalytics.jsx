@@ -70,7 +70,7 @@ const ManagerAnalytics = () => {
             ) : (
                 <>
                     {/* Top Level Metrics */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                         <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2.5 bg-green-50 text-green-600 rounded-lg"><TrendingUp size={20} /></div>
@@ -78,41 +78,41 @@ const ManagerAnalytics = () => {
                                     {overview.revenueChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {Math.abs(overview.revenueChange)}%
                                 </span>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
-                            <h3 className="text-2xl font-extrabold text-gray-900">₹{(overview.totalRevenue || 0).toLocaleString('en-IN')}</h3>
+                            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Total Revenue</p>
+                            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">₹{(overview.totalRevenue || 0).toLocaleString('en-IN')}</h3>
                         </div>
                         
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-2">
-                                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg"><ShoppingBag size={20} /></div>
-                                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded ${overview.ordersChange >= 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
+                                <div className="p-2.5 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-lg"><ShoppingBag size={20} /></div>
+                                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded ${overview.ordersChange >= 0 ? 'text-green-600 dark:text-emerald-400 bg-green-50 dark:bg-emerald-950/60' : 'text-red-600 dark:text-rose-400 bg-red-50 dark:bg-rose-950/60'}`}>
                                     {overview.ordersChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {Math.abs(overview.ordersChange)}%
                                 </span>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Total Orders</p>
-                            <h3 className="text-2xl font-extrabold text-gray-900">{overview.totalOrders || 0}</h3>
+                            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Total Orders</p>
+                            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">{overview.totalOrders || 0}</h3>
                         </div>
 
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-2">
-                                <div className="p-2.5 bg-purple-50 text-purple-600 rounded-lg"><Users size={20} /></div>
-                                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded ${overview.customersChange >= 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
+                                <div className="p-2.5 bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 rounded-lg"><Users size={20} /></div>
+                                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded ${overview.customersChange >= 0 ? 'text-green-600 dark:text-emerald-400 bg-green-50 dark:bg-emerald-950/60' : 'text-red-600 dark:text-rose-400 bg-red-50 dark:bg-rose-950/60'}`}>
                                     {overview.customersChange >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {Math.abs(overview.customersChange)}%
                                 </span>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Customer Traffic</p>
-                            <h3 className="text-2xl font-extrabold text-gray-900">{overview.activeCustomers || 0}</h3>
+                            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Customer Traffic</p>
+                            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">{overview.activeCustomers || 0}</h3>
                         </div>
 
-                        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group">
+                        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-2">
-                                <div className="p-2.5 bg-orange-50 text-orange-600 rounded-lg"><Clock size={20} /></div>
-                                <span className="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
+                                <div className="p-2.5 bg-orange-50 dark:bg-amber-950/60 text-orange-600 dark:text-amber-400 rounded-lg"><Clock size={20} /></div>
+                                <span className="flex items-center gap-1 text-xs font-bold text-green-600 dark:text-emerald-400 bg-green-50 dark:bg-emerald-950/60 px-2 py-1 rounded">
                                     <ArrowDownRight size={14} /> {qrAnalytics?.avgPrepTime || 0} min
                                 </span>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mb-1">Avg Prep Time</p>
-                            <h3 className="text-2xl font-extrabold text-gray-900">{qrAnalytics?.avgPrepTime || 0} mins</h3>
+                            <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Avg Prep Time</p>
+                            <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">{qrAnalytics?.avgPrepTime || 0} mins</h3>
                         </div>
                     </div>
 
@@ -120,13 +120,13 @@ const ManagerAnalytics = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         
                         {/* Popular Items */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                <h3 className="font-bold text-gray-900 text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>Top Selling Items</h3>
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+                            <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-950/40">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>Top Selling Items</h3>
                             </div>
                             <div className="p-5">
                                 {popularItems.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-400">
+                                    <div className="text-center py-8 text-gray-400 dark:text-slate-400">
                                         <p className="text-sm font-semibold">No order data yet</p>
                                         <p className="text-xs mt-1">Top selling items will appear once orders are placed.</p>
                                     </div>
@@ -135,13 +135,13 @@ const ManagerAnalytics = () => {
                                         {popularItems.map((item, i) => (
                                             <div key={i} className="flex justify-between items-center">
                                                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                                                    <span className="font-extrabold text-gray-300 w-4">{i + 1}</span>
+                                                    <span className="font-extrabold text-gray-300 dark:text-slate-600 w-4">{i + 1}</span>
                                                     <div>
-                                                        <p className="font-bold text-gray-900 text-sm">{item.name}</p>
-                                                        <p className="text-xs text-gray-500">{item.qty} sold</p>
+                                                        <p className="font-bold text-gray-900 dark:text-white text-sm">{item.name}</p>
+                                                        <p className="text-xs text-gray-500 dark:text-slate-400">{item.qty} sold</p>
                                                     </div>
                                                 </div>
-                                                <span className="font-bold text-gray-700">{item.rev}</span>
+                                                <span className="font-bold text-gray-700 dark:text-slate-200">{item.rev}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -150,30 +150,30 @@ const ManagerAnalytics = () => {
                         </div>
 
                         {/* Order Operations Breakdown */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                <h3 className="font-bold text-gray-900 text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>Dine-In & Order Operations</h3>
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+                            <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-950/40">
+                                <h3 className="font-bold text-gray-900 dark:text-white text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>Dine-In &amp; Order Operations</h3>
                             </div>
                             <div className="p-5 space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+                                    <div className="bg-gray-50 dark:bg-slate-800/70 p-4 rounded-xl border border-gray-100 dark:border-slate-700 text-center">
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Tables</p>
-                                        <p className="text-2xl font-black text-gray-900 mt-1">{qrAnalytics?.activeTables || 0}</p>
+                                        <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">{qrAnalytics?.activeTables || 0}</p>
                                     </div>
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+                                    <div className="bg-gray-50 dark:bg-slate-800/70 p-4 rounded-xl border border-gray-100 dark:border-slate-700 text-center">
                                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Completed Orders</p>
-                                        <p className="text-2xl font-black text-gray-900 mt-1">{qrAnalytics?.completedOrders || 0}</p>
+                                        <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">{qrAnalytics?.completedOrders || 0}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-3 pt-2">
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-gray-600 font-medium">Completed Orders Rate</span>
-                                            <span className="font-bold text-green-600">
+                                            <span className="text-gray-600 dark:text-slate-400 font-medium">Completed Orders Rate</span>
+                                            <span className="font-bold text-green-600 dark:text-emerald-400">
                                                 {overview.totalOrders > 0 ? `${Math.round(((qrAnalytics?.completedOrders || 0) / overview.totalOrders) * 100)}%` : '0%'}
                                             </span>
                                         </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2">
+                                        <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-2">
                                             <div 
                                                 className="bg-green-500 h-2 rounded-full transition-all duration-350" 
                                                 style={{ width: `${overview.totalOrders > 0 ? Math.round(((qrAnalytics?.completedOrders || 0) / overview.totalOrders) * 100) : 0}%` }}

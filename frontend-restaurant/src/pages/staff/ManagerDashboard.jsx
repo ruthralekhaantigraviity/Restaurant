@@ -110,65 +110,65 @@ const ManagerDashboard = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform" />
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 dark:bg-blue-950/40 rounded-full group-hover:scale-110 transition-transform" />
           <div className="relative">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-blue-100 text-blue-600 rounded-xl"><Store size={24} /></div>
-              <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
+              <div className="p-3 bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 rounded-xl"><Store size={24} /></div>
+              <span className="bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-transparent dark:border-blue-800 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1">
                 <TrendingUp size={14} /> {data?.overview?.revenueChange ? `${data.overview.revenueChange > 0 ? '+' : ''}${data.overview.revenueChange}%` : '0%'}
               </span>
             </div>
-            <p className="text-gray-500 text-sm font-medium mb-1">Today's Revenue</p>
-            <h2 className="text-3xl font-extrabold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium mb-1">Today's Revenue</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
               ₹{totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </h2>
           </div>
         </div>
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-50 rounded-full group-hover:scale-110 transition-transform" />
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-50 dark:bg-amber-950/40 rounded-full group-hover:scale-110 transition-transform" />
           <div className="relative">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-orange-100 text-orange-600 rounded-xl"><Users size={24} /></div>
-              <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md">
+              <div className="p-3 bg-orange-100 dark:bg-amber-950/70 text-orange-600 dark:text-amber-400 rounded-xl"><Users size={24} /></div>
+              <span className="text-xs font-bold text-orange-700 dark:text-amber-300 bg-orange-50 dark:bg-amber-950/70 border border-transparent dark:border-amber-800 px-2.5 py-1 rounded-md">
                 {staffList.filter(s => s.status === 'On Break').length} on break
               </span>
             </div>
-            <p className="text-gray-500 text-sm font-medium mb-1">Staff on Shift</p>
-            <h2 className="text-3xl font-extrabold text-gray-900" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium mb-1">Staff on Shift</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
               {staffList.length}
             </h2>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 sm:gap-6">
         {/* Left Column (Orders & Stock) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                <AlertTriangle size={20} className="text-red-500" /> Stock Alerts
+        <div className="xl:col-span-2 space-y-5 sm:space-y-6 min-w-0">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-950/40">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                <AlertTriangle size={20} className="text-red-500 shrink-0" /> Stock Alerts
               </h3>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${stockAlerts.length > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${stockAlerts.length > 0 ? 'bg-red-100 dark:bg-rose-950/70 text-red-600 dark:text-rose-300' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-300 border border-transparent dark:border-slate-700'}`}>
                 {stockAlerts.length} Item{stockAlerts.length !== 1 ? 's' : ''}
               </span>
             </div>
             {/* Stock warnings list */}
             <div className="p-4 space-y-3">
               {stockAlerts.length === 0 ? (
-                <div className="text-center py-6 text-gray-400">
-                  <p className="text-sm font-semibold">No stock alerts</p>
-                  <p className="text-xs text-gray-400 mt-0.5">All inventory items are sufficiently stocked.</p>
+                <div className="text-center py-6 text-gray-400 dark:text-slate-400">
+                  <p className="text-sm font-semibold text-gray-600 dark:text-slate-300">No stock alerts</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">All inventory items are sufficiently stocked.</p>
                 </div>
               ) : (
                 stockAlerts.map((item, idx) => (
-                  <div key={item._id || idx} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                  <div key={item._id || idx} className="flex justify-between items-center py-2 border-b border-gray-50 dark:border-slate-800 last:border-0">
                     <div>
-                      <p className="font-bold text-gray-900 text-sm">{item.name}</p>
-                      <p className="text-xs text-gray-500">{item.quantity} {item.unit || 'units'} left · Min: {item.minStock || 5} {item.unit || 'units'}</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">{item.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">{item.quantity} {item.unit || 'units'} left · Min: {item.minStock || 5} {item.unit || 'units'}</p>
                     </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${item.quantity <= (item.minStock / 2) ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'}`}>
+                    <span className={`text-xs font-bold px-2 py-1 rounded ${item.quantity <= (item.minStock / 2) ? 'bg-red-50 dark:bg-rose-950/60 text-red-600 dark:text-rose-300' : 'bg-orange-50 dark:bg-amber-950/60 text-orange-600 dark:text-amber-300'}`}>
                       {item.quantity <= (item.minStock / 2) ? 'Critical' : 'Low Stock'}
                     </span>
                   </div>
@@ -179,37 +179,37 @@ const ManagerDashboard = () => {
 
           {/* Delivery Partner Ops */}
           {data?.deliveryAnalytics && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  <Truck size={20} className="text-blue-500" /> Delivery Partner Ops
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-950/40">
+                <h3 className="font-bold text-gray-900 dark:text-white text-base sm:text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  <Truck size={20} className="text-blue-500 shrink-0" /> Delivery Partner Ops
                 </h3>
-                <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-1 rounded-full">
+                <span className="bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-300 border border-transparent dark:border-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">
                   {data.deliveryAnalytics.onlinePartners} Online
                 </span>
               </div>
               <div className="p-3.5 sm:p-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
-                <div className="bg-gray-50 border border-gray-100 p-3 sm:p-4 rounded-xl text-center">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pending Assign</p>
-                  <p className="text-xl font-black text-gray-900 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.pendingAssignments}</p>
+                <div className="bg-gray-50 dark:bg-slate-800/70 border border-gray-100 dark:border-slate-700 p-3 sm:p-4 rounded-xl text-center">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pending Assign</p>
+                  <p className="text-xl font-black text-gray-900 dark:text-white mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.pendingAssignments}</p>
                 </div>
-                <div className="bg-orange-50 border border-orange-100 p-3 sm:p-4 rounded-xl text-center">
-                  <p className="text-xs font-semibold text-orange-600 uppercase tracking-wider">Active Deliveries</p>
-                  <p className="text-xl font-black text-orange-700 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.activeDeliveries}</p>
+                <div className="bg-orange-50 dark:bg-amber-950/40 border border-orange-100 dark:border-amber-800/60 p-3 sm:p-4 rounded-xl text-center">
+                  <p className="text-xs font-semibold text-orange-600 dark:text-amber-400 uppercase tracking-wider">Active Deliveries</p>
+                  <p className="text-xl font-black text-orange-700 dark:text-amber-300 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.activeDeliveries}</p>
                 </div>
-                <div className="bg-green-50 border border-green-100 p-3 sm:p-4 rounded-xl text-center">
-                  <p className="text-xs font-semibold text-green-600 uppercase tracking-wider">Completed</p>
-                  <p className="text-xl font-black text-green-700 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.completedDeliveries}</p>
+                <div className="bg-green-50 dark:bg-emerald-950/40 border border-green-100 dark:border-emerald-800/60 p-3 sm:p-4 rounded-xl text-center">
+                  <p className="text-xs font-semibold text-green-600 dark:text-emerald-400 uppercase tracking-wider">Completed</p>
+                  <p className="text-xl font-black text-green-700 dark:text-emerald-300 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>{data.deliveryAnalytics.completedDeliveries}</p>
                 </div>
-                <div className="bg-purple-50 border border-purple-100 p-3 sm:p-4 rounded-xl text-center">
-                  <p className="text-xs font-semibold text-purple-600 uppercase tracking-wider">Delivery Revenue</p>
-                  <p className="text-xl font-black text-purple-700 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{data.deliveryAnalytics.totalDeliveryEarnings}</p>
+                <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-800/60 p-3 sm:p-4 rounded-xl text-center">
+                  <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Delivery Revenue</p>
+                  <p className="text-xl font-black text-purple-700 dark:text-purple-300 mt-1" style={{ fontFamily: 'Manrope, sans-serif' }}>₹{data.deliveryAnalytics.totalDeliveryEarnings}</p>
                 </div>
               </div>
-              <div className="p-4 border-t border-gray-50 bg-gray-50/20 text-center">
+              <div className="p-4 border-t border-gray-50 dark:border-slate-800 bg-gray-50/20 dark:bg-slate-950/30 text-center">
                 <button 
                   onClick={() => navigate('/manager/orders')} 
-                  className="text-xs text-blue-600 font-bold hover:underline"
+                  className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline cursor-pointer"
                 >
                   View Active Order Dispatch Tracking ↗
                 </button>
@@ -219,10 +219,10 @@ const ManagerDashboard = () => {
         </div>
 
         {/* Right Column (Staff & Daily Goal) */}
-        <div className="space-y-6 min-w-0 pr-1.5 flex-1">
+        <div className="space-y-5 sm:space-y-6 min-w-0 flex-1">
           <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 sm:p-6 text-white shadow-md">
             <h3 className="font-bold text-green-50 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>Daily Revenue Goal</h3>
-            <p className="text-3xl font-extrabold mb-6 mt-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
+            <p className="text-2xl sm:text-3xl font-extrabold mb-6 mt-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
               ₹{totalRevenue.toLocaleString('en-IN')} <span className="text-lg text-green-200 font-medium">/ ₹{revenueGoal.toLocaleString('en-IN')}</span>
             </p>
             <div className="w-full bg-green-700/50 rounded-full h-3 mb-2">
@@ -235,10 +235,10 @@ const ManagerDashboard = () => {
               <span>₹{goalRemaining.toLocaleString('en-IN')} to go</span>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wider">Current Shift Staff</h3>
-              <button className="text-gray-400 hover:text-gray-600"><MoreVertical size={18} /></button>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-950/40">
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Current Shift Staff</h3>
+              <button className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"><MoreVertical size={18} /></button>
             </div>
             <div className="p-4 space-y-4">
               {staffList.length === 0 ? (
@@ -249,21 +249,21 @@ const ManagerDashboard = () => {
               ) : (
                 staffList.slice(0, 5).map((staff, i) => (
                   <div key={staff._id || i} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-gray-600">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center font-bold text-gray-600 dark:text-slate-200 shrink-0">
                       {staff.name ? staff.name.charAt(0).toUpperCase() : 'S'}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-gray-900 text-sm">{staff.name}</p>
-                      <p className="text-xs text-gray-500">{staff.role || 'Staff'}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 dark:text-white text-sm truncate">{staff.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{staff.role || 'Staff'}</p>
                     </div>
-                    <div className={`w-2.5 h-2.5 rounded-full ${staff.status === 'On Break' ? 'bg-orange-500' : 'bg-green-500'}`} title={staff.status || 'Working'} />
+                    <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${staff.status === 'On Break' ? 'bg-orange-500' : 'bg-green-500'}`} title={staff.status || 'Working'} />
                   </div>
                 ))
               )}
             </div>
-            <div className="p-4 border-t border-gray-50">
-              <button onClick={() => navigate('/manager/staff')} className="w-full py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold rounded-lg transition-colors">
-                Manage Schedule & Staff
+            <div className="p-4 border-t border-gray-50 dark:border-slate-800">
+              <button onClick={() => navigate('/manager/staff')} className="w-full py-2 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 text-sm font-bold rounded-lg transition-colors cursor-pointer">
+                Manage Schedule &amp; Staff
               </button>
             </div>
           </div>
@@ -272,13 +272,13 @@ const ManagerDashboard = () => {
 
 
       {/* Supplier Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
               Supplier Contact Directory
             </h3>
-            <p className="text-gray-500 text-xs mt-0.5">Quick call and supplier directory for inventory management.</p>
+            <p className="text-gray-500 dark:text-slate-400 text-xs mt-0.5">Quick call and supplier directory for inventory management.</p>
           </div>
           
           {/* Quick Search */}
@@ -289,7 +289,7 @@ const ManagerDashboard = () => {
               placeholder="Search suppliers..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all font-medium"
             />
           </div>
         </div>
@@ -301,43 +301,43 @@ const ManagerDashboard = () => {
         ) : (
           <div>
             {filteredSuppliers.length === 0 ? (
-              <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                <p className="text-gray-500 text-sm font-medium">No suppliers found.</p>
+              <div className="text-center py-10 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">No suppliers found.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredSuppliers.map((s) => {
                   const initials = s.name ? s.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'SP';
                   return (
-                    <div key={s._id} className="p-4 border border-gray-100 rounded-2xl bg-white hover:shadow-md transition-shadow flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold text-sm shrink-0">
+                    <div key={s._id} className="p-4 border border-gray-100 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-800/40 hover:shadow-md transition-shadow flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-emerald-950/60 text-green-700 dark:text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0">
                         {initials}
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-1.5">
-                          <p className="font-bold text-gray-900 text-sm truncate">{s.name}</p>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${s.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          <p className="font-bold text-gray-900 dark:text-white text-sm truncate">{s.name}</p>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${s.isActive !== false ? 'bg-green-100 dark:bg-emerald-950/70 text-green-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-rose-950/70 text-red-700 dark:text-rose-300'}`}>
                             {s.isActive !== false ? 'Active' : 'Inactive'}
                           </span>
                         </div>
-                        <p className="text-xs font-semibold text-green-600 mt-0.5">{s.category || 'General'}</p>
+                        <p className="text-xs font-semibold text-green-600 dark:text-emerald-400 mt-0.5">{s.category || 'General'}</p>
                         
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400 mt-2">
                           <Phone size={12} className="shrink-0" />
                           <span className="truncate">{s.phone}</span>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-50">
+                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-50 dark:border-slate-800">
                           <button 
                             onClick={() => setSelectedSupplier(s)}
-                            className="flex-1 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1"
+                            className="flex-1 py-1.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <Eye size={12} /> View
                           </button>
                           <a 
                             href={`tel:${s.phone}`} 
-                            className="flex-1 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 text-center"
+                            className="flex-1 py-1.5 bg-green-50 dark:bg-emerald-950/60 hover:bg-green-100 dark:hover:bg-emerald-900/60 text-green-700 dark:text-emerald-300 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 text-center"
                           >
                             <Phone size={12} /> Call
                           </a>
@@ -355,12 +355,12 @@ const ManagerDashboard = () => {
       {/* Supplier Details Modal */}
       {selectedSupplier && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95">
+          <div className="bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95">
             {/* Header */}
             <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 text-white relative">
               <button 
                 onClick={() => setSelectedSupplier(null)}
-                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-full"
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-full cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -373,13 +373,13 @@ const ManagerDashboard = () => {
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-4 text-sm text-gray-700">
+            <div className="p-6 space-y-4 text-sm text-gray-700 dark:text-slate-300">
               {selectedSupplier.contactPerson && (
                 <div className="flex items-start gap-3">
                   <Users size={16} className="text-gray-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Contact Person</p>
-                    <p className="font-bold text-gray-900 mt-0.5">{selectedSupplier.contactPerson}</p>
+                    <p className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedSupplier.contactPerson}</p>
                   </div>
                 </div>
               )}
@@ -388,7 +388,7 @@ const ManagerDashboard = () => {
                 <Phone size={16} className="text-gray-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs font-semibold text-gray-400">Phone Number</p>
-                  <p className="font-bold text-gray-900 mt-0.5">{selectedSupplier.phone}</p>
+                  <p className="font-bold text-gray-900 dark:text-white mt-0.5">{selectedSupplier.phone}</p>
                 </div>
               </div>
 
@@ -397,7 +397,7 @@ const ManagerDashboard = () => {
                   <Mail size={16} className="text-gray-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Email Address</p>
-                    <p className="font-medium text-gray-900 mt-0.5 break-all">{selectedSupplier.email}</p>
+                    <p className="font-medium text-gray-900 dark:text-white mt-0.5 break-all">{selectedSupplier.email}</p>
                   </div>
                 </div>
               )}
@@ -407,7 +407,7 @@ const ManagerDashboard = () => {
                   <MapPin size={16} className="text-gray-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-xs font-semibold text-gray-400">Address</p>
-                    <p className="font-medium text-gray-900 mt-0.5">{selectedSupplier.address}</p>
+                    <p className="font-medium text-gray-900 dark:text-white mt-0.5">{selectedSupplier.address}</p>
                   </div>
                 </div>
               )}
@@ -416,7 +416,7 @@ const ManagerDashboard = () => {
                 <Info size={16} className="text-gray-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs font-semibold text-gray-400">Status</p>
-                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold mt-1 ${selectedSupplier.isActive !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold mt-1 ${selectedSupplier.isActive !== false ? 'bg-green-100 dark:bg-emerald-950/70 text-green-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-rose-950/70 text-red-700 dark:text-rose-300'}`}>
                     {selectedSupplier.isActive !== false ? 'Active' : 'Inactive'}
                   </span>
                 </div>
@@ -424,7 +424,7 @@ const ManagerDashboard = () => {
             </div>
 
             {/* Actions */}
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+            <div className="p-6 bg-gray-50 dark:bg-slate-950/60 border-t border-gray-100 dark:border-slate-800 flex gap-3">
               <a 
                 href={`tel:${selectedSupplier.phone}`}
                 className="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 text-center"
@@ -433,7 +433,7 @@ const ManagerDashboard = () => {
               </a>
               <button 
                 onClick={() => setSelectedSupplier(null)}
-                className="px-5 py-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors text-center"
+                className="px-5 py-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold rounded-xl transition-colors text-center cursor-pointer"
               >
                 Close
               </button>

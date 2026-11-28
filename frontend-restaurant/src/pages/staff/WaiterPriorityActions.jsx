@@ -67,22 +67,22 @@ const WaiterPriorityActions = () => {
                         if (['new_order', 'order_updated', 'order_status_updated', 'ready_to_serve', 'new_notification'].includes(msg.type)) {
                             fetchData(false);
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 };
 
-                ws.onerror = () => {};
+                ws.onerror = () => { };
                 ws.onclose = () => {
                     if (!isUnmounted && document.visibilityState !== 'hidden') {
                         reconnectTimer = setTimeout(connectWS, 5000);
                     }
                 };
-            } catch (err) {}
+            } catch (err) { }
         };
 
         const handlePageHide = () => {
             clearTimeout(reconnectTimer);
             if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-                try { ws.close(1000, 'Page hidden'); } catch (_) {}
+                try { ws.close(1000, 'Page hidden'); } catch (_) { }
             }
         };
 
@@ -99,9 +99,9 @@ const WaiterPriorityActions = () => {
                 ws.onerror = null;
                 ws.onclose = null;
                 if (ws.readyState === WebSocket.CONNECTING) {
-                    ws.onopen = () => { try { ws.close(1000, 'Unmount'); } catch (_) {} };
+                    ws.onopen = () => { try { ws.close(1000, 'Unmount'); } catch (_) { } };
                 } else if (ws.readyState === WebSocket.OPEN) {
-                    try { ws.close(1000, 'Unmount'); } catch (_) {}
+                    try { ws.close(1000, 'Unmount'); } catch (_) { }
                 }
             }
         };
@@ -144,7 +144,7 @@ const WaiterPriorityActions = () => {
             const isSelf = isSelfOrder(o);
             const status = String(o.status || '').trim();
             const isReady = ['Ready', 'Ready for Pickup'].includes(status);
-            
+
             let cardType = 'URGENT';
             let cardTitle = 'Food Ready in Kitchen';
             let actionText = 'Serve Now';
@@ -222,15 +222,15 @@ const WaiterPriorityActions = () => {
         )
         : priorityItems;
 
-    const filteredItems = filter === 'All' 
-        ? displayItems 
-        : (filter === 'URGENT' 
+    const filteredItems = filter === 'All'
+        ? displayItems
+        : (filter === 'URGENT'
             ? displayItems.filter(item => item.type === 'URGENT' || item.type === 'PICKUP READY')
             : displayItems.filter(item => item.type === filter));
 
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12">
-            
+
             {/* Header Banner */}
             <div className="bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -248,7 +248,7 @@ const WaiterPriorityActions = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button 
+                    <button
                         onClick={fetchData}
                         className="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-white/20"
                     >
@@ -266,11 +266,10 @@ const WaiterPriorityActions = () => {
                     <button
                         key={t}
                         onClick={() => setFilter(t)}
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
-                            filter === t
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                        }`}
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${filter === t
+                            ? 'bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-md'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
                     >
                         {t}
                     </button>
@@ -278,27 +277,25 @@ const WaiterPriorityActions = () => {
             </div>
 
             {/* Priority Items Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
                 {filteredItems.map((item) => {
                     const Icon = item.icon;
                     return (
-                        <div 
-                            key={item.id} 
-                            className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden group"
+                        <div
+                            key={item.id}
+                            className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between space-y-4 relative overflow-hidden group"
                         >
-                            <div className={`absolute top-0 left-0 w-2 h-full ${
-                                item.color === 'rose' ? 'bg-rose-500' :
+                            <div className={`absolute top-0 left-0 w-2 h-full ${item.color === 'rose' ? 'bg-rose-500' :
                                 item.color === 'amber' ? 'bg-amber-500' :
-                                item.color === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'
-                            }`} />
+                                    item.color === 'blue' ? 'bg-blue-500' : 'bg-emerald-500'
+                                }`} />
 
                             <div className="pl-2">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${
-                                        item.color === 'rose' ? 'bg-rose-100 text-rose-800' :
-                                        item.color === 'amber' ? 'bg-amber-100 text-amber-800' :
-                                        item.color === 'blue' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
-                                    }`}>
+                                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${item.color === 'rose' ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300' :
+                                        item.color === 'amber' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' :
+                                            item.color === 'blue' ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300' : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                                        }`}>
                                         {item.type}
                                     </span>
                                     <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
@@ -306,21 +303,20 @@ const WaiterPriorityActions = () => {
                                     </span>
                                 </div>
 
-                                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
                                     {item.table}
                                 </h3>
-                                <p className="text-xs font-bold text-slate-700 mt-1">{item.title}</p>
-                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{item.subtitle}</p>
+                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200 mt-1">{item.title}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{item.subtitle}</p>
                             </div>
 
-                            <div className="pl-2 pt-2 border-t border-slate-100">
+                            <div className="pl-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                                 <button
                                     onClick={item.handler}
-                                    className={`w-full py-3 px-4 rounded-xl text-xs font-extrabold text-white flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer ${
-                                        item.color === 'rose' ? 'bg-rose-600 hover:bg-rose-700' :
+                                    className={`w-full py-3 px-4 rounded-xl text-xs font-extrabold text-white flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all cursor-pointer ${item.color === 'rose' ? 'bg-rose-600 hover:bg-rose-700' :
                                         item.color === 'amber' ? 'bg-amber-600 hover:bg-amber-700' :
-                                        item.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'
-                                    }`}
+                                            item.color === 'blue' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                                        }`}
                                 >
                                     <Icon size={16} />
                                     <span>{item.actionText}</span>

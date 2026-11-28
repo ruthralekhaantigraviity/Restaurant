@@ -100,25 +100,25 @@ const WaiterShiftStatus = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Timer Box */}
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-4">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4">
                     <div>
                         <span className="text-xs font-bold text-slate-400 uppercase">Active Duty Timer</span>
-                        <div className="text-3xl font-black text-slate-900 mt-2 font-mono">{formatTime(elapsedSeconds)}</div>
-                        <p className="text-xs text-emerald-600 font-bold mt-1">{clockInLabel}</p>
+                        <div className="text-3xl font-black text-slate-900 dark:text-white mt-2 font-mono">{formatTime(elapsedSeconds)}</div>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-1">{clockInLabel}</p>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleStatusChange('On Duty')}
-                            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 ${
-                                status === 'On Duty' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
+                            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 cursor-pointer ${
+                                status === 'On Duty' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                             }`}
                         >
                             <Play size={14} /> Resume
                         </button>
                         <button
                             onClick={() => handleStatusChange('On Break')}
-                            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 ${
-                                status === 'On Break' ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-700'
+                            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 cursor-pointer ${
+                                status === 'On Break' ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                             }`}
                         >
                             <Coffee size={14} /> Break
@@ -127,7 +127,7 @@ const WaiterShiftStatus = () => {
                 </div>
 
                 {/* Floor Zone Selection */}
-                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
                     <span className="text-xs font-bold text-slate-400 uppercase">Active Zone Assignment</span>
                     <div className="space-y-2">
                         {['Floor Zone A (Main Hall)', 'Floor Zone B (Patio)', 'Terrace Dining'].map((z) => (
@@ -136,12 +136,12 @@ const WaiterShiftStatus = () => {
                                 onClick={() => { setZone(z); localStorage.setItem(`waiter_zone_${user?._id || 'me'}`, z); toast.success(`Assigned to ${z}`); }}
                                 className={`w-full p-3 rounded-2xl border text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
                                     zone === z
-                                    ? 'bg-emerald-50 border-emerald-500 text-emerald-900'
-                                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-emerald-300'
+                                    : 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                                 }`}
                             >
                                 <span>{z}</span>
-                                <MapPin size={14} className={zone === z ? 'text-emerald-600' : 'text-slate-400'} />
+                                <MapPin size={14} className={zone === z ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'} />
                             </button>
                         ))}
                     </div>

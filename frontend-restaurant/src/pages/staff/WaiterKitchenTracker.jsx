@@ -101,8 +101,8 @@ const WaiterKitchenTracker = () => {
                         onClick={() => setStageFilter(st)}
                         className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border whitespace-nowrap shrink-0 ${
                             stageFilter === st
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            ? 'bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-md'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                     >
                         {st === 'Ready' ? 'Prepared' : st}
@@ -119,35 +119,35 @@ const WaiterKitchenTracker = () => {
                     const isSelf = isSelfOrder(order);
 
                     return (
-                        <div key={order._id} className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-4 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div key={order._id} className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-3 sm:space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                                 <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                                    <h3 className="text-xl font-black text-slate-900">{tableText || '📦 Self-Pickup Counter'}</h3>
+                                    <h3 className="text-xl font-black text-slate-900 dark:text-white">{tableText || '📦 Self-Pickup Counter'}</h3>
                                     {hasTable && (
                                         <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold border ${
                                             order.serviceType === 'Self Dine-In (KFC Style)'
-                                                ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                                : 'bg-blue-50 text-blue-700 border-blue-200'
+                                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                                                : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                                         }`}>
                                             {order.serviceType === 'Self Dine-In (KFC Style)' ? 'Self Dine-In' : 'Waiter Service'}
                                         </span>
                                     )}
                                     <span className="text-xs font-bold text-slate-400">#{order._id.substring(order._id.length - 6).toUpperCase()}</span>
                                     {order.kotNumbers && order.kotNumbers.length > 0 && (
-                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-900 text-white shadow-xs">
+                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-slate-900 dark:bg-slate-800 text-white shadow-xs border border-slate-700">
                                             {order.kotNumbers.join(', ')}
                                         </span>
                                     )}
                                     {order.customerName && (
-                                        <span className="text-xs font-semibold text-slate-700">
+                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                                             👤 {order.customerName}
                                         </span>
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className={`px-3 py-1 rounded-xl text-xs font-extrabold uppercase ${
-                                        (order.status === 'Ready' || order.status === 'Ready for Pickup') ? 'bg-emerald-100 text-emerald-800' :
-                                        order.status === 'Preparing' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
+                                        (order.status === 'Ready' || order.status === 'Ready for Pickup') ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300' :
+                                        order.status === 'Preparing' ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                                     }`}>
                                         {order.status}
                                     </span>
@@ -155,20 +155,20 @@ const WaiterKitchenTracker = () => {
                             </div>
 
                             {/* Item Summary */}
-                            <p className="text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
                                 {order.orderItems?.map(i => `${i.qty}x ${i.name}`).join(' • ')}
                             </p>
 
                             {/* 5-Stage Step Bar */}
                             <div>
                                 <div className="flex justify-between text-[9px] sm:text-[11px] font-extrabold text-slate-400 mb-2">
-                                    <span className={step >= 1 ? 'text-emerald-700' : ''}>1. Received</span>
-                                    <span className={step >= 2 ? 'text-emerald-700' : ''}>2. Preparing</span>
-                                    <span className={step >= 3 ? 'text-emerald-700 font-black' : ''}>3. Ready</span>
-                                    <span className={step >= 4 ? 'text-emerald-700' : ''}>4. Picked Up</span>
-                                    <span className={step >= 5 ? 'text-emerald-700' : ''}>5. Served</span>
+                                    <span className={step >= 1 ? 'text-emerald-700 dark:text-emerald-400' : ''}>1. Received</span>
+                                    <span className={step >= 2 ? 'text-emerald-700 dark:text-emerald-400' : ''}>2. Preparing</span>
+                                    <span className={step >= 3 ? 'text-emerald-700 dark:text-emerald-400 font-black' : ''}>3. Ready</span>
+                                    <span className={step >= 4 ? 'text-emerald-700 dark:text-emerald-400' : ''}>4. Picked Up</span>
+                                    <span className={step >= 5 ? 'text-emerald-700 dark:text-emerald-400' : ''}>5. Served</span>
                                 </div>
-                                <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                                     <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style={{ width: `${(step / 5) * 100}%` }} />
                                 </div>
                             </div>
@@ -180,7 +180,7 @@ const WaiterKitchenTracker = () => {
                                     <select
                                         value={order.status}
                                         onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
-                                        className="text-[11px] font-bold py-1 px-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 cursor-pointer focus:outline-none"
+                                        className="text-[11px] font-bold py-1 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none"
                                         title="Manually advance stage & sync KOT"
                                     >
                                         <option value="Pending">1. Received / Pending</option>
@@ -217,7 +217,7 @@ const WaiterKitchenTracker = () => {
                                                     <CheckCircle2 size={15} /> Serve to {tableText}
                                                 </button>
                                                 {order.serviceType === 'Self Dine-In (KFC Style)' && (
-                                                    <button onClick={() => handleUpdateStatus(order._id, 'Picked Up')} className="px-3 py-2 text-amber-800 font-extrabold rounded-xl text-xs border border-amber-300 transition-all flex items-center gap-1 cursor-pointer bg-amber-50 hover:bg-amber-100">
+                                                    <button onClick={() => handleUpdateStatus(order._id, 'Picked Up')} className="px-3 py-2 text-amber-800 dark:text-amber-300 font-extrabold rounded-xl text-xs border border-amber-300 dark:border-amber-700 transition-all flex items-center gap-1 cursor-pointer bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60">
                                                         Picked Up
                                                     </button>
                                                 )}

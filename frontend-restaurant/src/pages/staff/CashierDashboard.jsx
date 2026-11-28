@@ -350,7 +350,7 @@ const CashierDashboard = () => {
                 {/* Second Row: KOT Tag & Order Ref & Customer */}
                 <div className="w-full flex items-center justify-between text-xs gap-1.5 flex-wrap">
                     <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="font-mono font-black text-[11px] bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-2 py-0.5 rounded-lg shadow-xs flex items-center gap-1 whitespace-nowrap">
+                        <span className="font-mono font-black text-[11px] bg-slate-900 dark:bg-slate-800 text-white border border-transparent dark:border-slate-700 px-2 py-0.5 rounded-lg shadow-xs flex items-center gap-1 whitespace-nowrap">
                             <span>🎟️</span>
                             <span>{displayKot}</span>
                         </span>
@@ -1309,10 +1309,10 @@ const CashierDashboard = () => {
                                             <td className="p-4 font-black">₹{Number(bill.totalPrice || 0).toFixed(2)}</td>
                                             <td className="p-4 text-right">
                                                 <div className="flex items-center justify-end gap-1.5">
-                                                    <button onClick={() => handlePrintKOT(bill)} className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg border border-slate-200 transition-all flex items-center gap-1 text-[11px]" title="Print Kitchen Order Ticket">
+                                                    <button onClick={() => handlePrintKOT(bill)} className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 font-bold rounded-lg border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-1 text-[11px] cursor-pointer" title="Print Kitchen Order Ticket">
                                                         <Printer size={12} /> KOT
                                                     </button>
-                                                    <button onClick={() => handlePrintReceipt(bill)} className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-lg border border-blue-100 transition-all flex items-center gap-1 text-[11px]">
+                                                    <button onClick={() => handlePrintReceipt(bill)} className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-300 font-bold rounded-lg border border-blue-100 dark:border-blue-800 transition-all flex items-center gap-1 text-[11px] cursor-pointer">
                                                         <Printer size={12} /> Receipt
                                                     </button>
                                                 </div>
@@ -1363,7 +1363,7 @@ const CashierDashboard = () => {
             <div className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
             
                 {/* Left Queue View (shown full width on mobile unless bill is opened) */}
-                <div className={`w-full lg:w-[350px] xl:w-[380px] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-col min-h-0 shrink-0 ${activeBill ? 'hidden lg:flex' : 'flex'}`}>
+                <div className={`w-full lg:w-[295px] xl:w-[320px] 2xl:w-[350px] bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-col min-h-0 shrink-0 ${activeBill ? 'hidden lg:flex' : 'flex'}`}>
                     <div className="flex items-center justify-between mb-2.5 px-0.5">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -1506,7 +1506,7 @@ const CashierDashboard = () => {
                 </div>
 
                 {/* Right Side Billing Console (full screen on mobile when a bill is active) */}
-                <div className={`flex-1 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-3 sm:p-5 flex flex-col min-h-0 overflow-y-auto lg:overflow-hidden ${!activeBill ? 'hidden lg:flex' : 'flex'}`}>
+                <div className={`flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-3 sm:p-4 lg:p-5 flex flex-col min-h-0 overflow-y-auto xl:overflow-hidden ${!activeBill ? 'hidden lg:flex' : 'flex'}`}>
                     {!activeBill ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-4 my-auto">
                             <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner">
@@ -1536,10 +1536,10 @@ const CashierDashboard = () => {
                             <p className="text-xs text-slate-500 font-semibold">Printing receipt and updating table status...</p>
                         </div>
                     ) : (
-                        <div className="flex flex-col lg:flex-row h-full gap-4 sm:gap-5 min-h-0 overflow-y-auto lg:overflow-hidden">
+                        <div className="flex flex-col xl:flex-row h-full gap-4 sm:gap-5 min-h-0 overflow-y-auto xl:overflow-hidden">
                             
                             {/* Left Sub-Column: Order Details & Scrollable Items Table */}
-                            <div className="flex-1 flex flex-col min-h-0">
+                            <div className="flex-1 flex flex-col min-h-0 min-w-0">
                                 
                                 {/* Mobile Back to Queue Button */}
                                 <button
@@ -1551,21 +1551,21 @@ const CashierDashboard = () => {
                                 </button>
                                 
                                 {/* Order Header */}
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
-                                    <div>
+                                <div className="flex flex-col 2xl:flex-row 2xl:items-start justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                                    <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                                            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight whitespace-nowrap">
                                                 {activeBill.tableNumber && activeBill.tableNumber !== 'Any' && activeBill.tableNumber !== 'Takeout'
                                                     ? (activeBill.tableNumber.startsWith('Table') ? activeBill.tableNumber : `Table ${activeBill.tableNumber}`)
                                                     : (isSelfOrder(activeBill) ? 'Self-Pickup Counter' : (activeBill.orderType || 'Counter'))
                                                 }
                                             </h3>
                                             {activeBill.serviceType === 'Self Dine-In (KFC Style)' && (
-                                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap shrink-0">
                                                     Self Dine-In
                                                 </span>
                                             )}
-                                            <span className="font-mono font-black text-xs bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-2 py-0.5 rounded-lg shadow-xs flex items-center gap-1">
+                                            <span className="font-mono font-black text-xs bg-slate-900 dark:bg-slate-800 text-white dark:text-slate-100 border border-transparent dark:border-slate-700 px-2.5 py-1 rounded-lg shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
                                                 <span>🎟️</span>
                                                 <span>
                                                     {activeBill.kotNumbers && activeBill.kotNumbers.length > 0 
@@ -1575,48 +1575,48 @@ const CashierDashboard = () => {
                                                 </span>
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
-                                            <span className="font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[11px]" title={`Full Ref: #${activeBill._id.toUpperCase()}`}>
+                                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex-wrap">
+                                            <span className="font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[11px] whitespace-nowrap" title={`Full Ref: #${activeBill._id.toUpperCase()}`}>
                                                 Ref: #{activeBill._id.substring(activeBill._id.length - 6).toUpperCase()}
                                             </span>
                                             {activeBill.customerName && (
-                                                <span className="font-bold text-slate-700 dark:text-slate-300">👤 {activeBill.customerName}</span>
+                                                <span className="font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">👤 {activeBill.customerName}</span>
                                             )}
                                             {activeBill.customerPhone && (
-                                                <span className="font-semibold text-slate-500">📞 {activeBill.customerPhone}</span>
+                                                <span className="font-semibold text-slate-500 whitespace-nowrap">📞 {activeBill.customerPhone}</span>
                                             )}
                                             {activeBill.createdAt && (
-                                                <span className="text-slate-400 flex items-center gap-1">
-                                                    <Clock size={12} /> {new Date(activeBill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                <span className="text-slate-400 inline-flex items-center gap-1 whitespace-nowrap">
+                                                    <Clock size={12} className="shrink-0" /> {new Date(activeBill.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
 
                                     {/* Action Buttons Toolbar */}
-                                    <div className="flex items-center gap-1.5 shrink-0">
+                                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                                         <button
                                             type="button"
                                             onClick={() => handlePrintKOT(activeBill)}
-                                            className="text-xs bg-slate-900 hover:bg-slate-800 text-white font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer shadow-xs transition-all active:scale-95"
+                                            className="text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold px-2.5 py-1.5 rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-95 whitespace-nowrap"
                                             title="Print Kitchen Order Ticket"
                                         >
-                                            <Printer size={13} /> Print KOT
+                                            <Printer size={13} className="shrink-0" /> Print KOT
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handlePrintReceipt(activeBill)}
-                                            className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3 py-1.5 rounded-xl shadow-md shadow-emerald-700/20 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                                            className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-black px-3 py-1.5 rounded-xl shadow-md shadow-emerald-700/20 inline-flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
                                             title="Generate Official Tax Invoice / Bill"
                                         >
-                                            <Receipt size={14} /> Generate Invoice
+                                            <Receipt size={14} className="shrink-0" /> Generate Invoice
                                         </button>
                                         <button 
                                             type="button"
                                             onClick={() => setIsMerging(!isMerging)}
-                                            className="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                                            className="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 inline-flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
                                         >
-                                            <ArrowLeftRight size={13} /> Merge
+                                            <ArrowLeftRight size={13} className="shrink-0" /> Merge
                                         </button>
                                     </div>
                                 </div>
@@ -1685,7 +1685,7 @@ const CashierDashboard = () => {
                             </div>
 
                             {/* Right Sub-Column: Dedicated Checkout & Settlement Console */}
-                            <div className="w-full lg:w-[350px] xl:w-[370px] flex flex-col justify-between shrink-0 bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 min-h-0 mt-3 lg:mt-0">
+                            <div className="w-full xl:w-[305px] 2xl:w-[350px] flex flex-col justify-between shrink-0 bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 min-h-0 mt-2 xl:mt-0">
                                 {activeTab === 'Paid' ? (
                                     <div className="space-y-4 flex-1 flex flex-col justify-between">
                                         <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 p-4 rounded-2xl text-center space-y-2">

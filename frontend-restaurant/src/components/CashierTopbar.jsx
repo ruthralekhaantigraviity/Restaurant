@@ -1,4 +1,4 @@
-import { Bell, User, Search, LogOut, Menu, Settings, Trash2, Eye, X } from 'lucide-react';
+import { Bell, User, Search, LogOut, Menu, Settings, Trash2, Eye, X, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
@@ -68,6 +68,28 @@ const CashierTopbar = () => {
     const unreadCount = notifications.filter(n => !n.read).length || 0;
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [isDark, setIsDark] = useState(() => {
+        try {
+            return (localStorage.getItem('theme') || 'light') === 'dark' || document.documentElement.classList.contains('dark');
+        } catch {
+            return false;
+        }
+    });
+
+    const toggleTheme = () => {
+        const nextTheme = isDark ? 'light' : 'dark';
+        setIsDark(!isDark);
+        try {
+            localStorage.setItem('theme', nextTheme);
+        } catch (_) {}
+        if (nextTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        }
+    };
 
     const handleSearchChange = (val) => {
         setSearchTerm(val);
@@ -75,11 +97,11 @@ const CashierTopbar = () => {
     };
 
     return (
-        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-6 sticky top-0 z-10 shadow-xs">
+        <header className="h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-3 sm:px-4 md:px-6 sticky top-0 z-10 shadow-xs transition-colors">
             <div className="flex-1 flex items-center gap-1.5 sm:gap-2 md:gap-4 min-w-0">
                 <button 
                     onClick={() => window.dispatchEvent(new Event('toggle-sidebar'))} 
-                    className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg shrink-0 cursor-pointer"
+                    className="p-2 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg shrink-0 cursor-pointer"
                     aria-label="Toggle Menu"
                     title="Toggle Sidebar"
                 >
@@ -87,7 +109,7 @@ const CashierTopbar = () => {
                 </button>
                 <button
                     onClick={() => window.history.back()}
-                    className="md:hidden p-1.5 px-2 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 shrink-0 shadow-xs cursor-pointer"
+                    className="md:hidden p-1.5 px-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs cursor-pointer"
                     aria-label="Go Back"
                     title="Back"
                 >
@@ -100,13 +122,13 @@ const CashierTopbar = () => {
                         value={searchTerm}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="Search bill or table..."
-                        className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-slate-400 text-slate-900"
+                        className="w-full pl-8 sm:pl-9 pr-7 sm:pr-8 py-1.5 sm:py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-slate-400 text-slate-900 dark:text-slate-100"
                     />
                     {searchTerm && (
                         <button
                             type="button"
                             onClick={() => handleSearchChange('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold cursor-pointer"
                         >
                             ✕
                         </button>
@@ -114,20 +136,29 @@ const CashierTopbar = () => {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-5 shrink-0">
+                <button
+                    type="button"
+                    onClick={toggleTheme}
+                    aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="p-2 rounded-lg text-slate-500 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                    {isDark ? <Sun size={19} /> : <Moon size={19} />}
+                </button>
                 <div className="relative" ref={notifRef}>
                     <button 
                         onClick={() => { setShowNotifs(!showNotifs); setShowProfile(false); }}
-                        className="relative p-2 text-slate-400 hover:text-purple-600 transition-colors hover:bg-purple-50 rounded-lg"
+                        className="relative p-2 text-slate-400 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:bg-purple-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
                     >
                         <Bell size={20} />
-                        {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
+                        {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}
                     </button>
                     {showNotifs && (
-                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50">
-                            <div className="p-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50">
+                            <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Cashier Notifications</h3>
+                                    <h3 className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm">Cashier Notifications</h3>
                                     {unreadCount > 0 && (
                                         <span className="px-1.5 py-0.5 rounded-full bg-purple-600 text-white text-[10px] font-black">
                                             {unreadCount}
@@ -144,9 +175,9 @@ const CashierTopbar = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+                            <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800">
                                 {notifications.length === 0 ? (
-                                    <div className="p-6 text-center text-gray-400 text-xs font-semibold">No new notifications</div>
+                                    <div className="p-6 text-center text-gray-400 dark:text-slate-400 text-xs font-semibold">No new notifications</div>
                                 ) : (
                                     notifications.slice(0, 15).map(note => (
                                         <div key={note._id} className={`p-3.5 transition-colors ${!note.read ? 'bg-purple-50/40 dark:bg-slate-800/60' : 'hover:bg-gray-50 dark:hover:bg-slate-800/30'}`}>
@@ -197,27 +228,27 @@ const CashierTopbar = () => {
                         <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden text-left animate-in zoom-in-95 duration-200">
                             <div className="px-5 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-purple-50/60 dark:bg-slate-800">
                                 <div>
-                                    <h3 className="font-extrabold text-slate-900 text-sm">
+                                    <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
                                         {selectedOrderNote.title}
                                     </h3>
-                                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                                         {new Date(selectedOrderNote.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · Details
                                     </p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => setSelectedOrderNote(null)}
-                                    className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                                 >
                                     <X size={18} />
                                 </button>
                             </div>
                             <div className="p-5 space-y-3.5">
-                                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 block mb-1">
+                                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 block mb-1">
                                         Details
                                     </span>
-                                    <p className="text-xs text-slate-800 font-medium leading-relaxed">
+                                    <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
                                         {selectedOrderNote.desc}
                                     </p>
                                 </div>
@@ -235,7 +266,7 @@ const CashierTopbar = () => {
                                     <button
                                         type="button"
                                         onClick={() => setSelectedOrderNote(null)}
-                                        className="px-4 py-2 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl cursor-pointer"
+                                        className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-black text-white font-bold text-xs rounded-xl cursor-pointer"
                                     >
                                         Close
                                     </button>
@@ -249,13 +280,13 @@ const CashierTopbar = () => {
                 <button
                     type="button"
                     onClick={() => window.dispatchEvent(new Event('open-cashier-settings'))}
-                    className="p-2 text-slate-400 hover:text-purple-600 transition-colors hover:bg-purple-50 rounded-lg group cursor-pointer"
+                    className="p-2 text-slate-400 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors hover:bg-purple-50 dark:hover:bg-slate-800 rounded-lg group cursor-pointer"
                     title="Cashier POS Settings"
                 >
                     <Settings size={20} className="group-hover:rotate-45 transition-transform duration-300" />
                 </button>
 
-                <div className="h-6 sm:h-8 w-px bg-slate-200"></div>
+                <div className="h-6 sm:h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
 
                 <div className="relative" ref={profileRef}>
                     <div 
@@ -263,18 +294,18 @@ const CashierTopbar = () => {
                         className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
                     >
                         <div className="text-right hidden sm:block group-hover:opacity-80 transition-opacity">
-                            <p className="text-sm font-bold text-gray-900 capitalize">{user?.name || 'Cashier User'}</p>
-                            <p className="text-xs font-medium text-purple-600 capitalize">{user?.role || 'Cashier'}</p>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white capitalize">{user?.name || 'Cashier User'}</p>
+                            <p className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">{user?.role || 'Cashier'}</p>
                         </div>
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center border border-purple-200 text-purple-700 group-hover:bg-purple-200 transition-colors">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-100 dark:bg-purple-950/60 rounded-full flex items-center justify-center border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/60 transition-colors">
                             <User size={18} />
                         </div>
                     </div>
                     {showProfile && (
-                        <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50 py-1">
+                        <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-gray-100 dark:border-slate-800 overflow-hidden z-50 py-1">
                             <button 
                                 onClick={logout}
-                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-gray-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-rose-950/40 hover:text-red-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                             >
                                 <LogOut size={16} /> Logout
                             </button>

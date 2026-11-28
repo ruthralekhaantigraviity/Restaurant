@@ -38,7 +38,6 @@ const RevenueAnalytics = () => {
             setLoading(false);
         }
     };
-export default RevenueAnalytics;
 
     useEffect(() => {
         fetchData();
@@ -54,9 +53,7 @@ export default RevenueAnalytics;
     }
 
     const stats = analytics?.stats || {};
-export default RevenueAnalytics;
     const trends = analytics?.trends || {};
-export default RevenueAnalytics;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 text-slate-900 dark:text-slate-100">
@@ -79,45 +76,45 @@ export default RevenueAnalytics;
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {[
-                    { 
-                        label: 'Monthly Recurring Revenue (MRR)', 
-                        value: `₹${(stats.monthlyRecurringRevenue || 0).toLocaleString('en-IN')}`, 
-                        icon: TrendingUp, 
-                        color: 'text-emerald-600 dark:text-emerald-400', 
+                    {
+                        label: 'Monthly Recurring Revenue (MRR)',
+                        value: `₹${(stats.monthlyRecurringRevenue || 0).toLocaleString('en-IN')}`,
+                        icon: TrendingUp,
+                        color: 'text-emerald-600 dark:text-emerald-400',
                         iconBg: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/60',
                         tag: '+12.4%',
                         tagColor: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60',
-                        desc: 'Normalized monthly income' 
+                        desc: 'Normalized monthly income'
                     },
-                    { 
-                        label: 'Annual Recurring Revenue (ARR)', 
-                        value: `₹${(stats.annualRecurringRevenue || 0).toLocaleString('en-IN')}`, 
-                        icon: Award, 
-                        color: 'text-indigo-600 dark:text-indigo-400', 
+                    {
+                        label: 'Annual Recurring Revenue (ARR)',
+                        value: `₹${(stats.annualRecurringRevenue || 0).toLocaleString('en-IN')}`,
+                        icon: Award,
+                        color: 'text-indigo-600 dark:text-indigo-400',
                         iconBg: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60',
                         tag: 'Annualized',
                         tagColor: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200/60 dark:border-indigo-800/60',
-                        desc: 'Annualized recurring projection' 
+                        desc: 'Annualized recurring projection'
                     },
-                    { 
-                        label: 'Subscription Renewal Rate', 
-                        value: `${stats.renewalRate || 100}%`, 
-                        icon: ArrowUpRight, 
-                        color: 'text-sky-600 dark:text-sky-400', 
+                    {
+                        label: 'Subscription Renewal Rate',
+                        value: `${stats.renewalRate || 100}%`,
+                        icon: ArrowUpRight,
+                        color: 'text-sky-600 dark:text-sky-400',
                         iconBg: 'bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800/60',
                         tag: 'Healthy',
                         tagColor: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200/60 dark:border-sky-800/60',
-                        desc: 'Active vs expired ratios' 
+                        desc: 'Active vs expired ratios'
                     },
-                    { 
-                        label: 'SaaS Subscriber Churn', 
-                        value: `${stats.churnRate || 0}%`, 
-                        icon: ArrowDownRight, 
-                        color: 'text-rose-600 dark:text-rose-400', 
+                    {
+                        label: 'SaaS Subscriber Churn',
+                        value: `${stats.churnRate || 0}%`,
+                        icon: ArrowDownRight,
+                        color: 'text-rose-600 dark:text-rose-400',
                         iconBg: 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60',
                         tag: 'Low Risk',
                         tagColor: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200/60 dark:border-rose-800/60',
-                        desc: 'Cancellation percentiles' 
+                        desc: 'Cancellation percentiles'
                     }
                 ].map((kpi, idx) => {
                     const Icon = kpi.icon;
@@ -260,6 +257,4 @@ export default RevenueAnalytics;
         </div>
     );
 };
-export default RevenueAnalytics;
-
 export default RevenueAnalytics;

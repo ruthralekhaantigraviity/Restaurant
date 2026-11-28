@@ -46,13 +46,13 @@ const WaiterPendingServes = () => {
 
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-green-200">
+            <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-green-200 dark:border-emerald-800/60">
                 <div>
-                    <h2 className="text-2xl font-bold text-green-700" style={{ fontFamily: 'Poppins, sans-serif' }}>Pending Serves &amp; Transfers</h2>
-                    <p className="text-sm text-green-600/80 mt-1">These orders are ready at the kitchen counter for table serve or cashier transfer!</p>
+                    <h2 className="text-2xl font-bold text-green-700 dark:text-emerald-400" style={{ fontFamily: 'Poppins, sans-serif' }}>Pending Serves &amp; Transfers</h2>
+                    <p className="text-sm text-green-600/80 dark:text-emerald-400/80 mt-1">These orders are ready at the kitchen counter for table serve or cashier transfer!</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center border border-green-200">
-                    <span className="text-xl font-bold text-green-700">{pending.length}</span>
+                <div className="w-12 h-12 bg-green-100 dark:bg-emerald-950/60 rounded-full flex items-center justify-center border border-green-200 dark:border-emerald-800">
+                    <span className="text-xl font-bold text-green-700 dark:text-emerald-300">{pending.length}</span>
                 </div>
             </div>
 
@@ -60,7 +60,7 @@ const WaiterPendingServes = () => {
                 {(() => {
                     const visiblePending = pending.filter((o) => matchesOrderSearch(o, searchQuery));
                     if (visiblePending.length === 0) {
-                        return <div className="text-center py-20 text-gray-400 font-medium text-lg">{searchQuery.trim() ? `No pending serves matching "${searchQuery}".` : 'No pending serves right now. Great job!'}</div>;
+                        return <div className="text-center py-20 text-gray-400 dark:text-slate-400 font-medium text-lg">{searchQuery.trim() ? `No pending serves matching "${searchQuery}".` : 'No pending serves right now. Great job!'}</div>;
                     }
                     return visiblePending.map(order => {
                         const hasTable = order.tableNumber && order.tableNumber !== 'Any' && order.tableNumber !== 'Takeout';
@@ -68,22 +68,22 @@ const WaiterPendingServes = () => {
                         const isSelfService = order.serviceType === 'Self Dine-In (KFC Style)' || (!hasTable && isSelfOrder(order));
 
                         return (
-                            <div key={order._id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
+                            <div key={order._id} className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
                                 
                                 <div className="flex items-center gap-6">
                                     <div className={`w-28 h-22 rounded-2xl flex flex-col items-center justify-center border shrink-0 ${
                                         order.serviceType === 'Self Dine-In (KFC Style)'
-                                            ? 'bg-amber-50 border-amber-200 text-amber-800'
+                                            ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300'
                                             : hasTable
-                                            ? 'bg-green-50 border-green-100 text-green-700'
-                                            : 'bg-blue-50 border-blue-200 text-blue-800'
+                                            ? 'bg-green-50 dark:bg-emerald-950/50 border-green-100 dark:border-emerald-800 text-green-700 dark:text-emerald-300'
+                                            : 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300'
                                     }`}>
                                         <span className="text-[10px] font-bold uppercase">{hasTable ? 'Table' : 'Pickup'}</span>
                                         <span className="text-xl font-extrabold font-sans text-center px-1">
                                             {hasTable ? tableNum : 'Self'}
                                         </span>
                                         {hasTable && (
-                                            <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded mt-0.5 bg-white/70">
+                                            <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded mt-0.5 bg-white/70 dark:bg-slate-900/60">
                                                 {order.serviceType === 'Self Dine-In (KFC Style)' ? 'Self Dine-In' : 'Table Serv.'}
                                             </span>
                                         )}
@@ -93,22 +93,22 @@ const WaiterPendingServes = () => {
                                         <div className="flex items-center gap-2 mb-1">
                                             <p className="text-sm font-medium text-gray-400">Order #{order._id.substring(order._id.length - 6).toUpperCase()}</p>
                                             {order.customerName && (
-                                                <span className="text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
+                                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                                                     👤 {order.customerName}
                                                 </span>
                                             )}
                                         </div>
-                                        <ul className="text-base text-gray-800 font-bold space-y-1">
+                                        <ul className="text-base text-gray-800 dark:text-slate-100 font-bold space-y-1">
                                             {order.orderItems?.map((item, idx) => <li key={idx}>{item.qty}x {item.name}</li>)}
                                         </ul>
                                         {order.note && (
-                                            <p className="text-sm text-gray-500 italic mt-2">Note: {order.note}</p>
+                                            <p className="text-sm text-gray-500 dark:text-slate-400 italic mt-2">Note: {order.note}</p>
                                         )}
                                     </div>
                                 </div>
                                 
-                                <div className="flex flex-wrap items-center gap-3 justify-between md:justify-end border-t border-gray-100 md:border-0 pt-4 md:pt-0">
-                                    <span className="text-sm font-bold text-orange-500 flex items-center gap-1.5 bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-100">
+                                <div className="flex flex-wrap items-center gap-3 justify-between md:justify-end border-t border-gray-100 dark:border-slate-800 md:border-0 pt-4 md:pt-0">
+                                    <span className="text-sm font-bold text-orange-500 dark:text-orange-400 flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/50 px-3 py-1.5 rounded-xl border border-orange-100 dark:border-orange-800">
                                         <Clock size={16} /> Ready {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                                     </span>
                                     
@@ -123,7 +123,7 @@ const WaiterPendingServes = () => {
                                             {order.serviceType === 'Self Dine-In (KFC Style)' && (
                                                 <button 
                                                     onClick={() => handleServe(order._id, 'Picked Up')}
-                                                    className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all border border-amber-300 active:scale-95 flex items-center gap-1.5 cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-800"
+                                                    className="px-4 py-2.5 rounded-xl text-sm font-bold transition-all border border-amber-300 dark:border-amber-700 active:scale-95 flex items-center gap-1.5 cursor-pointer bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300"
                                                     title="Customer collected their tray directly from counter"
                                                 >
                                                     Customer Picked Up

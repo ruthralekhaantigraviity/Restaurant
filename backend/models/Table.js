@@ -22,7 +22,7 @@ const tableSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Available', 'Occupied', 'Reserved', 'Cleaning', 'Billing'],
+        enum: ['Available', 'Occupied', 'Waiting for Food', 'Reserved', 'Cleaning', 'Billing', 'Needs Attention'],
         default: 'Available',
     },
     activeOrder: {

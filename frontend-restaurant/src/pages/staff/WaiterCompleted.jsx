@@ -9,9 +9,9 @@ const WaiterCompleted = () => {
     const [loading, setLoading] = useState(true);
     const searchQuery = useWaiterSearch();
 
-    const fetchCompletedOrders = async () => {
+    const fetchCompletedOrders = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const res = await api.get('/orders');
             const rawOrders = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.orders) ? res.data.orders : []);
             const doneOrders = rawOrders.filter(o => ['Served', 'Completed', 'Delivered', 'Picked Up', 'Paid'].includes(o?.status));
@@ -19,7 +19,7 @@ const WaiterCompleted = () => {
         } catch (error) {
             console.error('Failed to fetch completed orders', error);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
@@ -30,8 +30,8 @@ const WaiterCompleted = () => {
     };
 
     useEffect(() => {
-        fetchCompletedOrders();
-        const interval = setInterval(fetchCompletedOrders, 5000);
+        fetchCompletedOrders(false);
+        const interval = setInterval(() => fetchCompletedOrders(true), 5000);
         return () => clearInterval(interval);
     }, [api]);
 
@@ -80,9 +80,21 @@ const WaiterCompleted = () => {
                                     </td>
                                     <td className="p-4 font-black text-emerald-600 dark:text-emerald-400">₹{order.totalPrice}</td>
                                     <td className="p-4">
-                                        <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                                            {order.status}
-                                        </span>
+                                        {(() => {
+                                            const statusStyle = {
+                                                Completed: 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+                                                Served: 'bg-teal-100 dark:bg-teal-950/70 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+                                                'Picked Up': 'bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+                                                Delivered: 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+                                                Paid: 'bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+                                                Pending: 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                                            }[order.status] || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                                            return (
+                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${statusStyle}`}>
+                                                    {order.status}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="p-4 text-xs font-medium text-gray-500 dark:text-slate-400">
                                         {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -53,7 +53,7 @@ const formatTime = (dateString) => {
 };
 
 const NotificationCenter = () => {
-    const { api } = useAuth();
+    const { api, user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('All'); // All, Unread, Alerts
@@ -255,21 +255,34 @@ const NotificationCenter = () => {
         }
     };
 
-    // Filter out routine kitchen tickets so Admin dashboard displays only important events
+    // Filter out routine kitchen tickets so Admin/Manager dashboard displays only relevant events
     const isImportantForAdmin = (n) => {
-        if (n.type === 'Alert' || n.type === 'Broadcast' || n.type === 'System' || n.type === 'Info') return true;
-        if (n.metadata?.isImportant === true) return true;
-        if (isRestockRequestNote(n)) return true;
+        const userRole = user?.role;
+        const isManager = userRole === 'BranchManager';
+        const isAdminUser = userRole === 'RestaurantAdmin' || userRole === 'Admin';
+        const userBranchId = user?.branchId ? String(user.branchId) : null;
+
+        if (isManager && userBranchId && n.branchId && String(n.branchId) !== userBranchId) {
+            return false;
+        }
+        if (Array.isArray(n.targetRole) && n.targetRole.length > 0) {
+            const matchesRole = n.targetRole.includes(userRole) ||
+                n.targetRole.includes('All') ||
+                (isAdminUser && n.targetRole.includes('Admin')) ||
+                (isManager && (n.targetRole.includes('BranchManager') || n.targetRole.includes('Manager')));
+            if (!matchesRole) return false;
+        }
+
         const titleLower = (n.title || '').toLowerCase();
-        if (titleLower.includes('cancelled') || titleLower.includes('urgent') || titleLower.includes('refund') || titleLower.includes('dispute') || titleLower.includes('complaint')) {
-            return true;
-        }
-        // Exclude routine preparation, ready, and served updates from admin clutter
-        if (titleLower.includes('ready') || titleLower.includes('preparation') || titleLower.includes('cashier counter') || titleLower.includes('served')) {
-            return false;
-        }
-        if (n.metadata?.totalPrice && Number(n.metadata.totalPrice) < 1000) {
-            return false;
+        const typeLower = (n.type || '').toLowerCase();
+
+        if (isAdminUser || isManager) {
+            if (typeLower === 'kitchen' || titleLower.includes('order ready') || titleLower.includes('served') || titleLower.includes('preparation') || titleLower.includes('cashier counter')) {
+                return false;
+            }
+            if (n.metadata?.totalPrice && Number(n.metadata.totalPrice) < 1000) {
+                return false;
+            }
         }
         return true;
     };

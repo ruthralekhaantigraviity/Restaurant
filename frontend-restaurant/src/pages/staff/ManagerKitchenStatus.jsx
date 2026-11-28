@@ -173,7 +173,7 @@ const ManagerKitchenStatus = () => {
             </div>
 
             {/* Station Load Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 {stationsList.map((station, i) => (
                     <div key={i} className={`bg-white rounded-2xl p-5 border shadow-sm relative overflow-hidden ${station.delay ? 'border-red-200' : 'border-gray-100'}`}>
                         {station.delay && <div className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl-lg"><AlertTriangle size={14} /></div>}

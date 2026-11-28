@@ -1,4 +1,4 @@
-import { Bell, User, Search, LogOut, Menu, Settings, X, Trash2, Eye } from 'lucide-react';
+import { Bell, User, Search, LogOut, Menu, Settings, X, Trash2, Eye, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -22,6 +22,28 @@ const WaiterTopbar = () => {
     });
     const notifRef = useRef(null);
     const profileRef = useRef(null);
+    const [isDark, setIsDark] = useState(() => {
+        try {
+            return (localStorage.getItem('theme') || 'light') === 'dark' || document.documentElement.classList.contains('dark');
+        } catch {
+            return false;
+        }
+    });
+
+    const toggleTheme = () => {
+        const nextTheme = isDark ? 'light' : 'dark';
+        setIsDark(!isDark);
+        try {
+            localStorage.setItem('theme', nextTheme);
+        } catch (_) {}
+        if (nextTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        }
+    };
 
     const handleSearchChange = (val) => {
         setSearchTerm(val);
@@ -85,18 +107,18 @@ const WaiterTopbar = () => {
     const unreadCount = notifications.filter(n => !n.read).length || 0;
 
     return (
-        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-3 sm:px-4 md:px-8 sticky top-0 z-10 shadow-xs">
+        <header className="h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-3 sm:px-4 md:px-8 sticky top-0 z-10 shadow-xs transition-colors">
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
                 <button 
                     onClick={() => window.dispatchEvent(new Event('toggle-sidebar'))} 
-                    className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg shrink-0 cursor-pointer"
+                    className="md:hidden p-2 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg shrink-0 cursor-pointer"
                     aria-label="Toggle Sidebar"
                 >
                     <Menu size={22} />
                 </button>
                 <button
                     onClick={() => window.history.back()}
-                    className="md:hidden p-1.5 px-2 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 shrink-0 shadow-xs cursor-pointer"
+                    className="md:hidden p-1.5 px-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors flex items-center gap-1 text-xs font-bold border border-slate-200 dark:border-slate-700 shrink-0 shadow-xs cursor-pointer"
                     aria-label="Go Back"
                     title="Back"
                 >
@@ -121,13 +143,13 @@ const WaiterTopbar = () => {
                         value={searchTerm}
                         onChange={(e) => handleSearchChange(e.target.value)}
                         placeholder="Search table or order..." 
-                        className="pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all w-36 sm:w-64 font-medium"
+                        className="pl-9 pr-8 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all w-36 sm:w-64 font-medium"
                     />
                     {searchTerm && (
                         <button
                             type="button"
                             onClick={() => handleSearchChange('')}
-                            className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                            className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                             aria-label="Clear search"
                         >
                             <X size={14} />
@@ -137,19 +159,28 @@ const WaiterTopbar = () => {
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4">
+                <button
+                    type="button"
+                    onClick={toggleTheme}
+                    aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="p-2 rounded-lg text-slate-500 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                    {isDark ? <Sun size={19} /> : <Moon size={19} />}
+                </button>
                 <div className="relative" ref={notifRef}>
                     <button 
                         onClick={() => { setShowNotifs(!showNotifs); setShowProfile(false); }}
-                        className="relative p-2 text-slate-500 hover:text-green-600 transition-colors hover:bg-green-50 rounded-lg cursor-pointer"
+                        className="relative p-2 text-slate-500 dark:text-slate-300 hover:text-green-600 dark:hover:text-emerald-400 transition-colors hover:bg-green-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
                     >
                         <Bell size={20} />
-                        {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
+                        {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>}
                     </button>
                     {showNotifs && (
-                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50">
-                            <div className="p-3.5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-50">
+                            <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">Waiter Notifications</h3>
+                                    <h3 className="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm">Waiter Notifications</h3>
                                     {unreadCount > 0 && (
                                         <span className="px-1.5 py-0.5 rounded-full bg-green-600 text-white text-[10px] font-black">
                                             {unreadCount}
@@ -166,9 +197,9 @@ const WaiterTopbar = () => {
                                     </button>
                                 )}
                             </div>
-                            <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100">
+                            <div className="max-h-96 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800">
                                 {notifications.length === 0 ? (
-                                    <div className="p-6 text-center text-gray-400 text-xs font-semibold">No new notifications</div>
+                                    <div className="p-6 text-center text-gray-400 dark:text-slate-400 text-xs font-semibold">No new notifications</div>
                                 ) : (
                                     notifications.slice(0, 15).map(note => (
                                         <div key={note._id} className={`p-3.5 transition-colors ${!note.read ? 'bg-green-50/40 dark:bg-slate-800/60' : 'hover:bg-gray-50 dark:hover:bg-slate-800/30'}`}>

@@ -116,12 +116,12 @@ const WaiterFloorPlan = () => {
 
     const getTableStyle = (status) => {
         switch (status) {
-            case 'Available': return 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:border-emerald-500';
-            case 'Waiting for Food': case 'Occupied': return 'bg-amber-50 border-amber-300 text-amber-900 hover:border-amber-500';
-            case 'Billing': return 'bg-blue-50 border-blue-300 text-blue-900 hover:border-blue-500';
-            case 'Reserved': return 'bg-purple-50 border-purple-300 text-purple-900 hover:border-purple-500';
-            case 'Needs Attention': return 'bg-rose-50 border-rose-300 text-rose-900 hover:border-rose-500 animate-pulse';
-            default: return 'bg-slate-50 border-slate-200 text-slate-800';
+            case 'Available': return 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800/80 text-emerald-900 dark:text-emerald-300 hover:border-emerald-500';
+            case 'Waiting for Food': case 'Occupied': return 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-300 hover:border-amber-500';
+            case 'Billing': return 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800/80 text-blue-900 dark:text-blue-300 hover:border-blue-500';
+            case 'Reserved': return 'bg-purple-50 dark:bg-purple-950/40 border-purple-300 dark:border-purple-800/80 text-purple-900 dark:text-purple-300 hover:border-purple-500';
+            case 'Needs Attention': return 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/80 text-rose-900 dark:text-rose-300 hover:border-rose-500 animate-pulse';
+            default: return 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200';
         }
     };
 
@@ -129,16 +129,16 @@ const WaiterFloorPlan = () => {
         <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12">
             
             {/* Header */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-900 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         Interactive Floor Plan
                     </h1>
                     <p className="text-xs text-slate-400 font-medium mt-1">Real-time table status grid & order management</p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <span className="px-3.5 py-1.5 bg-emerald-100 text-emerald-800 font-bold rounded-xl text-xs">
+                    <span className="px-3.5 py-1.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold rounded-xl text-xs border border-emerald-200/50 dark:border-emerald-800">
                         {tables.length} Total Floor Tables
                     </span>
                 </div>
@@ -152,8 +152,8 @@ const WaiterFloorPlan = () => {
                         onClick={() => setStatusFilter(s)}
                         className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
                             statusFilter === s
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                            ? 'bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-md'
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                     >
                         {s}
@@ -162,7 +162,7 @@ const WaiterFloorPlan = () => {
             </div>
 
             {/* Floor Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4">
                 {filteredTables.map((t) => {
                     const isAssigned = assignedIds.includes(t.id) || assignedIds.includes(t.rawId);
                     return (
@@ -175,7 +175,7 @@ const WaiterFloorPlan = () => {
                                 <span className="font-extrabold text-base tracking-tight">{t.id}</span>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); handleToggleAssignment(t.id); }}
-                                    className="p-1 rounded-lg hover:bg-black/10"
+                                    className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10"
                                 >
                                     <Star size={16} className={isAssigned ? 'fill-amber-500 text-amber-500' : 'opacity-40'} />
                                 </button>
@@ -186,7 +186,7 @@ const WaiterFloorPlan = () => {
                                 <p className="text-xs font-bold mt-1 truncate">{t.status}</p>
                             </div>
 
-                            <div className="pt-2 border-t border-black/10 flex items-center justify-between">
+                            <div className="pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between">
                                 <span className="text-[10px] font-bold opacity-60">Tap for details</span>
                                 <ChevronRight size={14} />
                             </div>
@@ -197,26 +197,26 @@ const WaiterFloorPlan = () => {
 
             {/* Side Drawer Panel */}
             {panelOpen && (
-                <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white shadow-2xl border-l border-slate-200 z-50 p-6 flex flex-col justify-between animate-in slide-in-from-right-4">
+                <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 z-50 p-6 flex flex-col justify-between animate-in slide-in-from-right-4">
                     <div>
-                        <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                            <h2 className="text-xl font-black text-slate-900">{activeTable?.id}</h2>
-                            <button onClick={() => setPanelOpen(false)} className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600">
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <h2 className="text-xl font-black text-slate-900 dark:text-white">{activeTable?.id}</h2>
+                            <button onClick={() => setPanelOpen(false)} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300">
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="py-4 space-y-3 overflow-y-auto max-h-[60vh]">
-                        <p className="text-xs font-semibold text-slate-500">Current Status: <span className="font-bold text-slate-900">{activeTable?.status}</span> · {activeTable?.seats} Seats</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Current Status: <span className="font-bold text-slate-900 dark:text-white">{activeTable?.status}</span> · {activeTable?.seats} Seats</p>
                         {activeTable?.orders ? (
-                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2">
+                            <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 space-y-2">
                                 <div className="flex justify-between text-xs font-bold">
-                                    <span className="text-slate-700">Order #{String(activeTable.orders._id).slice(-5).toUpperCase()}</span>
-                                    <span className="text-emerald-600">₹{Number(activeTable.orders.totalPrice || 0).toFixed(2)}</span>
+                                    <span className="text-slate-700 dark:text-slate-200">Order #{String(activeTable.orders._id).slice(-5).toUpperCase()}</span>
+                                    <span className="text-emerald-600 dark:text-emerald-400">₹{Number(activeTable.orders.totalPrice || 0).toFixed(2)}</span>
                                 </div>
-                                <p className="text-[11px] font-bold text-slate-500">Status: {activeTable.orders.status}</p>
-                                <div className="divide-y divide-slate-200/70 pt-1">
+                                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Status: {activeTable.orders.status}</p>
+                                <div className="divide-y divide-slate-200/70 dark:divide-slate-700 pt-1">
                                     {(activeTable.orders.orderItems || []).map((it, idx) => (
-                                        <div key={idx} className="py-1.5 flex justify-between text-xs text-slate-700">
+                                        <div key={idx} className="py-1.5 flex justify-between text-xs text-slate-700 dark:text-slate-200">
                                             <span>{it.qty || it.quantity || 1}× {it.name}</span>
                                             <span className="font-semibold">₹{((it.price || 0) * (it.qty || it.quantity || 1)).toFixed(0)}</span>
                                         </div>
@@ -224,7 +224,7 @@ const WaiterFloorPlan = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-slate-50 rounded-2xl p-4 text-xs text-slate-500 font-medium">
+                            <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 text-xs text-slate-500 dark:text-slate-400 font-medium border border-slate-100 dark:border-slate-700">
                                 Table is currently idle. Use POS Desk below to open an order for {activeTable?.id}.
                             </div>
                         )}

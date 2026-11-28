@@ -55,39 +55,39 @@ const CashierOverview = () => {
     return (
         <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
             <div>
-                <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Welcome back, {user?.name || 'Cashier'}!</h2>
-                <p className="text-gray-500 mt-1">Here's what's happening at the register today.</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Welcome back, {user?.name || 'Cashier'}!</h2>
+                <p className="text-gray-500 dark:text-slate-400 mt-1">Here's what's happening at the register today.</p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
-                        <Banknote size={24} className="text-purple-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center shrink-0">
+                        <Banknote size={24} className="text-purple-600 dark:text-purple-400" />
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Today's Revenue</p>
-                        <h3 className="text-3xl font-black text-gray-900">₹{stats.totalRevenue.toFixed(2)}</h3>
-                    </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-                        <CheckCircle size={24} className="text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Settled Bills</p>
-                        <h3 className="text-3xl font-black text-gray-900">{stats.settledBills}</h3>
+                    <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1 truncate">Today's Revenue</p>
+                        <h3 className="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white truncate">₹{stats.totalRevenue.toFixed(2)}</h3>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
-                        <Clock size={24} className="text-orange-600" />
+                <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-50 dark:bg-emerald-950/60 flex items-center justify-center shrink-0">
+                        <CheckCircle size={24} className="text-green-600 dark:text-emerald-400" />
                     </div>
-                    <div>
-                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">Pending Bills</p>
-                        <h3 className="text-3xl font-black text-gray-900">{stats.pendingBills}</h3>
+                    <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1 truncate">Settled Bills</p>
+                        <h3 className="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white truncate">{stats.settledBills}</h3>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-4 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-orange-50 dark:bg-amber-950/60 flex items-center justify-center shrink-0">
+                        <Clock size={24} className="text-orange-600 dark:text-amber-400" />
+                    </div>
+                    <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1 truncate">Pending Bills</p>
+                        <h3 className="text-2xl xl:text-3xl font-black text-gray-900 dark:text-white truncate">{stats.pendingBills}</h3>
                     </div>
                 </div>
             </div>

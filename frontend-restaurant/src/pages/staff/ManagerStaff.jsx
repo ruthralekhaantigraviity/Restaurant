@@ -21,7 +21,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
     Search, Plus, Calendar, Clock, UserCheck, UserX, AlertTriangle, 
     MessageSquare, X, CheckCircle2, AlertCircle, DollarSign, CreditCard, 
-    FileText, Printer, ChevronRight, Edit2, ShieldCheck, Download, Filter, 
+    FileText, Printer, ChevronRight, ChevronDown, Edit2, ShieldCheck, Download, Filter, 
     RefreshCw, CalendarDays, Check, Ban
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -192,7 +192,6 @@ const ManagerStaff = () => {
         try {
             setLeavesLoading(true);
             const params = {};
-            if (leaveStatusFilter !== 'All') params.status = leaveStatusFilter;
             if (user?.branchId) {
                 params.branchId = user.branchId?._id || user.branchId;
             }
@@ -646,12 +645,13 @@ const ManagerStaff = () => {
 
     const filteredLeaves = useMemo(() => {
         return leaves.filter(l => {
+            const matchesStatus = leaveStatusFilter === 'All' || l.status === leaveStatusFilter;
             const empName = l.employee?.name?.toLowerCase() || '';
             const empCode = l.employee?.employeeId?.toLowerCase() || '';
             const matchesSearch = !leaveSearch || empName.includes(leaveSearch.toLowerCase()) || empCode.includes(leaveSearch.toLowerCase());
-            return matchesSearch;
+            return matchesStatus && matchesSearch;
         });
-    }, [leaves, leaveSearch]);
+    }, [leaves, leaveSearch, leaveStatusFilter]);
 
     const attendanceStats = useMemo(() => {
         let present = 0, absent = 0, paidLeave = 0, unpaidLeave = 0;
@@ -752,7 +752,7 @@ const ManagerStaff = () => {
                     onClick={() => handleTabChange('shifts')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
                         activeTab === 'shifts'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                            ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-sm'
                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -762,7 +762,7 @@ const ManagerStaff = () => {
                     onClick={() => handleTabChange('leaves')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
                         activeTab === 'leaves'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                            ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-sm'
                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -777,7 +777,7 @@ const ManagerStaff = () => {
                     onClick={() => handleTabChange('attendance')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
                         activeTab === 'attendance'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                            ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-sm'
                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -787,7 +787,7 @@ const ManagerStaff = () => {
                     onClick={() => handleTabChange('payroll')}
                     className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
                         activeTab === 'payroll'
-                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                            ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-sm'
                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                     }`}
                 >
@@ -821,7 +821,7 @@ const ManagerStaff = () => {
                     </div>
 
                     {/* Quick Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                         <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
                             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-lg"><UserCheck size={20} /></div>
                             <div>
@@ -2026,15 +2026,18 @@ const ManagerStaff = () => {
                         }} className="p-6 space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase mb-1">Select Employee</label>
-                                <select 
-                                    value={assignShiftData.staffId} 
-                                    onChange={(e) => setAssignShiftData({ ...assignShiftData, staffId: e.target.value })}
-                                    className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 dark:text-white"
-                                >
-                                    {staffList.map(s => (
-                                        <option key={s._id} value={s._id}>{s.name} ({s.role})</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <select 
+                                        value={assignShiftData.staffId} 
+                                        onChange={(e) => setAssignShiftData({ ...assignShiftData, staffId: e.target.value })}
+                                        className="w-full appearance-none border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-xl pl-4 pr-10 py-2.5 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                                    >
+                                        {staffList.map(s => (
+                                            <option key={s._id} value={s._id}>{s.name} ({s.role})</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={16} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-400" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase mb-1">Shift Date</label>

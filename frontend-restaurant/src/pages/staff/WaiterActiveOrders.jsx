@@ -57,23 +57,23 @@ const WaiterActiveOrders = () => {
 
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>All Active Orders</h2>
-                    <p className="text-sm text-gray-500 mt-1">Track everything currently in progress on the floor and at pickup counters.</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>All Active Orders</h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Track everything currently in progress on the floor and at pickup counters.</p>
                 </div>
                 <div className="flex gap-3">
-                    <span className="px-4 py-2 bg-blue-50 text-blue-700 font-bold rounded-xl text-sm border border-blue-100 flex items-center gap-2">
+                    <span className="px-4 py-2 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold rounded-xl text-sm border border-blue-100 dark:border-blue-800 flex items-center gap-2">
                         Total: {orders.length}
                     </span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
                 {(() => {
                     const visibleOrders = orders.filter((o) => matchesOrderSearch(o, searchQuery));
                     if (visibleOrders.length === 0) {
-                        return <div className="col-span-full text-center text-gray-500 py-10">{searchQuery.trim() ? `No active orders matching "${searchQuery}".` : 'No active orders found.'}</div>;
+                        return <div className="col-span-full text-center text-gray-500 dark:text-slate-400 py-10">{searchQuery.trim() ? `No active orders matching "${searchQuery}".` : 'No active orders found.'}</div>;
                     }
                     return visibleOrders.map(order => {
                     const hasTable = order.tableNumber && order.tableNumber !== 'Any' && order.tableNumber !== 'Takeout';
@@ -82,19 +82,19 @@ const WaiterActiveOrders = () => {
                     const isReady = ['Ready', 'Ready for Pickup'].includes(order.status);
 
                     return (
-                        <div key={order._id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between">
+                        <div key={order._id} className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-md transition-shadow flex flex-col justify-between">
                             <div>
                                 <div className="flex justify-between items-start mb-3">
                                     <div>
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <h3 className="text-xl font-bold text-gray-900 font-sans">
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white font-sans">
                                                 {tableDisplay || '📦 Self-Pickup Counter'}
                                             </h3>
                                             {hasTable && (
                                                 <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold border ${
                                                     order.serviceType === 'Self Dine-In (KFC Style)'
-                                                        ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                                        : 'bg-blue-50 text-blue-700 border-blue-200'
+                                                        ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                                                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                                                 }`}>
                                                     {order.serviceType === 'Self Dine-In (KFC Style)' ? 'Self Dine-In' : 'Waiter Service'}
                                                 </span>
@@ -103,41 +103,41 @@ const WaiterActiveOrders = () => {
                                         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                             <p className="text-xs font-medium text-gray-400">Order #{order._id.substring(order._id.length - 6).toUpperCase()}</p>
                                             {order.kotNumbers && order.kotNumbers.length > 0 && (
-                                                <span className="text-[10px] font-black font-mono bg-slate-900 text-white px-1.5 py-0.5 rounded shadow-xs">
+                                                <span className="text-[10px] font-black font-mono bg-slate-900 dark:bg-slate-800 text-white px-1.5 py-0.5 rounded shadow-xs border border-slate-700">
                                                     {order.kotNumbers.join(', ')}
                                                 </span>
                                             )}
                                         </div>
                                         {order.customerName && (
-                                            <p className="text-xs font-semibold text-slate-700 mt-1">
-                                                👤 Guest: <span className="text-slate-900">{order.customerName}</span>
+                                            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">
+                                                👤 Guest: <span className="text-slate-900 dark:text-white">{order.customerName}</span>
                                             </p>
                                         )}
                                     </div>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
-                                        isReady ? 'bg-green-100 text-green-700 border border-green-200 animate-pulse' :
-                                        order.status === 'Preparing' || order.status === 'In Kitchen' ? 'bg-orange-100 text-orange-700' :
-                                        'bg-gray-100 text-gray-700'
+                                        isReady ? 'bg-green-100 dark:bg-emerald-950/70 text-green-700 dark:text-emerald-300 border border-green-200 dark:border-emerald-700 animate-pulse' :
+                                        order.status === 'Preparing' || order.status === 'In Kitchen' ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300' :
+                                        'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
                                     }`}>
                                         {order.status}
                                     </span>
                                 </div>
                                 
                                 <div className="space-y-3 mb-6">
-                                    <ul className="text-sm text-gray-700 font-medium space-y-1 list-disc list-inside">
+                                    <ul className="text-sm text-gray-700 dark:text-slate-200 font-medium space-y-1 list-disc list-inside">
                                         {order.orderItems?.map((item, idx) => <li key={idx}>{item.qty}x {item.name}</li>)}
                                     </ul>
                                     
                                     {order.note && (
-                                        <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 flex items-start gap-2">
+                                        <div className="bg-gray-50 dark:bg-slate-800/60 p-3 rounded-xl border border-gray-100 dark:border-slate-700 flex items-start gap-2">
                                             <MessageSquare size={14} className="text-gray-400 shrink-0 mt-0.5" />
-                                            <p className="text-xs text-gray-600 font-medium italic">"{order.note}"</p>
+                                            <p className="text-xs text-gray-600 dark:text-slate-300 font-medium italic">"{order.note}"</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                             
-                            <div className="flex flex-wrap justify-between items-center pt-4 border-t border-gray-100 gap-2">
+                            <div className="flex flex-wrap justify-between items-center pt-4 border-t border-gray-100 dark:border-slate-800 gap-2">
                                 <span className="text-xs font-bold text-gray-400 flex items-center gap-1.5">
                                     <Clock size={14} /> {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                                 </span>
@@ -168,7 +168,7 @@ const WaiterActiveOrders = () => {
                                             <button 
                                                 onClick={() => handleServe(order._id, 'Served')}
                                                 disabled={updatingId === order._id}
-                                                className="px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1 cursor-pointer"
+                                                className="px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-1 cursor-pointer"
                                                 title="Directly deliver to table"
                                             >
                                                 <CheckCircle size={13} /> Serve
@@ -192,7 +192,7 @@ const WaiterActiveOrders = () => {
                                                     <button 
                                                         onClick={() => handleServe(order._id, 'Picked Up')}
                                                         disabled={updatingId === order._id}
-                                                        className="px-3 py-2 rounded-xl text-xs font-bold transition-all border border-amber-300 active:scale-95 flex items-center gap-1 cursor-pointer bg-amber-50 hover:bg-amber-100 text-amber-800"
+                                                        className="px-3 py-2 rounded-xl text-xs font-bold transition-all border border-amber-300 dark:border-amber-700 active:scale-95 flex items-center gap-1 cursor-pointer bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300"
                                                         title="Customer collected their tray directly from counter"
                                                     >
                                                         Customer Picked Up
@@ -215,7 +215,7 @@ const WaiterActiveOrders = () => {
                                         value={order.status}
                                         onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
                                         disabled={updatingId === order._id}
-                                        className="text-[11px] font-bold py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-700 cursor-pointer focus:outline-none"
+                                        className="text-[11px] font-bold py-1.5 px-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none"
                                         title="Quick update order status & sync KOT"
                                     >
                                         <option value="Pending">Pending</option>

@@ -64,21 +64,21 @@ const StaffMyLeave = () => {
         reason: ''
     });
 
-    const fetchMyLeaves = async () => {
+    const fetchMyLeaves = async (silent = false) => {
         try {
-            setLoading(true);
+            if (!silent) setLoading(true);
             const { data } = await api.get('/staff/leave/my');
             setLeaves(data);
         } catch (error) {
             console.error('Failed to load my leaves', error);
             toast.error(error.response?.data?.message || 'Failed to fetch leave history');
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchMyLeaves();
+        fetchMyLeaves(false);
     }, []);
 
     // Calculate duration in days
@@ -113,6 +113,9 @@ const StaffMyLeave = () => {
                 reason: form.reason.trim()
             });
 
+            if (data?.leave) {
+                setLeaves(prev => [data.leave, ...prev.filter(l => l._id !== data.leave._id)]);
+            }
             toast.success(data.message || 'Leave request submitted successfully!');
             setIsApplyModalOpen(false);
             setForm({
@@ -121,7 +124,7 @@ const StaffMyLeave = () => {
                 endDate: new Date().toISOString().split('T')[0],
                 reason: ''
             });
-            fetchMyLeaves();
+            fetchMyLeaves(true);
         } catch (error) {
             console.error('Apply leave error', error);
             toast.error(error.response?.data?.message || 'Failed to submit leave request');

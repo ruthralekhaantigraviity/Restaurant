@@ -52,8 +52,9 @@ const WaiterTasks = () => {
             // Merge with local personal tasks stored in localStorage
             let localPersonal = [];
             try {
-                localPersonal = JSON.parse(localStorage.getItem(`waiter_personal_tasks_${user?._id}`) || '[]');
-            } catch (e) {}
+                const storageKey = `waiter_personal_tasks_${user?._id || user?.id || 'me'}`;
+                localPersonal = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            } catch (e) { }
 
             setTasks([...liveTasks, ...localPersonal]);
         } catch (error) {
@@ -96,12 +97,15 @@ const WaiterTasks = () => {
         const updated = tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t);
         setTasks(updated);
         const personalOnly = updated.filter(t => !t.orderId && !t.requestId);
-        localStorage.setItem(`waiter_personal_tasks_${user?._id}`, JSON.stringify(personalOnly));
+        localStorage.setItem(`waiter_personal_tasks_${user?._id || user?.id || 'me'}`, JSON.stringify(personalOnly));
     };
 
     const handleAddTask = (e) => {
         e.preventDefault();
-        if (!newTaskText.trim()) return;
+        if (!newTaskText.trim()) {
+            toast.error('Please enter a task description first');
+            return;
+        }
         const newTask = {
             id: `custom-${Date.now()}`,
             text: newTaskText.trim(),
@@ -109,12 +113,14 @@ const WaiterTasks = () => {
             urgent: isUrgent,
             category: 'Personal'
         };
-        const updated = [newTask, ...tasks];
-        setTasks(updated);
+        setTasks(prev => {
+            const updated = [newTask, ...prev];
+            const personalOnly = updated.filter(t => !t.orderId && !t.requestId);
+            localStorage.setItem(`waiter_personal_tasks_${user?._id || user?.id || 'me'}`, JSON.stringify(personalOnly));
+            return updated;
+        });
         setNewTaskText('');
         setIsUrgent(false);
-        const personalOnly = updated.filter(t => !t.orderId && !t.requestId);
-        localStorage.setItem(`waiter_personal_tasks_${user?._id}`, JSON.stringify(personalOnly));
         toast.success('Task added to shift checklist!');
     };
 
@@ -122,7 +128,7 @@ const WaiterTasks = () => {
         const updated = tasks.filter(t => t.id !== id);
         setTasks(updated);
         const personalOnly = updated.filter(t => !t.orderId && !t.requestId);
-        localStorage.setItem(`waiter_personal_tasks_${user?._id}`, JSON.stringify(personalOnly));
+        localStorage.setItem(`waiter_personal_tasks_${user?._id || user?.id || 'me'}`, JSON.stringify(personalOnly));
         toast.success('Task removed');
     };
 
@@ -132,12 +138,12 @@ const WaiterTasks = () => {
     const filteredTasks = filter === 'All'
         ? tasks
         : filter === 'Pending' ? tasks.filter(t => !t.done)
-        : filter === 'Completed' ? tasks.filter(t => t.done)
-        : tasks.filter(t => t.urgent && !t.done);
+            : filter === 'Completed' ? tasks.filter(t => t.done)
+                : tasks.filter(t => t.urgent && !t.done);
 
     return (
         <div className="w-full max-w-[1400px] mx-auto space-y-6 pb-12">
-            
+
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -184,16 +190,16 @@ const WaiterTasks = () => {
             </form>
 
             {/* Filters */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
                 {['All', 'Pending', 'Completed', 'Urgent'].map((f) => (
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer border ${
                             filter === f
-                            ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-md'
-                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
-                        }`}
+                                ? 'bg-slate-900 dark:bg-emerald-600 text-white border-slate-900 dark:border-emerald-600 shadow-md'
+                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
                     >
                         {f}
                     </button>
@@ -211,20 +217,18 @@ const WaiterTasks = () => {
                         <div
                             key={task.id}
                             onClick={() => toggleTask(task)}
-                            className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-xs ${
-                                task.done
+                            className={`p-4 rounded-3xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-xs ${task.done
                                 ? 'bg-slate-50 dark:bg-slate-950 border-slate-200/60 dark:border-slate-800 opacity-60 line-through text-slate-400'
                                 : task.urgent
-                                ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40 text-slate-900 dark:text-white hover:border-rose-300'
-                                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white hover:border-slate-300'
-                            }`}
+                                    ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/40 text-slate-900 dark:text-white hover:border-rose-300'
+                                    : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white hover:border-slate-300'
+                                }`}
                         >
                             <div className="flex items-center gap-3.5">
-                                <div className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center transition-all ${
-                                    task.done
+                                <div className={`w-6 h-6 rounded-xl border-2 flex items-center justify-center transition-all ${task.done
                                     ? 'bg-emerald-600 border-emerald-600 text-white'
                                     : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700'
-                                }`}>
+                                    }`}>
                                     {task.done && <Check size={14} strokeWidth={3} />}
                                 </div>
                                 <div>
@@ -241,7 +245,8 @@ const WaiterTasks = () => {
                                 )}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
-                                    className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
+                                    className="p-2 text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-xl transition-colors cursor-pointer"
+                                    title="Delete Task"
                                 >
                                     <Trash2 size={16} />
                                 </button>

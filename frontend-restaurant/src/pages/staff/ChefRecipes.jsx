@@ -60,7 +60,7 @@ const ChefRecipes = () => {
                     <p className="text-slate-500 dark:text-gray-400">No menu recipes found in the database.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 sm:gap-6">
                     {filteredRecipes.map((recipe, i) => {
                         const prepTime = recipe.description?.length > 100 ? '25m' : (recipe.description?.length > 50 ? '15m' : '10m');
                         const difficulty = recipe.description?.length > 100 ? 'Hard' : (recipe.description?.length > 50 ? 'Medium' : 'Easy');

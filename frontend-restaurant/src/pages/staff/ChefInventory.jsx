@@ -117,7 +117,7 @@ const ChefInventory = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-sm font-bold text-slate-700 dark:text-gray-300 block mb-1.5">Quantity <span className="text-red-500 font-bold ml-0.5">*</span></label>
-                                <div className="flex items-center bg-slate-50 dark:bg-[#151923] border border-slate-200 dark:border-[#2a3040] rounded-xl overflow-hidden focus-within:border-red-500 transition-colors">
+                                <div className="flex items-center gap-2 px-2 bg-slate-50 dark:bg-[#151923] border border-slate-200 dark:border-[#2a3040] rounded-xl overflow-hidden focus-within:border-red-500 transition-colors">
                                     <button 
                                         type="button"
                                         onClick={() => {

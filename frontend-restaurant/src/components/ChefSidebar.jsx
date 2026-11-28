@@ -161,7 +161,7 @@ const ChefSidebar = () => {
                                             {({ isActive }) => (
                                                 <>
                                                     <Icon size={17} className={clsx("transition-transform group-hover:scale-110 shrink-0", isActive ? "text-white" : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200")} />
-                                                    <span className="truncate">{item.name}</span>
+                                                    <span className="text-[13px] leading-snug truncate min-w-0 flex-1">{item.name}</span>
                                                     {isActive && <ChevronRight size={14} className="ml-auto shrink-0 opacity-80" />}
                                                 </>
                                             )}
@@ -182,7 +182,7 @@ const ChefSidebar = () => {
                 </div>
                 <button 
                     onClick={() => setShowLogoutConfirm(true)} 
-                    className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-500 dark:text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-all text-sm cursor-pointer"
+                    className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition-all text-sm cursor-pointer"
                 >
                     <LogOut size={17} />
                     <span>Exit Kitchen</span>
